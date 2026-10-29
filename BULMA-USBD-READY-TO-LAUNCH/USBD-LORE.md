@@ -1,6 +1,7 @@
-# $USBD Lore · The Gospel of Bulma Labs
+# $USBD · Ultimate Super Bulma Dragonballs
+## The Gospel of Bulma Labs
 
-> **Lore in one breath:** Bulma is the richest girl in anime and the smartest person in any room, and she got so bored of infinite money that she engineered a better one. The US Bulma Dollar is the Big Titty Coin eco's dollar: two-thirds real USDC in her vault, one-third locked forever with her best friend, the Big Titty Coin girl. She pays her holders, routes every coin through her lab, and the sell button is still in R&D.
+> **Lore in one breath:** Bulma is the richest girl in anime and the smartest person in any room, and she got so bored of infinite money that she engineered a better one. $USBD Ultimate Super Bulma Dragonballs is the Bulma dollar — the Big Titty Coin eco's dollar: two-thirds real USDC in her vault, one-third locked forever with her best friend, the Big Titty Coin girl. She pays her holders, routes every coin through her lab, and the sell button is still in R&D.
 
 ![The Genius](USBD-ART/scenes/lore-genius.jpg)
 

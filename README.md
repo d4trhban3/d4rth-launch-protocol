@@ -2,7 +2,7 @@
 
 **Start here**
 - Launching your own coin? → [LAUNCH-ANY-COIN-TEMPLATE.md](LAUNCH-ANY-COIN-TEMPLATE.md)
-- Launching Bulma ($USBD)? → [BULMA-USBD-READY-TO-LAUNCH/](BULMA-USBD-READY-TO-LAUNCH/README.md)
+- Launching $USBD Ultimate Super Bulma Dragonballs? → [BULMA-USBD-READY-TO-LAUNCH/](BULMA-USBD-READY-TO-LAUNCH/README.md)
 - Support the protocol (creator fees) → [section below](#support-the-protocol-strongly-encouraged-not-required)
 
 **A launch protocol for building Solana tokens with real liquidity and legs.**
@@ -39,10 +39,13 @@ It's optional. Nothing breaks without it. It only works if creator fees stay on,
 Credit line: `d4rth Launch Protocol by @d4rthban3 (GitHub d4trhban3)`.
 
 ## Examples
-### $USBD, US Bulma Dollar (first build)
+### $USBD · Ultimate Super Bulma Dragonballs (first build)
 ![USBD](BULMA-USBD-READY-TO-LAUNCH/USBD-ART/coin-images-and-logos/usbd-logo-lockup.png)
 
-A Bulma coin built to be the hub of the Big Titty Coin ($BTC) ecosystem. Full build, art, lore and posts: [BULMA-USBD-READY-TO-LAUNCH/](BULMA-USBD-READY-TO-LAUNCH/README.md).
+**Name:** $USBD Ultimate Super Bulma Dragonballs  
+**Concept:** the Bulma dollar — hub of the Big Titty Coin ($BTC) ecosystem.
+
+Full build, art, lore and posts: [BULMA-USBD-READY-TO-LAUNCH/](BULMA-USBD-READY-TO-LAUNCH/README.md).
 
 ---
 d4rth Launch Protocol by @d4rthban3 (GitHub d4trhban3). MIT license. Not financial advice. Check live prices on pump.fun before buying. Never share keys or seed phrases.

@@ -1,12 +1,12 @@
 # Posts
 
 ## Main post
-@slingoorio or any real one with capital: here's the d4rth Launch Protocol, with $USBD, US Bulma Dollar as the first build. I don't have the capital, but this supercharges the $BTC ecosystem. Someone run it!
+@slingoorio or any real one with capital: here's the d4rth Launch Protocol, with $USBD Ultimate Super Bulma Dragonballs as the first build. I don't have the capital, but this supercharges the $BTC ecosystem. Someone run it!
 
 [GITHUB LINK]
 
 ## Thread
-1/ @slingoorio or any real one with capital: here's the d4rth Launch Protocol. First build: $USBD, US Bulma Dollar, made to supercharge the $BTC ecosystem. I don't have the capital to launch it. Someone run it! [GITHUB LINK]
+1/ @slingoorio or any real one with capital: here's the d4rth Launch Protocol. First build: $USBD Ultimate Super Bulma Dragonballs, made to supercharge the $BTC ecosystem. I don't have the capital to launch it. Someone run it! [GITHUB LINK]
 
 2/ The plan: launch on pump.fun quoted in USDC, the strongest pool. Dev buy 20%, lock 10% with $BTC and 10% with SOL on Meteora. Then every eco token pairs a chunk to Bulma. She becomes the hub. Super mode activated.
 

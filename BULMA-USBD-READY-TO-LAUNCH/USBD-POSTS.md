@@ -3,18 +3,17 @@ All ≤280 chars. Fill [PLACEHOLDERS] before posting and recount if they grow.
 
 ## Launch
 ```
-Now live: $USBD · US Bulma Dollar
-The Big Titty Coin eco's dollar. USDC main pool, locked pools with $BTC and SOL.
+Now live: $USBD Ultimate Super Bulma Dragonballs
+The Bulma dollar. USDC main pool, locked pools with $BTC and SOL.
 Fees go to holders.
-Ultimate Super Bulma Dragonballs.
 CA: [MINT]
 ```
 
 ## Launch alt
 ```
 The richest girl in anime just opened her vault.
-$USBD is live: US Bulma Dollar.
-Hold USBD, get rewards.
+$USBD Ultimate Super Bulma Dragonballs is live.
+The Bulma dollar. Hold USBD, get rewards.
 Locked LP with $BTC. Dev buy disclosed.
 CA: [MINT]
 ```

@@ -8,13 +8,13 @@
 - Wrapped SOL: `So11111111111111111111111111111111111111112`
 
 ## 1. pump.fun (USDC)
-Quote **USDC**. Name `US Bulma Dollar`, ticker `USBD`, image `USBD-ART/coin-images-and-logos/usbd-token-1000.png`, banner `USBD-ART/banners-and-headers/usbd-pumpfun-banner-1500x500.jpg` (banner can only be set at creation).
+Quote **USDC**. Name `Ultimate Super Bulma Dragonballs`, ticker `USBD`, image `USBD-ART/coin-images-and-logos/usbd-token-1000.png`, banner `USBD-ART/banners-and-headers/usbd-pumpfun-banner-1500x500.jpg` (banner can only be set at creation).
 
 Dev buy **200M (20% of supply)**.
 
 Fees: holder rewards are the point. To also share creator fees, keep creator fees **on** (not pump.fun's send-all-fees-to-holders switch) and pay holders from there. Strongly encouraged (not required): add GitHub `d4trhban3` as a creator-fee recipient. Nothing breaks without it.
 
-Description: `US Bulma Dollar. Ultimate Super Bulma Dragonballs. USDC main pool, locked $BTC and SOL pools. Fees go to holders. Fan parody.`
+Description: `$USBD Ultimate Super Bulma Dragonballs. The Bulma dollar. USDC main pool, locked $BTC and SOL pools. Fees go to holders. Fan parody.`
 
 ## 2. USBD + $BTC (Meteora, locked)
 1. https://meteora.ag/create/dammv2/standard (Create → DAMM V2 → Standard Pool)

@@ -9,7 +9,7 @@ All text on images is the composited lockup PNG or PIL-rendered (Anton / Inter).
 - `coin-images-and-logos/usbd-logo-icon-transparent.png` (1000x1000): Alt icon, transparent background.
 - `coin-images-and-logos/usbd-logo-icon.png` (1000x1000): Alt icon: cartoon emblem (gold/teal ring).
 - `coin-images-and-logos/usbd-logo-lockup-black.png` (2233x1000): Logo lockup on black.
-- `coin-images-and-logos/usbd-logo-lockup.png` (2233x1000): Logo lockup, transparent: $USBD / US BULMA DOLLAR / Ultimate Super Bulma Dragonballs.
+- `coin-images-and-logos/usbd-logo-lockup.png` (2233x1000): Logo lockup, transparent: $USBD Ultimate Super Bulma Dragonballs (the Bulma dollar).
 - `coin-images-and-logos/usbd-token-1000-gold-ring.png` (1000x1000): Same as the token image, circle-cropped with a thin gold ring (transparent PNG).
 - `coin-images-and-logos/usbd-token-1000.png` (1000x1000): pump.fun coin image (1:1, min 1000px). Bulma face and upper body from usbd-main.
 
