@@ -10,7 +10,7 @@ Here's the whole template. Sling, or anyone who wants to send it: art, logo, ste
 
 Ultimate Super Bulma Dragonballs. A Bulma coin built to be the hub of slingoorio's Big Titty Coin ($BTC) eco.
 
-**The plan** (full steps in [LAUNCH.md](HOW-TO-LAUNCH-USBD.md))
+**The plan** (full steps in [HOW-TO-LAUNCH-USBD.md](HOW-TO-LAUNCH-USBD.md))
 1. Launch on pump.fun quoted in USDC. Strongest pool, full stop.
 2. Dev buy 20% of supply.
 3. Lock 10% with Big Titty $BTC on Meteora.
@@ -22,6 +22,6 @@ Ultimate Super Bulma Dragonballs. A Bulma coin built to be the hub of slingoorio
 
 Launch post: [ANNOUNCEMENT-POSTS.md](../ANNOUNCEMENT-POSTS.md) · Use it for any token: [LAUNCH-ANY-COIN-TEMPLATE.md](../LAUNCH-ANY-COIN-TEMPLATE.md)
 
-Posts: [posts.md](USBD-POSTS.md) · Art pack: [art/README.md](USBD-ART/README.md) · Lore: [LORE.md](USBD-LORE.md)
+Posts: [USBD-POSTS.md](USBD-POSTS.md) · Art pack: [USBD-ART/README.md](USBD-ART/README.md) · Lore: [USBD-LORE.md](USBD-LORE.md)
 
 Fan parody. Not a stablecoin, not pegged, not affiliated with any anime studio. Concept and build by @d4rthban3.
