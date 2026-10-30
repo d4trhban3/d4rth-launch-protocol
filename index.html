@@ -7,7 +7,7 @@ layout: null
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>d4rth Launch Protocol</title>
-<meta name="description" content="Launch any Solana token with real legs. USBD was just my idea. Use any token you want. I used the Bulma dollar.">
+<meta name="description" content="A quick launch template for any Solana token. Bulma Dollar was just a name I liked. Nobody has to use it.">
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
@@ -25,7 +25,29 @@ layout: null
     color: #6d7585; margin-bottom: 10px;
   }
   h1 { margin: 0; font-size: 34px; font-weight: 600; letter-spacing: -0.02em; }
-  .lede { margin: 10px 0 0; max-width: 620px; color: #9aa3b2; font-size: 16px; line-height: 1.5; }
+  .lede { margin: 12px 0 0; max-width: 640px; color: #c5ccd8; font-size: 17px; line-height: 1.5; }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+  .chips div {
+    padding: 8px 12px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.03);
+    font-size: 13px; color: #d5dbe6;
+  }
+  .chips b { color: #f5d78a; margin-right: 6px; font-weight: 650; }
+  .sample {
+    margin-top: 22px; display: grid; grid-template-columns: 72px 1fr; gap: 14px; align-items: center;
+    padding: 14px; border-radius: 14px;
+    border: 1px dashed rgba(255,255,255,0.16);
+    background: rgba(255,255,255,0.02);
+  }
+  .sample img { width: 72px; height: 72px; border-radius: 50%; object-fit: cover; opacity: 0.9; }
+  .sample b { display: block; font-size: 14px; }
+  .sample p { margin: 4px 0 0; color: #8b93a3; font-size: 13px; line-height: 1.45; }
+  .tag {
+    display: inline-block; margin-bottom: 6px; padding: 2px 8px; border-radius: 999px;
+    font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: #f5d78a;
+    border: 1px solid rgba(245,215,138,0.4);
+  }
   .row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 22px; }
   .btn {
     display: inline-block; padding: 10px 16px; border-radius: 10px;
@@ -74,31 +96,24 @@ layout: null
   @media (max-width: 720px) {
     .hero { grid-template-columns: 1fr; }
     .portrait { justify-self: start; width: 140px; }
-    .grid { grid-template-columns: 1fr; }
+    .grid, .sample { grid-template-columns: 1fr; }
     h1 { font-size: 28px; }
   }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <div class="hero">
-    <div>
-      <div class="kicker">01 / Home</div>
-      <h1>d4rth Launch Protocol</h1>
-      <p class="lede">A way to launch any Solana token so it has legs. USDC main pool, locked liquidity, built to be a hub. USBD was just my idea. Use any token you want. I used the Bulma dollar.</p>
-      <div class="row">
-        <a class="btn primary" href="galaxy/">Open the galaxy</a>
-        <a class="btn" href="https://github.com/d4trhban3/d4rth-launch-protocol/blob/main/LAUNCH-ANY-COIN-TEMPLATE.md">Use any token</a>
-        <a class="btn" href="https://github.com/d4trhban3/d4rth-launch-protocol/blob/main/BULMA-USBD-READY-TO-LAUNCH/README.md">The idea I used</a>
-      </div>
-    </div>
-    <img class="portrait" src="BULMA-USBD-READY-TO-LAUNCH/USBD-ART/coin-images-and-logos/usbd-avatar-400.jpg" alt="$USBD">
+  <div class="kicker">Quick launch template</div>
+  <h1>Your coin. Not mine.</h1>
+  <p class="lede">Fill in your own token. USDC main pool, lock the side pools, and other coins can pair into yours. I am not telling you what to name it.</p>
+  <div class="chips">
+    <div><b>01</b>USDC pool</div>
+    <div><b>02</b>Lock the sides</div>
+    <div><b>03</b>It can be the hub</div>
   </div>
-
-  <div class="card">
-    <h2>@slingoorio — this is the important part for you</h2>
-    <p>The protocol is for any token. The idea I brought you is the Bulma dollar. If you run it, pair a chunk of every token in the Big Titty ecosystem with Bulma. Launch $USBD on USDC, buy 20%, lock the $BTC and SOL pools, then lock a chunk of each titty token against $USBD. The map is that example: hit Add USBD and the web gets tighter. Use a different idea and the same shape still works.</p>
-    <div class="go"><a class="btn primary" href="galaxy/">Open the twin-sun map</a></div>
+  <div class="row">
+    <a class="btn primary" href="https://github.com/d4trhban3/d4rth-launch-protocol/blob/main/LAUNCH-ANY-COIN-TEMPLATE.md">Copy the template</a>
+    <a class="btn" href="galaxy/">See one sample map</a>
   </div>
 
   <h3>The 6 steps</h3>
@@ -111,23 +126,35 @@ layout: null
     <li><span>06</span>Then partner tokens pair a chunk of their supply to it. It becomes the hub.</li>
   </ol>
 
-  <h3>The idea I used</h3>
-  <div class="grid">
-    <div class="mini">
-      <b>$USBD · the Bulma dollar</b>
-      <span>Not the protocol. Just my idea. Use any token you want. Lore, art, posts and the launch sequence for this one are in the pack.</span>
+  <h3>Optional sample</h3>
+  <div class="sample">
+    <img src="BULMA-USBD-READY-TO-LAUNCH/USBD-ART/coin-images-and-logos/usbd-avatar-400.jpg" alt="">
+    <div>
+      <span class="tag">You can ignore this</span>
+      <b>Bulma Dollar</b>
+      <p>I just liked the sound of it. Nobody has to use this name, this ticker, or this art. USBD was only the ticker I wrote down for the sample.</p>
+      <div class="row">
+        <a class="btn" href="https://github.com/d4trhban3/d4rth-launch-protocol/blob/main/BULMA-USBD-READY-TO-LAUNCH/README.md">Sample pack</a>
+        <a class="btn" href="galaxy/">Sample on the map</a>
+      </div>
     </div>
-    <div class="mini">
-      <b>Why 20%</b>
-      <span>A pump.fun curve sells about 79% before graduation. 10% side pools stay smaller than USDC, so USDC stays the main pool.</span>
-    </div>
+  </div>
+
+  <div class="card">
+    <h2>If you run the Big Titty ecosystem</h2>
+    <p>The sample on the map is Bulma Dollar sitting next to $BTC. Same template, one filled-in idea. Pair a chunk of each token to whatever hub you actually launch. Hit show sample if you want to see that version.</p>
+    <div class="go"><a class="btn primary" href="galaxy/">Open the sample map</a></div>
   </div>
 
   <h3>Also</h3>
   <div class="grid">
     <div class="mini">
+      <b>Why 20%</b>
+      <span>A pump.fun curve sells about 79% before graduation. 10% side pools stay smaller than USDC, so USDC stays the main pool.</span>
+    </div>
+    <div class="mini">
       <b><a href="https://github.com/d4trhban3/d4rth-launch-protocol/blob/main/ANNOUNCEMENT-POSTS.md">Posts</a></b>
-      <span>Ready-to-send copy for the open call.</span>
+      <span>Ready-to-send copy. The sample is named. The template is not.</span>
     </div>
     <div class="mini">
       <b>Support the protocol</b>

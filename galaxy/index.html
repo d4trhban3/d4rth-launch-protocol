@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>d4rth Launch Protocol · any token · Bulma is just the example</title>
+<title>Launch template · Bulma Dollar is only a sample</title>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
@@ -23,7 +23,13 @@
   }
   h1 { margin: 0; font-size: 16px; font-weight: 560; letter-spacing: 0.01em; }
   .sub { margin-top: 4px; font-size: 11px; color: #8b93a3; max-width: 420px; }
-  .idea { margin: 6px 0 0; max-width: 460px; font-size: 12px; line-height: 1.35; color: #f5d78a; }
+  .idea {
+    display: inline-block; margin: 8px 0 0; max-width: 520px;
+    padding: 4px 10px; border-radius: 999px;
+    border: 1px solid rgba(245,215,138,0.45);
+    background: rgba(245,215,138,0.1);
+    color: #f5d78a; font-size: 11px; line-height: 1.35;
+  }
   .pills { margin-top: 12px; display: flex; gap: 8px; pointer-events: auto; }
   button {
     background: rgba(16,18,24,0.72); color: #d5dbe6;
@@ -181,7 +187,7 @@
     }
     h1 { font-size: 18px; }
     .pills { margin-top: 10px; display: flex; gap: 8px; }
-    .pills button { flex: 1; min-height: 42px; padding: 10px 8px; font-size: 13px; }
+    .pills button { flex: 1; min-height: 42px; padding: 10px 8px; font-size: 12px; white-space: nowrap; }
     #zReset { flex: 0 0 72px; }
     .dock {
       display: flex; flex-direction: column;
@@ -234,12 +240,12 @@
 <body>
 <canvas id="canvas"></canvas>
 <div class="top">
-  <div class="kicker" id="kicker">01 / HOME SYSTEM</div>
-  <h1 id="title">Big Titty Galaxy</h1>
-  <div class="sub" id="subtitle">Tokens orbiting $BTC · closer means a deeper pool</div>
-  <p class="idea">USBD was just my idea. Use any token you want. I used the Bulma dollar.</p>
+  <div class="kicker" id="kicker">ANY COIN</div>
+  <h1 id="title">Launch template</h1>
+  <div class="sub" id="subtitle">One sun. Show the sample and the coins sit closer.</div>
+  <p class="idea">Sample only. I liked the sound of Bulma Dollar. Use your own coin.</p>
   <div class="pills">
-    <button id="btn">Add USBD</button>
+    <button id="btn">Show sample</button>
     <button id="btnSpin">Auto-Rotate</button>
     <button id="zReset" type="button">Fit</button>
   </div>
@@ -263,9 +269,9 @@
     <li><i class="sw dist"></i><span>Distance from $BTC is pool strength.</span></li>
     <li><i class="sw size"></i><span>Bigger disc means a bigger market cap.</span></li>
     <li><i class="sw btc-line"></i><span>Pale line is that coin's pool with $BTC.</span></li>
-    <li><i class="sw usbd-line"></i><span>Purple line is supply paired through $USBD.</span></li>
-    <li><i class="sw bond"></i><span>Gold bar is the $USBD–$BTC bond.</span></li>
-    <li><i class="sw ghost"></i><span>Empty ring is where it sat before USBD.</span></li>
+    <li><i class="sw usbd-line"></i><span>Purple line is supply paired through the sample hub.</span></li>
+    <li><i class="sw bond"></i><span>Gold bar is the sample hub’s bond with $BTC.</span></li>
+    <li><i class="sw ghost"></i><span>Empty ring is where it sat before the sample.</span></li>
   </ul>
 </aside>
 <div class="readout" id="readout"></div>
@@ -273,7 +279,7 @@
 <aside class="panel" id="panel">
   <div class="master">
     <h2>Each coin</h2>
-    <p>Increase runs that coin's market cap from where it is now up to +2000%. Supply paired is the slice locked with $USBD, up to 50%, which pulls it toward $BTC.</p>
+    <p>Increase runs that coin's market cap from where it is now up to +2000%. Supply paired is the slice locked with the sample hub, up to 50%, which pulls it toward $BTC.</p>
     <div class="bondline" id="bondNote"></div>
   </div>
   <div class="rows" id="rows"></div>
@@ -430,7 +436,7 @@ orbiters.forEach(t => {
     + '<div class="sl">Market cap increase <b data-v="' + t.ticker + '">' + boostLabel(t) + '</b></div>'
     + '<input type="range" data-kind="vol" min="0" max="2000" step="1" value="0" aria-label="' + t.ticker + ' volume">'
     + '<div class="ends"><span>0%</span><span>2000%</span></div>'
-    + '<div class="sl pair">Supply paired to $USBD <b data-s="' + t.ticker + '">0%</b></div>'
+    + '<div class="sl pair">Supply paired to the sample <b data-s="' + t.ticker + '">0%</b></div>'
     + '<input type="range" data-kind="share" min="0" max="50" step="1" value="0" aria-label="' + t.ticker + ' supply paired to USBD">'
     + '<div class="ends"><span>0%</span><span>50%</span></div>';
   row.appendChild(img);
@@ -517,10 +523,10 @@ function paintDeltas() {
   }
   const lift = bond / baseEco * 100;
   const btcLift = bond / btc.liq * 100;
-  note.textContent = 'Bond ' + money(bond) + ' · $BTC LP +' + btcLift.toFixed(1) + '% · ecosystem +' + lift.toFixed(1) + '% vs no USBD';
+  note.textContent = 'Bond ' + money(bond) + ' · $BTC LP +' + btcLift.toFixed(1) + '% · ecosystem +' + lift.toFixed(1) + '% vs no sample hub';
   const box = document.getElementById('readout');
   box.classList.add('show');
-  box.textContent = 'Twin bond ' + money(bond) + '  ·  always deeper with USBD in';
+  box.textContent = 'Sample hub ' + money(bond) + '  ·  always deeper with a hub in';
 }
 
 let userZoomed = false;
@@ -529,7 +535,7 @@ function chromeBox() {
   const narrow = W < 800;
   if (narrow) {
     const dock = document.getElementById('dock');
-    return { side: 0, header: 108, bottom: dock ? dock.offsetHeight : 220 };
+    return { side: 0, header: 136, bottom: dock ? dock.offsetHeight : 220 };
   }
   return { side: open ? 388 : 24, header: 16, bottom: 16 };
 }
@@ -628,13 +634,13 @@ document.getElementById('zReset').onclick = () => { userZoomed = false; setZoom(
 
 function refreshCopy() {
   const on = mode === 'bulma';
-  document.getElementById('btn').textContent = on ? 'Remove USBD' : 'Add USBD';
+  document.getElementById('btn').textContent = on ? 'Hide sample' : 'Show sample';
   document.getElementById('btn').classList.toggle('active', on);
-  document.getElementById('kicker').textContent = on ? '02 / TWIN SUNS' : '01 / HOME SYSTEM';
-  document.getElementById('title').textContent = on ? 'BTC × USBD' : 'Big Titty Galaxy';
+  document.getElementById('kicker').textContent = on ? 'ONE FILLED-IN IDEA' : 'ANY COIN';
+  document.getElementById('title').textContent = on ? 'Sample · Bulma Dollar' : 'Launch template';
   document.getElementById('subtitle').textContent = on
-    ? 'Slide a coin left to drop USBD. Slide right and it falls in toward $BTC.'
-    : 'One sun. Add USBD and the same coins sit closer.';
+    ? 'This second sun is a sample. Your hub can be any coin.'
+    : 'One sun. Show the sample and the coins sit closer.';
   document.getElementById('panel').classList.toggle('open', on);
   document.body.classList.toggle('bulma', on);
   const keyEl = document.getElementById('key');
@@ -861,11 +867,14 @@ function loop() {
       ctx.globalAlpha = s.alpha;
       const ready = usbdImg && usbdImg.ok;
       drawDisc(s.x, s.y, s.r, '#12343f', ready ? usbdImg : null);
-      ctx.fillStyle = '#e7f8ff';
-      ctx.font = '650 12px Inter, system-ui';
+      ctx.fillStyle = '#f5d78a';
+      ctx.font = '700 9px Inter, system-ui';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.fillText('USBD', s.x, s.y + s.r + 4);
+      ctx.fillText('SAMPLE', s.x, s.y + s.r + 3);
+      ctx.fillStyle = '#e7f8ff';
+      ctx.font = '650 12px Inter, system-ui';
+      ctx.fillText('BULMA', s.x, s.y + s.r + 15);
       ctx.restore();
     }
   });

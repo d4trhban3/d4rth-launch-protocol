@@ -1,6 +1,8 @@
 # d4rth Launch Protocol
 
-**USBD was just my idea. Use any token you want.** I used the Bulma dollar. The protocol is the launch. The character is the example.
+**A quick launch template. Your coin, not mine.**
+
+Bulma Dollar was just a name I liked the sound of. Nobody has to use it. USBD was only the ticker I wrote on the sample. Copy [LAUNCH-ANY-COIN-TEMPLATE.md](LAUNCH-ANY-COIN-TEMPLATE.md), fill in your own token, and launch.
 
 **Start here**
 - Launching your own coin? → [LAUNCH-ANY-COIN-TEMPLATE.md](LAUNCH-ANY-COIN-TEMPLATE.md)
