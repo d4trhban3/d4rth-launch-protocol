@@ -14,6 +14,13 @@ I'd be happy if you used it to launch Bulma Dollar. Just as happy if the coin is
 
 The d4rth Launch Protocol (DLP) is the six steps below. Launch on pump.fun paired with USDC. That is the main pool. Pair 10% with BTC. Pair 10% with SOL. The new USBD, or a token of your choice, becomes the treasury hub. Fill in [LAUNCH-ANY-COIN-TEMPLATE.md](LAUNCH-ANY-COIN-TEMPLATE.md) and go.
 
+## Quick terms
+- **pump.fun curve** — the bonding curve you launch on. Price rises with every buy. It sells about 79% of supply, then the coin graduates.
+- **PumpSwap** — the pool the coin moves to automatically once the curve finishes.
+- **Meteora DAMM V2** — the permanent liquidity pool you lock against. Once locked, the liquidity cannot be removed.
+- **Treasury hub** — the new coin that other tokens lock a chunk of supply against, so they all route through it.
+- **Creator-fee recipient** — an optional wallet or GitHub user that receives a slice of the launch fees. Holder rewards stay on.
+
 ---
 
 ### @slingoorio — this is the important part for you
@@ -25,7 +32,7 @@ If you run **this** idea, the key is pairing a chunk of **every token in the Big
 Once $USBD is launched on USDC, 20% bought, and the $BTC + SOL locks are in place, you take a chunk from each titty token and permanently lock a Meteora pool of that chunk against the new USBD (or token of your choice).  
 Every eco token gets a pool with it. It becomes the "treasury" hub.
 
-Open the map and hit **Add Bulma**. $BTC and Bulma become twin suns. That map is the example. Same shape if the treasury hub is a token of your choice.
+Open the map and hit **Add Bulma**. $BTC and Bulma become twin suns. That map is the example of the treasury hub. Same shape if the treasury hub is a token of your choice.
 
 **Live map:** [Big Titty Galaxy](https://d4trhban3.github.io/d4rth-launch-protocol/galaxy/)
 
@@ -34,12 +41,12 @@ Full sequence and the example pack: [BULMA-USBD-READY-TO-LAUNCH/](BULMA-USBD-REA
 ---
 
 ## The 6 steps
-1. Launch on pump.fun paired with USDC. That is the main pool.
+1. Launch on pump.fun paired with USDC. That is the main pool. *(The curve is the bonding curve that sells ~79% of supply before graduation.)*
 2. Dev buy about 20% of supply.
-3. Pair 10% with the ecosystem anchor token BTC on Meteora.
+3. Pair 10% with the ecosystem anchor token BTC on Meteora. *(DAMM V2 standard pool, permanently locked.)*
 4. Pair 10% with SOL on Meteora.
-5. The rest stays on USDC, through the curve and after graduation.
-6. Then partner tokens pair a chunk of their supply to the new USBD (or token of your choice). It becomes the "treasury" hub.
+5. The rest stays on USDC, through the curve and after graduation. *(Then it moves to PumpSwap.)*
+6. Then partner tokens pair a chunk of their supply to the new USBD (or token of your choice). It becomes the "treasury" hub. *(Each partner token gets its own permanent pool against it.)*
 
 Plus: add GitHub `d4trhban3` as a creator-fee recipient (strongly encouraged, see below).
 
