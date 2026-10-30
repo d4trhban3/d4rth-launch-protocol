@@ -27,14 +27,21 @@ layout: null
   .doc ul, .doc ol { margin: 0 0 16px; padding: 0; list-style: none; }
   .doc li { padding: 10px 0; border-top: 1px solid rgba(255,255,255,0.08); }
   .doc ol { counter-reset: step; }
-  .doc ol li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; }
-  .doc ol li::before { counter-increment: step; content: counter(step, decimal-leading-zero); color: #f5d78a; font-size: 12px; padding-top: 3px; }
+  .doc ol li { display: block; position: relative; padding: 12px 0 12px 36px; }
+  .doc ol li::before { counter-increment: step; content: counter(step, decimal-leading-zero); position: absolute; left: 0; top: 14px; width: 28px; color: #f5d78a; font-size: 12px; }
+  .gallery { display: grid; gap: 14px; margin: 0 0 22px; }
+  .gallery.coins, .gallery.stickers { grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); }
+  .gallery.banners, .gallery.scenes { grid-template-columns: 1fr; }
+  .gallery figure { margin: 0; }
+  .gallery img { width: 100%; height: 160px; object-fit: contain; background: #101218; margin: 0; border-radius: 12px; }
+  .gallery.banners img, .gallery.scenes img { height: auto; }
+  .gallery figcaption { margin-top: 6px; font-size: 11px; line-height: 1.35; color: #8b93a3; }
   .doc strong { color: #fff; font-weight: 650; }
   .doc em { color: #f5d78a; font-style: normal; }
   .doc code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5d78a; background: rgba(245,215,138,0.08); padding: 1px 6px; border-radius: 6px; word-break: break-all; }
   .doc pre { background: #101218; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 16px; overflow-x: auto; margin: 0 0 14px; }
   .doc pre code { background: none; padding: 0; color: #e7ebf3; white-space: pre-wrap; }
-  .doc img { width: 100%; max-width: 520px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); margin: 8px 0 16px; display: block; }
+  .doc img { width: auto; max-width: 100%; height: auto; border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); margin: 12px auto 18px; display: block; }
   .doc blockquote { margin: 8px 0 18px; padding: 14px 16px; border-left: 3px solid #f5d78a; background: rgba(245,215,138,0.06); border-radius: 0 12px 12px 0; }
   .doc blockquote p { margin: 0; }
   .doc hr { border: 0; border-top: 1px solid rgba(255,255,255,0.08); margin: 28px 0; }

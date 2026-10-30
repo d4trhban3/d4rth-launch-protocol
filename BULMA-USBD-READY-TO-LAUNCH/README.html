@@ -27,14 +27,21 @@ layout: null
   .doc ul, .doc ol { margin: 0 0 16px; padding: 0; list-style: none; }
   .doc li { padding: 10px 0; border-top: 1px solid rgba(255,255,255,0.08); }
   .doc ol { counter-reset: step; }
-  .doc ol li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; }
-  .doc ol li::before { counter-increment: step; content: counter(step, decimal-leading-zero); color: #f5d78a; font-size: 12px; padding-top: 3px; }
+  .doc ol li { display: block; position: relative; padding: 12px 0 12px 36px; }
+  .doc ol li::before { counter-increment: step; content: counter(step, decimal-leading-zero); position: absolute; left: 0; top: 14px; width: 28px; color: #f5d78a; font-size: 12px; }
+  .gallery { display: grid; gap: 14px; margin: 0 0 22px; }
+  .gallery.coins, .gallery.stickers { grid-template-columns: repeat(auto-fill, minmax(148px, 1fr)); }
+  .gallery.banners, .gallery.scenes { grid-template-columns: 1fr; }
+  .gallery figure { margin: 0; }
+  .gallery img { width: 100%; height: 160px; object-fit: contain; background: #101218; margin: 0; border-radius: 12px; }
+  .gallery.banners img, .gallery.scenes img { height: auto; }
+  .gallery figcaption { margin-top: 6px; font-size: 11px; line-height: 1.35; color: #8b93a3; }
   .doc strong { color: #fff; font-weight: 650; }
   .doc em { color: #f5d78a; font-style: normal; }
   .doc code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; color: #f5d78a; background: rgba(245,215,138,0.08); padding: 1px 6px; border-radius: 6px; word-break: break-all; }
   .doc pre { background: #101218; border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px 16px; overflow-x: auto; margin: 0 0 14px; }
   .doc pre code { background: none; padding: 0; color: #e7ebf3; white-space: pre-wrap; }
-  .doc img { width: 100%; max-width: 520px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); margin: 8px 0 16px; display: block; }
+  .doc img { width: auto; max-width: 100%; height: auto; border-radius: 16px; border: 1px solid rgba(255,255,255,0.12); margin: 12px auto 18px; display: block; }
   .doc blockquote { margin: 8px 0 18px; padding: 14px 16px; border-left: 3px solid #f5d78a; background: rgba(245,215,138,0.06); border-radius: 0 12px 12px 0; }
   .doc blockquote p { margin: 0; }
   .doc hr { border: 0; border-top: 1px solid rgba(255,255,255,0.08); margin: 28px 0; }
@@ -62,6 +69,16 @@ layout: null
 <p>Launch post: <a href="../ANNOUNCEMENT-POSTS.html">ANNOUNCEMENT-POSTS.md</a> · Use it for any token: <a href="../LAUNCH-ANY-COIN-TEMPLATE.html">LAUNCH-ANY-COIN-TEMPLATE.md</a></p>
 <p>Posts: <a href="USBD-POSTS.html">USBD-POSTS.md</a> · Art pack: <a href="USBD-ART/README.html">USBD-ART/README.md</a> · Lore: <a href="USBD-LORE.html">USBD-LORE.md</a></p>
 <p>Fan parody. Not a stablecoin, not pegged, not affiliated with any anime studio. Concept and build by @d4rthban3.</p>
+<h2>Art</h2>
+<p>Every piece in the pack.</p>
+<h3>Coin</h3>
+<div class="gallery coins"><figure><img src="USBD-ART/coin-images-and-logos/usbd-token-1000.png" alt="Token"><figcaption>Token</figcaption></figure><figure><img src="USBD-ART/coin-images-and-logos/usbd-token-1000-gold-ring.png" alt="Token, gold ring"><figcaption>Token, gold ring</figcaption></figure><figure><img src="USBD-ART/coin-images-and-logos/usbd-avatar-400.jpg" alt="Avatar"><figcaption>Avatar</figcaption></figure><figure><img src="USBD-ART/coin-images-and-logos/usbd-avatar-400-circle-preview.png" alt="Avatar, circle"><figcaption>Avatar, circle</figcaption></figure><figure><img src="USBD-ART/coin-images-and-logos/usbd-dexscreener-icon-512.png" alt="Dexscreener icon"><figcaption>Dexscreener icon</figcaption></figure><figure><img src="USBD-ART/coin-images-and-logos/usbd-logo-icon.png" alt="Logo icon"><figcaption>Logo icon</figcaption></figure><figure><img src="USBD-ART/coin-images-and-logos/usbd-logo-icon-transparent.png" alt="Logo icon, transparent"><figcaption>Logo icon, transparent</figcaption></figure><figure><img src="USBD-ART/coin-images-and-logos/usbd-logo-lockup.png" alt="Lockup"><figcaption>Lockup</figcaption></figure><figure><img src="USBD-ART/coin-images-and-logos/usbd-logo-lockup-black.png" alt="Lockup, black"><figcaption>Lockup, black</figcaption></figure></div>
+<h3>Banners</h3>
+<div class="gallery banners"><figure><img src="USBD-ART/banners-and-headers/usbd-pumpfun-banner-1500x500.jpg" alt="pump.fun banner"><figcaption>pump.fun banner</figcaption></figure><figure><img src="USBD-ART/banners-and-headers/usbd-dexscreener-header-1500x500.jpg" alt="Dexscreener header"><figcaption>Dexscreener header</figcaption></figure><figure><img src="USBD-ART/banners-and-headers/usbd-x-banner-genius.jpg" alt="X banner, genius"><figcaption>X banner, genius</figcaption></figure><figure><img src="USBD-ART/banners-and-headers/usbd-x-banner-heiress.jpg" alt="X banner, heiress"><figcaption>X banner, heiress</figcaption></figure><figure><img src="USBD-ART/banners-and-headers/usbd-x-banner-router.jpg" alt="X banner, router"><figcaption>X banner, router</figcaption></figure><figure><img src="USBD-ART/banners-and-headers/usbd-announcement-1920x1080.jpg" alt="Announcement"><figcaption>Announcement</figcaption></figure><figure><img src="USBD-ART/banners-and-headers/usbd-telegram-discord-960x540.jpg" alt="Telegram and Discord"><figcaption>Telegram and Discord</figcaption></figure></div>
+<h3>Scenes</h3>
+<div class="gallery scenes"><figure><img src="USBD-ART/scenes/usbd-main.png" alt="Main"><figcaption>Main</figcaption></figure><figure><img src="USBD-ART/scenes/lore-genius.jpg" alt="Genius"><figcaption>Genius</figcaption></figure><figure><img src="USBD-ART/scenes/lore-heiress.jpg" alt="Heiress"><figcaption>Heiress</figcaption></figure><figure><img src="USBD-ART/scenes/lore-alliance.jpg" alt="Alliance"><figcaption>Alliance</figcaption></figure><figure><img src="USBD-ART/scenes/lore-spheres.jpg" alt="Spheres"><figcaption>Spheres</figcaption></figure><figure><img src="USBD-ART/scenes/lore-lock.jpg" alt="Lock"><figcaption>Lock</figcaption></figure><figure><img src="USBD-ART/scenes/lore-router.jpg" alt="Router"><figcaption>Router</figcaption></figure></div>
+<h3>Stickers</h3>
+<div class="gallery stickers"><figure><img src="USBD-ART/stickers/sticker-bulma-never-sells.png" alt="Bulma never sells"><figcaption>Bulma never sells</figcaption></figure><figure><img src="USBD-ART/stickers/sticker-champagne.png" alt="Champagne"><figcaption>Champagne</figcaption></figure><figure><img src="USBD-ART/stickers/sticker-genius-doesnt-hoard.png" alt="Genius doesn't hoard"><figcaption>Genius doesn't hoard</figcaption></figure><figure><img src="USBD-ART/stickers/sticker-sell-button-rnd.png" alt="Sell button, R&D"><figcaption>Sell button, R&D</figcaption></figure><figure><img src="USBD-ART/stickers/sticker-smug.png" alt="Smug"><figcaption>Smug</figcaption></figure><figure><img src="USBD-ART/stickers/sticker-wink-locked.png" alt="Wink, locked"><figcaption>Wink, locked</figcaption></figure></div>
   </div>
   <footer>d4rth Launch Protocol by @d4rthban3. Not financial advice.</footer>
 </div>
