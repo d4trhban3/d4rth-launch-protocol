@@ -92,15 +92,32 @@
   input[type=range] { height: 28px; touch-action: pan-x; }
   .panel, .rows { touch-action: pan-y; -webkit-overflow-scrolling: touch; }
   @media (max-width: 800px) {
-    .top { top: 10px; left: 12px; right: 12px; }
-    .sub, .hint, .legend, .readout { display: none !important; }
-    h1 { font-size: 15px; }
-    button { padding: 11px 14px; font-size: 13px; }
-    .zoom { top: 72px; bottom: auto; left: 12px; }
-    .panel {
-      top: auto; left: 8px; right: 8px; bottom: 8px; width: auto;
-      max-height: 48vh;
+    .kicker { display: none; }
+    .top {
+      top: max(10px, env(safe-area-inset-top));
+      left: 12px; right: 12px;
     }
+    .sub, .hint, .legend, .readout { display: none !important; }
+    h1 { font-size: 17px; }
+    .pills { margin-top: 8px; }
+    .pills button { padding: 10px 14px; font-size: 13px; min-height: 42px; }
+    .zoom {
+      top: auto;
+      left: 12px;
+      right: auto;
+      bottom: max(14px, env(safe-area-inset-bottom));
+      z-index: 30;
+    }
+    .zoom button { min-width: 40px; min-height: 40px; padding: 6px 10px; font-size: 18px; }
+    body:has(#panel.open) .zoom {
+      bottom: calc(40vh + 16px + env(safe-area-inset-bottom));
+    }
+    .panel {
+      top: auto; left: 8px; right: 8px; width: auto;
+      bottom: max(8px, env(safe-area-inset-bottom));
+      max-height: 40vh;
+    }
+    .master p { display: none; }
   }
 </style>
 </head>
@@ -335,9 +352,22 @@ document.getElementById('allShare').addEventListener('input', (e) => {
   paintDeltas();
 });
 
+let userZoomed = false;
+function fittedZoom() {
+  const open = document.getElementById('panel').classList.contains('open');
+  const narrow = W < 800;
+  const header = narrow ? 96 : 20;
+  const sheet = (narrow && open) ? H * 0.40 : 0;
+  const side = (!narrow && open) ? 348 : 20;
+  const availW = Math.max(180, W - side);
+  const availH = Math.max(180, H - header - sheet);
+  const fit = Math.min(availW, availH) / 1000;
+  return Math.max(0.36, Math.min(narrow ? 0.92 : 1.15, fit));
+}
 function resize() {
   W = canvas.width = window.innerWidth;
   H = canvas.height = window.innerHeight;
+  if (!userZoomed) setZoom(fittedZoom());
 }
 window.addEventListener('resize', resize);
 resize();
@@ -347,7 +377,6 @@ function setZoom(next) {
   const el = document.getElementById('zPct');
   if (el) el.textContent = Math.round(scale * 100) + '%';
 }
-setZoom(0.86);
 
 function dragBy(dx, dy) {
   rotY += dx * 0.005;
@@ -365,6 +394,7 @@ window.addEventListener('mousemove', e => {
   lastY = e.clientY;
 });
 canvas.addEventListener('wheel', e => {
+  userZoomed = true;
   setZoom(scale + e.deltaY * -0.001);
   e.preventDefault();
 }, { passive: false });
@@ -393,6 +423,7 @@ canvas.addEventListener('touchmove', e => {
     lastX = t.clientX;
     lastY = t.clientY;
   } else if (e.touches.length === 2 && pinchDist) {
+    userZoomed = true;
     const d = touchDist(e.touches);
     setZoom(scale * (d / pinchDist));
     pinchDist = d;
@@ -409,9 +440,9 @@ canvas.addEventListener('touchend', e => {
   }
 }, { passive: false });
 canvas.addEventListener('touchcancel', () => { dragging = false; pinchDist = 0; });
-document.getElementById('zIn').onclick = () => setZoom(scale + 0.12);
-document.getElementById('zOut').onclick = () => setZoom(scale - 0.12);
-document.getElementById('zReset').onclick = () => { setZoom(0.86); rotX = 0.38; rotY = -0.1; rotZ = 0.02; };
+document.getElementById('zIn').onclick = () => { userZoomed = true; setZoom(scale + 0.12); };
+document.getElementById('zOut').onclick = () => { userZoomed = true; setZoom(scale - 0.12); };
+document.getElementById('zReset').onclick = () => { userZoomed = false; setZoom(fittedZoom()); rotX = 0.38; rotY = -0.1; rotZ = 0.02; };
 
 function refreshCopy() {
   const on = mode === 'bulma';
@@ -427,6 +458,7 @@ function refreshCopy() {
   box.classList.toggle('show', on);
   if (!on) box.textContent = '';
   paintDeltas();
+  if (!userZoomed) setZoom(fittedZoom());
 }
 document.getElementById('btn').addEventListener('click', () => {
   mode = mode === 'current' ? 'bulma' : 'current';
@@ -464,10 +496,11 @@ function rotate(p, rx, ry, rz) {
 function focus() {
   const open = document.getElementById('panel').classList.contains('open');
   const narrow = W < 800;
-  const panel = (open && !narrow) ? 320 : 0;
-  const sheet = (open && narrow) ? H * 0.2 : 0;
-  cx = (W - panel) / 2;
-  cy = (H - sheet) / 2;
+  const side = (open && !narrow) ? 332 : 0;
+  const header = narrow ? 100 : 0;
+  const sheet = (open && narrow) ? H * 0.40 : 0;
+  cx = (W - side) / 2;
+  cy = header + (H - header - sheet) / 2;
 }
 
 function project(p) {
