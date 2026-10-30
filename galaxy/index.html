@@ -105,7 +105,7 @@
   .readout.show { display: block; }
 
   .panel {
-    position: absolute; top: 14px; right: 14px; bottom: 14px; width: 312px;
+    position: absolute; top: 14px; right: 14px; bottom: 14px; width: 360px;
     z-index: 20; display: none; flex-direction: column;
     background: rgba(8,10,14,0.9);
     border: 1px solid rgba(255,255,255,0.1);
@@ -122,8 +122,11 @@
   .ends { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #6d7585; }
   .bondline { margin-top: 8px; font-size: 12px; color: #d8ffe8; }
   .rows { overflow: auto; padding: 8px 12px 18px; }
-  .row { display: grid; grid-template-columns: 28px 1fr; gap: 8px; align-items: center; margin: 0 0 10px; }
-  .row img, .row .ph { width: 28px; height: 28px; border-radius: 50%; object-fit: cover; background: #222; }
+  .row { display: grid; grid-template-columns: 32px 1fr; gap: 8px; align-items: start; margin: 0 0 14px; }
+  .row img, .row .ph { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: #222; margin-top: 2px; }
+  .sl { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; color: #8b93a3; margin: 6px 0 2px; }
+  .sl b { color: #e7ebf3; font-weight: 650; letter-spacing: 0; text-transform: none; font-size: 11px; }
+  .sl.pair b { color: #f5d78a; }
   .row .nm { display: flex; justify-content: space-between; font-size: 11px; }
   .row .nm b { font-weight: 650; }
   .row .delta { color: #9aa3b2; font-weight: 500; }
@@ -175,7 +178,6 @@
     .key-list li { font-size: 12px; }
     body.bulma .key-list { display: none; }
     .master { padding-bottom: 8px; }
-    .master p, .rows { display: none; }
     .dock .panel {
       position: relative; top: auto; right: auto; bottom: auto; left: auto;
       width: auto; height: auto; max-height: none;
@@ -230,14 +232,8 @@
 
 <aside class="panel" id="panel">
   <div class="master">
-    <h2>Twin suns</h2>
-    <p>Left of each slider is the coin alone. Right routes its volume through $USBD into $BTC. More USBD volume makes that same coin pull harder.</p>
-    <div class="mh"><span>USBD volume</span><b id="usbdVolLabel">$500K</b></div>
-    <input id="usbdVol" type="range" min="50000" max="2000000" step="10000" value="500000">
-    <div class="ends"><span>$50K</span><span>$2M</span></div>
-    <div class="mh"><span>Every coin</span><b id="allLabel">with USBD</b></div>
-    <input id="allShare" type="range" min="0" max="100" value="100">
-    <div class="ends"><span>without</span><span>with USBD</span></div>
+    <h2>Each coin</h2>
+    <p>Volume is the disc size. Supply paired is how much of that coin is locked with $USBD, which pulls it toward $BTC.</p>
     <div class="bondline" id="bondNote"></div>
   </div>
   <div class="rows" id="rows"></div>
@@ -285,7 +281,6 @@ let dragging = false, lastX = 0, lastY = 0;
 let mode = 'current';
 let bulmaT = 0;
 let autoRotate = false;
-let usbdVolume = 500000;
 
 const tokens = [
   { ticker: 'BTC', key: 'btc', sub: 'EARTH', color: '#f7931a', vol: 500000, liq: 250000, mc: 5000000, isCenter: true },
@@ -333,6 +328,7 @@ ranked.forEach((t, i) => {
   const strength = t.liq / maxLiq;
   t.baseR = t.inner ? (200 + (1 - strength) * 70) : (340 + (1 - strength) * 110);
   t.size = 12 + 7 * Math.sqrt(t.vol / maxVol);
+  t.baseVol = t.vol;
   t.share = 0;
 });
 btc.size = 56;
@@ -343,8 +339,13 @@ function money(n) {
   return '$' + Math.round(n);
 }
 
+function rescale() {
+  const maxV = Math.max(...orbiters.map(t => t.vol), 1);
+  orbiters.forEach(t => { t.size = 12 + 7 * Math.sqrt(t.vol / maxV); });
+}
+
 function addedOf(t) {
-  return (t.share || 0) * t.vol * (usbdVolume / 500000) * bulmaT;
+  return (t.share || 0) * t.vol * bulmaT;
 }
 function bondNow() {
   return orbiters.reduce((s, t) => s + addedOf(t), 0);
@@ -376,16 +377,27 @@ orbiters.forEach(t => {
   const img = document.createElement(t.image ? 'img' : 'div');
   if (t.image) { img.src = t.image.src; img.alt = t.ticker; }
   else { img.className = 'ph'; }
+  const maxV = Math.max(20000, Math.round(t.baseVol * 4));
+  const step = Math.max(1000, Math.round(t.baseVol / 40));
   const body = document.createElement('div');
-  body.innerHTML = '<div class="nm"><b>' + t.ticker + '</b><span class="delta" data-d="' + t.ticker + '">without</span></div>'
-    + '<input type="range" min="0" max="100" value="0" data-key="' + t.ticker + '" aria-label="' + t.ticker + ' volume into USBD">'
-    + '<div class="ends"><span>without</span><span>with USBD</span></div>';
+  body.innerHTML = '<div class="nm"><b>' + t.ticker + '</b><span class="delta" data-d="' + t.ticker + '">0% paired</span></div>'
+    + '<div class="sl">Volume <b data-v="' + t.ticker + '">' + money(t.vol) + '</b></div>'
+    + '<input type="range" data-kind="vol" min="0" max="' + maxV + '" step="' + step + '" value="' + t.vol + '" aria-label="' + t.ticker + ' volume">'
+    + '<div class="sl pair">Supply paired to $USBD <b data-s="' + t.ticker + '">0%</b></div>'
+    + '<input type="range" data-kind="share" min="0" max="100" value="0" aria-label="' + t.ticker + ' supply paired to USBD">'
+    + '<div class="ends"><span>0%</span><span>100%</span></div>';
   row.appendChild(img);
   row.appendChild(body);
   rows.appendChild(row);
-  body.querySelector('input').addEventListener('input', (e) => {
+  body.querySelector('[data-kind="vol"]').addEventListener('input', (e) => {
+    t.vol = Number(e.target.value);
+    rescale();
+    body.querySelector('[data-v]').textContent = money(t.vol);
+    paintDeltas();
+  });
+  body.querySelector('[data-kind="share"]').addEventListener('input', (e) => {
     t.share = Number(e.target.value) / 100;
-    syncAllLabel();
+    body.querySelector('[data-s]').textContent = e.target.value + '%';
     paintDeltas();
   });
 });
@@ -397,7 +409,7 @@ function paintDeltas() {
     if (!el) return;
     const add = addedOf(t);
     if (add < 1 || mode !== 'bulma') {
-      el.textContent = 'without';
+      el.textContent = Math.round((t.share || 0) * 100) + '% paired';
       el.classList.remove('on');
       return;
     }
@@ -405,36 +417,18 @@ function paintDeltas() {
     el.textContent = '+' + money(add) + ' · ' + closer + '% closer';
     el.classList.add('on');
   });
-  const lift = bond / baseEco * 100;
-  const btcLift = bond / btc.liq * 100;
   const note = document.getElementById('bondNote');
   if (mode !== 'bulma') {
     note.textContent = '';
     return;
   }
+  const lift = bond / baseEco * 100;
+  const btcLift = bond / btc.liq * 100;
   note.textContent = 'Bond ' + money(bond) + ' · $BTC LP +' + btcLift.toFixed(1) + '% · ecosystem +' + lift.toFixed(1) + '% vs no USBD';
-  document.getElementById('usbdVolLabel').textContent = money(usbdVolume);
   const box = document.getElementById('readout');
   box.classList.add('show');
   box.textContent = 'Twin bond ' + money(bond) + '  ·  always deeper with USBD in';
 }
-
-function syncAllLabel() {
-  const avg = orbiters.reduce((s, t) => s + t.share, 0) / orbiters.length;
-  document.getElementById('allLabel').textContent = Math.round(avg * 100) + '% into USBD';
-}
-
-document.getElementById('usbdVol').addEventListener('input', (e) => {
-  usbdVolume = Number(e.target.value);
-  paintDeltas();
-});
-document.getElementById('allShare').addEventListener('input', (e) => {
-  const v = Number(e.target.value);
-  orbiters.forEach(t => { t.share = v / 100; });
-  rows.querySelectorAll('input[type=range]').forEach(inp => { inp.value = v; });
-  syncAllLabel();
-  paintDeltas();
-});
 
 let userZoomed = false;
 function chromeBox() {
@@ -444,7 +438,7 @@ function chromeBox() {
     const dock = document.getElementById('dock');
     return { side: 0, header: 108, bottom: dock ? dock.offsetHeight : 220 };
   }
-  return { side: open ? 348 : 24, header: 16, bottom: 16 };
+  return { side: open ? 388 : 24, header: 16, bottom: 16 };
 }
 function fittedZoom() {
   const c = chromeBox();
@@ -562,8 +556,12 @@ document.getElementById('btn').addEventListener('click', () => {
   mode = mode === 'current' ? 'bulma' : 'current';
   if (mode === 'bulma' && orbiters.every(t => t.share === 0)) {
     orbiters.forEach(t => { t.share = 1; });
-    rows.querySelectorAll('input[type=range]').forEach(inp => { inp.value = 100; });
-    document.getElementById('allShare').value = 100;
+    rows.querySelectorAll('input[data-kind="share"]').forEach(inp => {
+      inp.value = 100;
+      const ticker = inp.getAttribute('aria-label').split(' ')[0];
+      const lab = rows.querySelector('[data-s="' + ticker + '"]');
+      if (lab) lab.textContent = '100%';
+    });
   }
   refreshCopy();
 });
@@ -683,7 +681,8 @@ function loop() {
   if (bulmaT > 0.02) {
     const usbdSpun = rotate(usbdWorld, rotX, rotY, rotZ);
     const pr = project(usbdSpun);
-    const volGrow = Math.min(1, usbdVolume / 2000000);
+    const paired = orbiters.reduce((s, t) => s + (t.share || 0) * t.vol, 0);
+    const volGrow = Math.min(1, paired / 1500000);
     const usbdSize = 34 + 18 * volGrow;
     bulma = {
       kind: 'bulma', x: pr.x, y: pr.y, z: usbdSpun.z,
