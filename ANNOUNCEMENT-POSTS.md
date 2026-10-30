@@ -1,19 +1,24 @@
-# Posts
+**Read this on the dark page:** https://d4trhban3.github.io/d4rth-launch-protocol/ANNOUNCEMENT-POSTS.html
 
-This is a free launch guide. Bulma Dollar is the example coin. Yours can be any coin.
+# Support the creator
 
-## Main post
-This is a free six-step guide for launching a Solana coin with real dollars in the main pool. I'd be happy if you launched Bulma Dollar with it. Just as happy if the coin is yours. @slingoorio or any real one with capital: the sides get locked, and other coins can connect to yours. I don't have the capital. Someone run it.
+This guide is free. If you launch with it, the way to support the work is a slice of the creator fees.
 
-https://d4trhban3.github.io/d4rth-launch-protocol/
+## How to support it
+1. On pump.fun, find the creator-fee recipients option. It is there when you make the coin, or later in the coin's creator-fee settings.
+2. Add a recipient by GitHub username: `d4trhban3`.
+3. Pick a share you are comfortable with.
 
-## Thread
-1/ This is a free launch guide. Bulma Dollar is the example coin. Yours can be any coin. @slingoorio or any real one with capital: here's the d4rth Launch Protocol. I don't have the capital to launch it. Someone run it. https://d4trhban3.github.io/d4rth-launch-protocol/
+Optional. Nothing breaks if you skip it. Holders can still get the rest. It only works if creator fees stay on, not pump.fun's send-all-fees-to-holders switch. Holder rewards are still the point, so you can share a slice and still pay holders.
 
-2/ 1. Launch the coin on pump.fun, paired with USDC. USDC is a dollar on Solana. That is the main pool. 2. Buy about 20% of the coins yourself. 3. Lock 10% in a pool with BTC on Meteora. 4. Lock 10% in a pool with SOL on Meteora. 5. Leave the rest in the USDC pool. 6. Then other coins lock a piece of their supply against your new coin. Your coin becomes the hub they all connect through. The example hub is Bulma Dollar. Yours can be any coin.
+Credit line, if you want one: `d4rth Launch Protocol by @d4rthban3 (GitHub d4trhban3)`.
 
-3/ Same six steps if the coin is yours. Fill-in-the-blanks guide in the repo. Fees to holders.
+## Disclaimer
+- Not financial advice. This is a free guide for launching a Solana coin. It is not a promise, a recommendation, or an offer to buy or sell anything.
+- Bulma Dollar is the example coin I wrote in. It is not a coin you have to use. A coin of your choice works the same way.
+- Fan parody. Not a stablecoin, not pegged to anything, not affiliated with any anime studio.
+- Check the live price on pump.fun before you buy. The price moves with every buy.
+- Never share your keys or seed phrase with anyone. Not with me. Not with a site.
+- Open source, MIT license. You can copy it, change it, and launch with it.
 
-4/ Built from a lot of research, free and open. If you launch with it, credit @d4rthban3 and please add GitHub d4trhban3 as a creator-fee recipient. Strongly encouraged, not required. Nothing breaks without it.
-
-Not financial advice. Bulma Dollar ($USBD) is the coin I wrote in. A coin of your choice works the same way.
+d4rth Launch Protocol by @d4rthban3. GitHub [d4trhban3/d4rth-launch-protocol](https://github.com/d4trhban3/d4rth-launch-protocol).

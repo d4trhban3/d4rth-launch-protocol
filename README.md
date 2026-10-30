@@ -61,7 +61,7 @@ Plus: add GitHub `d4trhban3` as a creator-fee recipient (strongly encouraged, se
 - It leaves most of the curve to real holders.
 
 ## Open call
-@slingoorio, or any real one with capital: the protocol is yours to run on any token. I don't have the capital. The idea I used is the Bulma dollar, below. Someone run it. Posts: [ANNOUNCEMENT-POSTS.md](ANNOUNCEMENT-POSTS.md).
+@slingoorio, or any real one with capital: the protocol is yours to run on any token. I don't have the capital. The idea I used is the Bulma dollar, below. Someone run it. Support and disclaimer: [Support](ANNOUNCEMENT-POSTS.md).
 
 ## Support the protocol (strongly encouraged, not required)
 This protocol came out of a lot of research and testing, and it's free and open. Creator fees are how you support it. If you launch with the d4rth Launch Protocol, please add GitHub **d4trhban3** as a pump.fun creator-fee recipient.
