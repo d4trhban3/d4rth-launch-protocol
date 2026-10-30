@@ -20,9 +20,14 @@ layout: null
   a { color: #d6b4ff; text-decoration: none; }
   a:hover { color: #fff; }
   .wrap { max-width: 920px; margin: 0 auto; padding: 28px 22px 64px; }
-  nav { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 22px; }
-  nav a { color: #8b93a3; text-decoration: none; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; }
-  nav a:hover { color: #f5d78a; }
+  nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+  nav a {
+    color: #e7ebf3; text-decoration: none; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase;
+    background: rgba(16,18,24,0.85); border: 1px solid rgba(255,255,255,0.16);
+    padding: 9px 14px; border-radius: 10px;
+  }
+  nav a:hover { border-color: rgba(245,215,138,0.75); color: #f5d78a; }
+  nav a.on { background: #f5d78a; color: #1a1408; border-color: #f5d78a; font-weight: 700; }
   .kicker {
     font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
     color: #6d7585; margin-bottom: 10px;
