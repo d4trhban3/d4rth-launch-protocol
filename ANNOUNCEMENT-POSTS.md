@@ -7,10 +7,10 @@ This is the template. My coin or yours. USBD, or a token of your choice.
 ## Main post
 This is the template. I'd be happy if you launched Bulma Dollar with it. Just as happy if the coin is yours. @slingoorio or any real one with capital: six steps. USDC is the main pool. Pair 10% with BTC. Pair 10% with SOL. The new coin becomes the treasury hub. I don't have the capital. Someone run it.
 
-[GITHUB LINK]
+https://d4trhban3.github.io/d4rth-launch-protocol/
 
 ## Thread
-1/ This is the template. My coin or yours. @slingoorio or any real one with capital: here's the d4rth Launch Protocol. I don't have the capital to launch it. Someone run it. [GITHUB LINK]
+1/ This is the template. My coin or yours. @slingoorio or any real one with capital: here's the d4rth Launch Protocol. I don't have the capital to launch it. Someone run it. https://d4trhban3.github.io/d4rth-launch-protocol/
 
 2/ 1. Launch on pump.fun paired with USDC. That is the main pool. 2. Dev buy about 20% of supply. 3. Pair 10% with the ecosystem anchor token BTC on Meteora. 4. Pair 10% with SOL on Meteora. 5. The rest stays on USDC, through the curve and after graduation. 6. Then partner tokens pair a chunk of their supply to the new USBD (or token of your choice). It becomes the "treasury" hub.
 
