@@ -1,4 +1,4 @@
-**This folder is one idea, not the protocol.** USBD was just my idea. Use any token you want. I used the Bulma dollar. Everything below is that example, ready to launch.
+**This folder is the coin I wrote in.** USBD, or a token of your choice. Same six steps. I'd be happy if you launched Bulma Dollar. Just as happy if the coin is yours.
 
 # $USBD · Ultimate Super Bulma Dragonballs
 
@@ -7,18 +7,18 @@
 ![USBD](USBD-ART/coin-images-and-logos/usbd-logo-lockup.png)
 
 **Name:** $USBD Ultimate Super Bulma Dragonballs  
-**Concept:** the Bulma dollar — USDC main pool, locked $BTC and SOL liquidity, the hub of the Big Titty Coin eco.
+**Concept:** the Bulma dollar. USDC is the main pool. Locked with BTC and SOL. The treasury hub of the Big Titty Coin eco, or a token of your choice in that seat.
 
 ## Launch sequence (do it in this order)
 Full details in [HOW-TO-LAUNCH-USBD.md](HOW-TO-LAUNCH-USBD.md).
 
-1. **Launch Bulma paired with USDC** on pump.fun.
-2. **Buy the specified amount of supply** — 200M tokens (20%).
-3. **Pair 10% with $BTC** on Meteora (permanently locked).
-4. **Pair 10% with SOL** on Meteora (permanently locked).
-5. **The rest stays on USDC** so USDC remains the main pool.
-6. **AND THEN — for the Big Titty ecosystem specifically:**  
-   Slingoor takes a chunk from **every titty token** in the ecosystem and pairs each of those chunks with Bulma ($USBD). Same locked Meteora process. Every eco token gets a pool against her. She becomes the hub.
+1. **Launch on pump.fun paired with USDC. That is the main pool.**
+2. **Dev buy about 20% of supply.** 200M tokens.
+3. **Pair 10% with the ecosystem anchor token BTC on Meteora.**
+4. **Pair 10% with SOL on Meteora.**
+5. **The rest stays on USDC, through the curve and after graduation.**
+6. **Then partner tokens pair a chunk of their supply to the new USBD (or token of your choice). It becomes the "treasury" hub.**  
+   For this eco, that means a chunk from every titty token, locked on Meteora against Bulma. Same process if the treasury hub is a different coin.
 
 Here's the whole package: art, logo, steps, posts, lore — all done.
 

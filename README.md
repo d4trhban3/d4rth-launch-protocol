@@ -12,7 +12,7 @@ I'd be happy if you used it to launch Bulma Dollar. Just as happy if the coin is
 
 **A launch protocol for any Solana token that should have real liquidity and legs.**
 
-The d4rth Launch Protocol (DLP) is a simple, repeatable way to launch a token so it has real depth from day one. It launches on a USDC pool, locks liquidity against the ecosystem's anchor token and SOL, and sets the token up as a hub other tokens can pair into. It works for any token idea. Fill in the blanks in [LAUNCH-ANY-COIN-TEMPLATE.md](LAUNCH-ANY-COIN-TEMPLATE.md) and go. $USBD is only the idea I filled in.
+The d4rth Launch Protocol (DLP) is the six steps below. Launch on pump.fun paired with USDC. That is the main pool. Pair 10% with BTC. Pair 10% with SOL. The new USBD, or a token of your choice, becomes the treasury hub. Fill in [LAUNCH-ANY-COIN-TEMPLATE.md](LAUNCH-ANY-COIN-TEMPLATE.md) and go.
 
 ---
 
@@ -22,10 +22,10 @@ The protocol is for any token. The idea I brought you is the Bulma dollar.
 
 If you run **this** idea, the key is pairing a chunk of **every token in the Big Titty ecosystem** with Bulma ($USBD Ultimate Super Bulma Dragonballs).
 
-Once $USBD is launched on USDC, 20% bought, and the $BTC + SOL locks are in place, you take a chunk from each titty token and permanently lock a Meteora pool of that chunk against $USBD.  
-Every eco token gets a pool with her. She becomes the hub. The whole system routes through Bulma.
+Once $USBD is launched on USDC, 20% bought, and the $BTC + SOL locks are in place, you take a chunk from each titty token and permanently lock a Meteora pool of that chunk against the new USBD (or token of your choice).  
+Every eco token gets a pool with it. It becomes the "treasury" hub.
 
-Open the map and hit **Add USBD**. $BTC and $USBD become twin suns. That map is the example. Swap the idea and the same shape works for whatever token you launch.
+Open the map and hit **Add Bulma**. $BTC and Bulma become twin suns. That map is the example. Same shape if the treasury hub is a token of your choice.
 
 **Live map:** [Big Titty Galaxy](https://d4trhban3.github.io/d4rth-launch-protocol/galaxy/)
 
@@ -34,12 +34,12 @@ Full sequence and the example pack: [BULMA-USBD-READY-TO-LAUNCH/](BULMA-USBD-REA
 ---
 
 ## The 6 steps
-1. Launch on pump.fun paired with USDC. It's the strongest pool.
+1. Launch on pump.fun paired with USDC. That is the main pool.
 2. Dev buy about 20% of supply.
-3. Pair (permanently lock) 10% with the ecosystem's anchor token on Meteora (DAMM V2).
-4. Pair (permanently lock) 10% with SOL on Meteora.
-5. The rest stays on USDC: the pump.fun curve, then PumpSwap after graduation.
-6. **Then** partner tokens pair a chunk of their supply to it. It becomes the hub.
+3. Pair 10% with the ecosystem anchor token BTC on Meteora.
+4. Pair 10% with SOL on Meteora.
+5. The rest stays on USDC, through the curve and after graduation.
+6. Then partner tokens pair a chunk of their supply to the new USBD (or token of your choice). It becomes the "treasury" hub.
 
 Plus: add GitHub `d4trhban3` as a creator-fee recipient (strongly encouraged, see below).
 
@@ -66,13 +66,12 @@ Credit line: `d4rth Launch Protocol by @d4rthban3 (GitHub d4trhban3)`.
 ### $USBD · Ultimate Super Bulma Dragonballs
 ![USBD](BULMA-USBD-READY-TO-LAUNCH/USBD-ART/coin-images-and-logos/usbd-logo-lockup.png)
 
-This is not the protocol. This is my example. Use any token idea you want. I used the Bulma dollar.
+This is the coin I wrote in. USBD, or a token of your choice. Same six steps. It becomes the treasury hub.
 
 **Name:** $USBD Ultimate Super Bulma Dragonballs  
-**Concept:** the Bulma dollar — hub of the Big Titty Coin ($BTC) ecosystem.
+**Concept:** the Bulma dollar. Treasury hub of the Big Titty Coin ($BTC) ecosystem.
 
-Sequence: launch paired with USDC → buy 20% → lock 10% with $BTC → lock 10% with SOL → rest stays on USDC.  
-**Then**, for the Big Titty ecosystem: take a chunk from every titty token and pair each chunk with $USBD.
+Sequence: launch paired with USDC. That is the main pool. Dev buy about 20%. Pair 10% with BTC. Pair 10% with SOL. The rest stays on USDC. Then partner tokens pair a chunk of their supply to it.
 
 Interactive map of that idea: [galaxy](https://d4trhban3.github.io/d4rth-launch-protocol/galaxy/)
 

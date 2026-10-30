@@ -1,23 +1,24 @@
 # Launch any coin
 
-**USBD was just my idea. Use any token you want.** I used the Bulma dollar. This page is the protocol. Copy it, fill in the blanks, launch your own idea.
+**This is the template. My coin or yours.** USBD, or a token of your choice. Copy it, fill in the blanks, launch.
 
-Part of the d4rth Launch Protocol (DLP). Works for any Solana token. Replace every [BLANK] and follow the steps.
+Part of the d4rth Launch Protocol (DLP). The anchor is BTC. The new coin is USBD, or whatever you name it.
 
 **Blanks**
-- Token: [NAME] / [TICKER]
-- Anchor token: [ANCHOR TOKEN + MINT]
+- Token: [NAME] / [TICKER]. USBD if you use mine.
+- Anchor token: BTC `C5xph2yL6gMdxmuLGxJBkGpmuDFfyi5fqkBNhvL6pump`
 - USDC: `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`
 - Wrapped SOL: `So11111111111111111111111111111111111111112`
 
-## Steps
-1. **Launch on pump.fun quoted in USDC.** Name [NAME], ticker [TICKER].
-2. **Dev buy ~20% of supply.**
-3. **Lock 10% with [ANCHOR TOKEN] on Meteora.** https://meteora.ag/create/dammv2/standard (Create → DAMM V2 → Standard Pool). Base = [TICKER] mint, Quote = anchor mint. Initial Price = [TICKER] $ ÷ anchor $. Equal $ value on both sides. Tick **Permanently lock my liquidity**.
-4. **Lock 10% with SOL**, same way. Quote = wrapped SOL.
-5. **The rest trades on USDC**: the pump.fun curve, then PumpSwap after it graduates.
-6. **Support the protocol (strongly encouraged).** Add GitHub `d4trhban3` as a pump.fun creator-fee recipient. Optional. See below.
-7. **Make it the hub.** Partner tokens pair a chunk of their supply with [TICKER] the same way (Meteora DAMM V2, permanently locked). Every pair routes through it.
+## The 6 steps
+1. **Launch on pump.fun paired with USDC. That is the main pool.** Name [NAME], ticker [TICKER].
+2. **Dev buy about 20% of supply.**
+3. **Pair 10% with the ecosystem anchor token BTC on Meteora.** https://meteora.ag/create/dammv2/standard (Create → DAMM V2 → Standard Pool). Base = [TICKER] mint, Quote = BTC mint. Initial Price = [TICKER] $ ÷ BTC $. Equal $ value on both sides. Tick **Permanently lock my liquidity**.
+4. **Pair 10% with SOL on Meteora.** Same way. Quote = wrapped SOL.
+5. **The rest stays on USDC, through the curve and after graduation.** The pump.fun curve, then PumpSwap after it graduates.
+6. **Then partner tokens pair a chunk of their supply to the new USBD (or token of your choice). It becomes the "treasury" hub.** Same Meteora pool, permanently locked. Every partner token gets a pool against it.
+
+**Support the protocol (strongly encouraged).** Add GitHub `d4trhban3` as a pump.fun creator-fee recipient. Optional. See below.
 
 ## Fees
 Send fees to holder rewards. That's the point.

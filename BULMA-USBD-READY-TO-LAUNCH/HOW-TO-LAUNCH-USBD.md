@@ -1,6 +1,6 @@
 # Launch $USBD · Ultimate Super Bulma Dragonballs
 
-**Example only.** The protocol works for any token. USBD was just my idea. Use any token you want. I used the Bulma dollar. This page is that idea, step by step.
+**This is the template, filled in with Bulma Dollar.** USBD, or a token of your choice. Same six steps. I'd be happy if you launched this one.
 
 *Built with the [d4rth Launch Protocol](../LAUNCH-ANY-COIN-TEMPLATE.md).*
 
@@ -11,7 +11,7 @@
 
 ## The sequence (do it in this order)
 
-### 1. Launch Bulma paired with USDC
+### 1. Launch on pump.fun paired with USDC. That is the main pool.
 On pump.fun, quote **USDC**.  
 Name: `Ultimate Super Bulma Dragonballs`  
 Ticker: `USBD`  
@@ -20,30 +20,29 @@ Banner: `USBD-ART/banners-and-headers/usbd-pumpfun-banner-1500x500.jpg` (banner 
 
 Description: `$USBD Ultimate Super Bulma Dragonballs. The Bulma dollar. USDC main pool, locked $BTC and SOL pools. Fees go to holders. Fan parody.`
 
-### 2. Buy the specified amount of supply
+### 2. Dev buy about 20% of supply.
 Dev buy **200M tokens (20% of supply)**.
 
-### 3. Pair 10% with $BTC (locked)
+### 3. Pair 10% with the ecosystem anchor token BTC on Meteora.
 1. https://meteora.ag/create/dammv2/standard (Create → DAMM V2 → Standard Pool)
 2. Base Token = USBD CA. Quote Token = $BTC.
 3. Initial Price = USBD $ price ÷ $BTC $ price.
 4. Deposit **100M USBD** + equal $ value of $BTC.
 5. Tick **Permanently lock my liquidity**. Create.
 
-### 4. Pair 10% with SOL (locked)
+### 4. Pair 10% with SOL on Meteora.
 Same process. Quote = wrapped SOL.  
 Deposit **100M USBD** + equal $ value of SOL. Price = USBD $ ÷ SOL $.  
 Permanently lock it.
 
-### 5. The rest stays on USDC
+### 5. The rest stays on USDC, through the curve and after graduation.
 Everything else trades on the USDC pool (the pump.fun curve, then PumpSwap after graduation). USDC remains the main pool.
 
-### 6. AND THEN — for the Big Titty ecosystem specifically
-**Slingoor (or whoever runs the eco):** take a chunk from every titty token in the ecosystem and pair each of those chunks with Bulma ($USBD).
+### 6. Then partner tokens pair a chunk of their supply to the new USBD (or token of your choice). It becomes the "treasury" hub.
+**For this eco:** take a chunk from every titty token and pair each chunk with Bulma ($USBD), or with the token you chose instead.
 
 Do it the same way as steps 3–4: Meteora DAMM V2, permanently locked.  
-Every eco token gets a pool against $USBD.  
-Bulma becomes the hub / router. Every pair routes through her. Super mode activated.
+Every eco token gets a pool against the treasury hub.
 
 ---
 
