@@ -259,7 +259,7 @@
   <p class="key-rule">Closer to $BTC = stronger liquidity pool</p>
   <ul class="key-list">
     <li><i class="sw dist"></i><span>Distance from $BTC is pool strength.</span></li>
-    <li><i class="sw size"></i><span>Bigger disc means more volume.</span></li>
+    <li><i class="sw size"></i><span>Bigger disc means a bigger market cap.</span></li>
     <li><i class="sw btc-line"></i><span>Pale line is that coin's pool with $BTC.</span></li>
     <li><i class="sw usbd-line"></i><span>Purple line is supply paired through $USBD.</span></li>
     <li><i class="sw bond"></i><span>Gold bar is the $USBD–$BTC bond.</span></li>
@@ -271,7 +271,7 @@
 <aside class="panel" id="panel">
   <div class="master">
     <h2>Each coin</h2>
-    <p>Volume is the disc size. Supply paired is how much of that coin is locked with $USBD, which pulls it toward $BTC.</p>
+    <p>Increase runs that coin's market cap from where it is now up to +2000%. Supply paired is the slice locked with $USBD, up to 50%, which pulls it toward $BTC.</p>
     <div class="bondline" id="bondNote"></div>
   </div>
   <div class="rows" id="rows"></div>
@@ -365,9 +365,9 @@ ranked.forEach((t, i) => {
   t.angle = (idx / n) * Math.PI * 2 + (t.inner ? 0.42 : 0.08);
   const strength = t.liq / maxLiq;
   t.baseR = t.inner ? (200 + (1 - strength) * 70) : (340 + (1 - strength) * 110);
-  t.size = 12 + 7 * Math.sqrt(t.vol / maxVol);
-  t.baseVol = t.vol;
+  t.boost = 0;
   t.share = 0;
+  t.vol = t.mc;
 });
 btc.size = 56;
 
@@ -380,6 +380,14 @@ function money(n) {
 function rescale() {
   const maxV = Math.max(...orbiters.map(t => t.vol), 1);
   orbiters.forEach(t => { t.size = 12 + 7 * Math.sqrt(t.vol / maxV); });
+}
+rescale();
+
+function levelOf(t) {
+  return t.mc * (1 + (t.boost || 0) / 100);
+}
+function boostLabel(t) {
+  return '+' + t.boost + '% · ' + money(levelOf(t));
 }
 
 function addedOf(t) {
@@ -415,22 +423,22 @@ orbiters.forEach(t => {
   const img = document.createElement(t.image ? 'img' : 'div');
   if (t.image) { img.src = t.image.src; img.alt = t.ticker; }
   else { img.className = 'ph'; }
-  const maxV = Math.max(20000, Math.round(t.baseVol * 4));
-  const step = Math.max(100, Math.round(t.baseVol / 200));
   const body = document.createElement('div');
   body.innerHTML = '<div class="nm"><b>' + t.ticker + '</b><span class="delta" data-d="' + t.ticker + '">0% paired</span></div>'
-    + '<div class="sl">Volume <b data-v="' + t.ticker + '">' + money(t.vol) + '</b></div>'
-    + '<input type="range" data-kind="vol" min="0" max="' + maxV + '" step="' + step + '" value="' + t.vol + '" aria-label="' + t.ticker + ' volume">'
+    + '<div class="sl">Market cap increase <b data-v="' + t.ticker + '">' + boostLabel(t) + '</b></div>'
+    + '<input type="range" data-kind="vol" min="0" max="2000" step="1" value="0" aria-label="' + t.ticker + ' volume">'
+    + '<div class="ends"><span>0%</span><span>2000%</span></div>'
     + '<div class="sl pair">Supply paired to $USBD <b data-s="' + t.ticker + '">0%</b></div>'
-    + '<input type="range" data-kind="share" min="0" max="100" value="0" aria-label="' + t.ticker + ' supply paired to USBD">'
-    + '<div class="ends"><span>0%</span><span>100%</span></div>';
+    + '<input type="range" data-kind="share" min="0" max="50" step="1" value="0" aria-label="' + t.ticker + ' supply paired to USBD">'
+    + '<div class="ends"><span>0%</span><span>50%</span></div>';
   row.appendChild(img);
   row.appendChild(body);
   rows.appendChild(row);
   body.querySelector('[data-kind="vol"]').addEventListener('input', (e) => {
-    t.vol = Number(e.target.value);
+    t.boost = Number(e.target.value);
+    t.vol = levelOf(t);
     rescale();
-    body.querySelector('[data-v]').textContent = money(t.vol);
+    body.querySelector('[data-v]').textContent = boostLabel(t);
     paintDeltas();
   });
   body.querySelector('[data-kind="share"]').addEventListener('input', (e) => {
@@ -639,17 +647,16 @@ document.getElementById('btn').addEventListener('click', () => {
   mode = mode === 'current' ? 'bulma' : 'current';
   const on = mode === 'bulma';
   orbiters.forEach(t => {
-    const step = Math.max(100, Math.round(t.baseVol / 200));
-    const raw = on ? t.baseVol * 1.2 : t.baseVol;
-    t.vol = Math.max(0, Math.round(raw / step) * step);
+    t.boost = on ? 20 : 0;
+    t.vol = levelOf(t);
     t.share = on ? 0.05 : 0;
     const vol = rows.querySelector('input[aria-label="' + t.ticker + ' volume"]');
     const share = rows.querySelector('input[aria-label="' + t.ticker + ' supply paired to USBD"]');
-    if (vol) vol.value = t.vol;
+    if (vol) vol.value = t.boost;
     if (share) share.value = on ? 5 : 0;
     const vLab = rows.querySelector('[data-v="' + t.ticker + '"]');
     const sLab = rows.querySelector('[data-s="' + t.ticker + '"]');
-    if (vLab) vLab.textContent = money(t.vol);
+    if (vLab) vLab.textContent = boostLabel(t);
     if (sLab) sLab.textContent = (on ? 5 : 0) + '%';
   });
   rescale();
