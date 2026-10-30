@@ -22,6 +22,15 @@
     text-transform: uppercase; margin-bottom: 6px;
   }
   h1 { margin: 0; font-size: 16px; font-weight: 560; letter-spacing: 0.01em; }
+  .title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  a.home {
+    pointer-events: auto; text-decoration: none; flex: none;
+    background: rgba(16,18,24,0.72); color: #d5dbe6;
+    border: 1px solid rgba(255,255,255,0.1);
+    padding: 7px 12px; border-radius: 8px;
+    font-size: 11px; letter-spacing: 0.04em;
+  }
+  a.home:hover { border-color: rgba(255,255,255,0.28); color: #fff; }
   .sub { margin-top: 4px; font-size: 11px; color: #8b93a3; max-width: 420px; }
   .idea {
     display: inline-block; margin: 8px 0 0; max-width: 520px;
@@ -186,6 +195,7 @@
       background: linear-gradient(180deg, rgba(7,9,14,0.96) 0%, rgba(7,9,14,0.88) 78%, rgba(7,9,14,0) 100%);
     }
     h1 { font-size: 18px; }
+    a.home { min-height: 42px; padding: 10px 14px; font-size: 13px; display: inline-flex; align-items: center; }
     .pills { margin-top: 10px; display: flex; gap: 8px; }
     .pills button { flex: 1; min-height: 42px; padding: 10px 8px; font-size: 12px; white-space: nowrap; }
     #zReset { flex: 0 0 72px; }
@@ -241,7 +251,10 @@
 <canvas id="canvas"></canvas>
 <div class="top">
   <div class="kicker" id="kicker">THE TEMPLATE</div>
-  <h1 id="title">Launch template</h1>
+  <div class="title-row">
+    <h1 id="title">Launch template</h1>
+    <a class="home" href="https://d4trhban3.github.io/d4rth-launch-protocol/">Home</a>
+  </div>
   <div class="sub" id="subtitle">One sun. Add Bulma, or picture your own coin there.</div>
   <p class="idea">My coin or yours. This is the template.</p>
   <div class="pills">
