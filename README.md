@@ -10,12 +10,12 @@
 The d4rth Launch Protocol (DLP) is a simple, repeatable way to launch a token so it has real depth from day one. It launches on a USDC pool, locks liquidity against the ecosystem's anchor token and SOL, and sets the token up as a hub other tokens can pair into. It works for any token. Fill in the blanks in [LAUNCH-ANY-COIN-TEMPLATE.md](LAUNCH-ANY-COIN-TEMPLATE.md) and go.
 
 ## The 6 steps
-1. Launch on pump.fun quoted in USDC. It's the strongest pool.
+1. Launch on pump.fun paired with USDC. It's the strongest pool.
 2. Dev buy about 20% of supply.
-3. Lock 10% with the ecosystem's anchor token on Meteora (DAMM V2).
-4. Lock 10% with SOL on Meteora.
-5. The rest trades on USDC: the pump.fun curve, then PumpSwap after graduation.
-6. Partner tokens pair a chunk to it. It becomes the hub.
+3. Pair (permanently lock) 10% with the ecosystem's anchor token on Meteora (DAMM V2).
+4. Pair (permanently lock) 10% with SOL on Meteora.
+5. The rest stays on USDC: the pump.fun curve, then PumpSwap after graduation.
+6. **Then** partner tokens pair a chunk of their supply to it. It becomes the hub.
 
 Plus: add GitHub `d4trhban3` as a creator-fee recipient (strongly encouraged, see below).
 
@@ -44,6 +44,9 @@ Credit line: `d4rth Launch Protocol by @d4rthban3 (GitHub d4trhban3)`.
 
 **Name:** $USBD Ultimate Super Bulma Dragonballs  
 **Concept:** the Bulma dollar — hub of the Big Titty Coin ($BTC) ecosystem.
+
+Sequence: launch paired with USDC → buy 20% → lock 10% with $BTC → lock 10% with SOL → rest stays on USDC.  
+**Then**, for the Big Titty ecosystem: take a chunk from every titty token and pair each chunk with $USBD.
 
 Full build, art, lore and posts: [BULMA-USBD-READY-TO-LAUNCH/](BULMA-USBD-READY-TO-LAUNCH/README.md).
 

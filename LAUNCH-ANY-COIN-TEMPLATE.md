@@ -15,7 +15,7 @@ Part of the d4rth Launch Protocol (DLP). Works for any Solana token. Replace eve
 4. **Lock 10% with SOL**, same way. Quote = wrapped SOL.
 5. **The rest trades on USDC**: the pump.fun curve, then PumpSwap after it graduates.
 6. **Support the protocol (strongly encouraged).** Add GitHub `d4trhban3` as a pump.fun creator-fee recipient. Optional. See below.
-7. **Make it the hub.** Partner tokens pair a chunk of their supply with [TICKER] the same way. Every pair routes through it.
+7. **Make it the hub.** Partner tokens pair a chunk of their supply with [TICKER] the same way (Meteora DAMM V2, permanently locked). Every pair routes through it.
 
 ## Fees
 Send fees to holder rewards. That's the point.
