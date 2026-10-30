@@ -3,6 +3,7 @@
 **Start here**
 - Launching your own coin? → [LAUNCH-ANY-COIN-TEMPLATE.md](LAUNCH-ANY-COIN-TEMPLATE.md)
 - Launching $USBD Ultimate Super Bulma Dragonballs? → [BULMA-USBD-READY-TO-LAUNCH/](BULMA-USBD-READY-TO-LAUNCH/README.md)
+- See the hub on the map → [interactive galaxy](https://htmlpreview.github.io/?https://github.com/d4trhban3/d4rth-launch-protocol/blob/main/galaxy/index.html)
 - Support the protocol (creator fees) → [section below](#support-the-protocol-strongly-encouraged-not-required)
 
 **A launch protocol for building Solana tokens with real liquidity and legs.**
@@ -17,6 +18,10 @@ The key to the system is you pairing a chunk of **every token in the Big Titty e
 
 Once $USBD is launched on USDC, 20% bought, and the $BTC + SOL locks are in place, you take a chunk from each titty token and permanently lock a Meteora pool of that chunk against $USBD.  
 Every eco token gets a pool with her. She becomes the hub. The whole system routes through Bulma.
+
+Open the map and hit **Add USBD**. $BTC and $USBD become twin suns. Slide any coin from without to with, or raise USBD volume, and watch that coin fall in toward $BTC. The gold bar between the suns is the bond. It only gets deeper with Bulma in.
+
+**Live map:** [Big Titty Galaxy](https://htmlpreview.github.io/?https://github.com/d4trhban3/d4rth-launch-protocol/blob/main/galaxy/index.html)
 
 Full sequence and ready-to-launch pack: [BULMA-USBD-READY-TO-LAUNCH/](BULMA-USBD-READY-TO-LAUNCH/README.md).
 
@@ -60,6 +65,8 @@ Credit line: `d4rth Launch Protocol by @d4rthban3 (GitHub d4trhban3)`.
 
 Sequence: launch paired with USDC → buy 20% → lock 10% with $BTC → lock 10% with SOL → rest stays on USDC.  
 **Then**, for the Big Titty ecosystem: take a chunk from every titty token and pair each chunk with $USBD.
+
+Interactive twin-sun map: [galaxy/index.html](galaxy/index.html) · [open it live](https://htmlpreview.github.io/?https://github.com/d4trhban3/d4rth-launch-protocol/blob/main/galaxy/index.html)
 
 Full build, art, lore and posts: [BULMA-USBD-READY-TO-LAUNCH/](BULMA-USBD-READY-TO-LAUNCH/README.md).
 
