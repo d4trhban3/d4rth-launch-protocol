@@ -554,15 +554,22 @@ function refreshCopy() {
 }
 document.getElementById('btn').addEventListener('click', () => {
   mode = mode === 'current' ? 'bulma' : 'current';
-  if (mode === 'bulma' && orbiters.every(t => t.share === 0)) {
-    orbiters.forEach(t => { t.share = 1; });
-    rows.querySelectorAll('input[data-kind="share"]').forEach(inp => {
-      inp.value = 100;
-      const ticker = inp.getAttribute('aria-label').split(' ')[0];
-      const lab = rows.querySelector('[data-s="' + ticker + '"]');
-      if (lab) lab.textContent = '100%';
-    });
-  }
+  const on = mode === 'bulma';
+  orbiters.forEach(t => {
+    const step = Math.max(1000, Math.round(t.baseVol / 40));
+    const raw = on ? t.baseVol * 1.2 : t.baseVol;
+    t.vol = Math.max(0, Math.round(raw / step) * step);
+    t.share = on ? 0.05 : 0;
+    const vol = rows.querySelector('input[aria-label="' + t.ticker + ' volume"]');
+    const share = rows.querySelector('input[aria-label="' + t.ticker + ' supply paired to USBD"]');
+    if (vol) vol.value = t.vol;
+    if (share) share.value = on ? 5 : 0;
+    const vLab = rows.querySelector('[data-v="' + t.ticker + '"]');
+    const sLab = rows.querySelector('[data-s="' + t.ticker + '"]');
+    if (vLab) vLab.textContent = money(t.vol);
+    if (sLab) sLab.textContent = (on ? 5 : 0) + '%';
+  });
+  rescale();
   refreshCopy();
 });
 document.getElementById('btnSpin').addEventListener('click', () => {
