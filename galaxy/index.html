@@ -47,7 +47,15 @@
     font-size: 11px; letter-spacing: 0.04em;
   }
   button:hover { border-color: rgba(255,255,255,0.28); color: #fff; }
-  button.active { border-color: rgba(120,220,160,0.7); color: #d8ffe8; }
+  #btn {
+    background: #f5d78a; color: #1a1408; border-color: #f5d78a;
+    font-weight: 750; font-size: 13px; padding: 10px 16px;
+  }
+  #btn:hover { color: #1a1408; filter: brightness(1.06); }
+  #btn.active {
+    background: rgba(16,18,24,0.72); color: #d8ffe8;
+    border-color: rgba(120,220,160,0.7); font-weight: 560; filter: none;
+  }
   #zReset { letter-spacing: 0.04em; }
   .key {
     position: absolute; left: 18px; bottom: 18px; z-index: 12; width: 372px;
@@ -196,7 +204,8 @@
     }
     h1 { font-size: 18px; }
     a.home { min-height: 42px; padding: 10px 14px; font-size: 13px; display: inline-flex; align-items: center; }
-    .pills { margin-top: 10px; display: flex; gap: 8px; }
+    .pills { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
+    #btn { flex: 1 0 100%; min-height: 48px; font-size: 16px; }
     .pills button { flex: 1; min-height: 42px; padding: 10px 8px; font-size: 12px; white-space: nowrap; }
     #zReset { flex: 0 0 72px; }
     .dock {
@@ -255,8 +264,8 @@
     <h1 id="title">Launch template</h1>
     <a class="home" href="https://d4trhban3.github.io/d4rth-launch-protocol/">Home</a>
   </div>
-  <div class="sub" id="subtitle">One sun. Add Bulma, or picture your own coin there.</div>
-  <p class="idea">My coin or yours. This is the template.</p>
+  <div class="sub" id="subtitle">Nothing moves until you click Add Bulma.</div>
+  <p class="idea" id="idea">Click Add Bulma. That's the whole point.</p>
   <div class="pills">
     <button id="btn">Add Bulma</button>
     <button id="btnSpin">Auto-Rotate</button>
@@ -585,7 +594,7 @@ function chromeBox() {
   const narrow = W < 800;
   if (narrow) {
     const dock = document.getElementById('dock');
-    return { side: 0, header: 136, bottom: dock ? dock.offsetHeight : 220 };
+    return { side: 0, header: 180, bottom: dock ? dock.offsetHeight : 220 };
   }
   return { side: open ? 388 : 24, header: 16, bottom: 16 };
 }
@@ -690,7 +699,10 @@ function refreshCopy() {
   document.getElementById('title').textContent = on ? 'Bulma Dollar' : 'Launch template';
   document.getElementById('subtitle').textContent = on
     ? "I'd be happy if you launched this. Or run the same steps with your coin."
-    : 'One sun. Add Bulma, or picture your own coin there.';
+    : 'Nothing moves until you click Add Bulma.';
+  document.getElementById('idea').textContent = on
+    ? 'My coin or yours. This is the template.'
+    : "Click Add Bulma. That's the whole point.";
   document.getElementById('panel').classList.toggle('open', on);
   document.body.classList.toggle('bulma', on);
   const keyEl = document.getElementById('key');
