@@ -2,7 +2,7 @@
 
 # Launch $USBD · Ultimate Super Bulma Dragonballs
 
-**This is the template, filled in with Bulma Dollar.** USBD, or a token of your choice. Same six steps. I'd be happy if you launched this one.
+**The six steps, filled in with Bulma Dollar.** This is the example coin. I'd be happy if you launched it. Just as happy if the coin is yours. If you use this one, the ticker is $USBD.
 
 *Built with the [d4rth Launch Protocol](../LAUNCH-ANY-COIN-TEMPLATE.md).*
 
@@ -13,7 +13,7 @@
 
 ## The sequence (do it in this order)
 
-### 1. Launch on pump.fun paired with USDC. That is the main pool.
+### 1. Launch the coin on pump.fun, paired with USDC. That is the main pool. USDC is a dollar on Solana.
 On pump.fun, quote **USDC**.  
 Name: `Ultimate Super Bulma Dragonballs`  
 Ticker: `USBD`  
@@ -22,25 +22,25 @@ Banner: `USBD-ART/banners-and-headers/usbd-pumpfun-banner-1500x500.jpg` (banner 
 
 Description: `$USBD Ultimate Super Bulma Dragonballs. The Bulma dollar. USDC main pool, locked $BTC and SOL pools. Fees go to holders. Fan parody.`
 
-### 2. Dev buy about 20% of supply.
+### 2. Buy about 20% of the coins yourself. That leaves most of the rest for other people.
 Dev buy **200M tokens (20% of supply)**.
 
-### 3. Pair 10% with the ecosystem anchor token BTC on Meteora.
+### 3. Lock 10% in a pool with BTC on Meteora. BTC is the main coin of this group. Lock means the money cannot be pulled back out.
 1. https://meteora.ag/create/dammv2/standard (Create → DAMM V2 → Standard Pool)
 2. Base Token = USBD CA. Quote Token = $BTC.
 3. Initial Price = USBD $ price ÷ $BTC $ price.
 4. Deposit **100M USBD** + equal $ value of $BTC.
 5. Tick **Permanently lock my liquidity**. Create.
 
-### 4. Pair 10% with SOL on Meteora.
+### 4. Lock 10% in a pool with SOL on Meteora. Same thing, with Solana's own coin.
 Same process. Quote = wrapped SOL.  
 Deposit **100M USBD** + equal $ value of SOL. Price = USBD $ ÷ SOL $.  
 Permanently lock it.
 
-### 5. The rest stays on USDC, through the curve and after graduation.
+### 5. Leave the rest in the USDC pool. That stays the main pool, during the launch and after.
 Everything else trades on the USDC pool (the pump.fun curve, then PumpSwap after graduation). USDC remains the main pool.
 
-### 6. Then partner tokens pair a chunk of their supply to the new USBD (or token of your choice). It becomes the "treasury" hub.
+### 6. Then other coins lock a piece of their supply against this coin. It becomes the hub they all connect through.
 **For this eco:** take a chunk from every titty token and pair each chunk with Bulma ($USBD), or with the token you chose instead.
 
 Do it the same way as steps 3–4: Meteora DAMM V2, permanently locked.  

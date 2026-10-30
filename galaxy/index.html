@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Launch template · my coin or yours</title>
+<title>Launch template · the example map</title>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
@@ -265,7 +265,7 @@
     <h1 id="title">Launch template</h1>
     <a class="home" href="https://d4trhban3.github.io/d4rth-launch-protocol/">Home</a>
   </div>
-  <div class="sub" id="subtitle">Nothing moves until you click Add Bulma.</div>
+  <div class="sub" id="subtitle">This map is the example. Nothing moves until you click Add Bulma.</div>
   <p class="idea" id="idea">Click Add Bulma. That's the whole point.</p>
   <div class="pills">
     <button id="btn">Add Bulma</button>
@@ -296,14 +296,14 @@
     <li><i class="sw bond"></i><span>Gold bar is the Bulma–$BTC bond.</span></li>
     <li><i class="sw ghost"></i><span>Empty ring is where it sat before Bulma.</span></li>
   </ul>
-  <p class="key-note">Purple line length / pull strength = how much of that coin’s supply is permanently paired with Bulma. Higher % = stronger pull toward $BTC.</p>
+  <p class="key-note">Closer to the center means a stronger pool with BTC. The purple line is how much of that coin is locked with Bulma. More locked means it sits closer to BTC.</p>
 </aside>
 <div class="readout" id="readout"></div>
 
 <aside class="panel" id="panel">
   <div class="master">
     <h2>All tokens</h2>
-    <p>Market cap increase grows the disc size. Supply paired to Bulma (0–50%) is the amount locked in the permanent pool with her; that is what pulls the coin closer to $BTC. One slider sets every coin; override any coin after.</p>
+    <p>A bigger market cap makes a bigger disc. Supply paired to Bulma is how much of that coin is locked with her. More locked pulls it closer to BTC. One slider sets every coin. Change a single coin after if you want it different.</p>
     <div class="sl">Market cap increase <b id="allBoostLabel">+0%</b></div>
     <input id="allBoost" type="range" min="0" max="2000" step="1" value="0" aria-label="All tokens market cap increase">
     <div class="ends"><span>0%</span><span>2000%</span></div>
@@ -701,7 +701,7 @@ function refreshCopy() {
   document.getElementById('title').textContent = on ? 'Bulma Dollar' : 'Launch template';
   document.getElementById('subtitle').textContent = on
     ? "I'd be happy if you launched this. Or run the same steps with your coin."
-    : 'Nothing moves until you click Add Bulma.';
+    : 'This map is the example. Nothing moves until you click Add Bulma.';
   document.getElementById('idea').textContent = on
     ? 'My coin or yours. This is the template.'
     : "Click Add Bulma. That's the whole point.";

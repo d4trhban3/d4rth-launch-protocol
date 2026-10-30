@@ -2,9 +2,9 @@
 
 # d4rth Launch Protocol
 
-**This is the template. My coin or yours.**
+**A free guide for launching a Solana coin that has real money behind it.**
 
-I'd be happy if you used it to launch Bulma Dollar. Just as happy if the coin is yours. Copy [LAUNCH-ANY-COIN-TEMPLATE.md](LAUNCH-ANY-COIN-TEMPLATE.md) and go.
+Most new coins start thin and die. This is a six-step way to launch so the main pool is real dollars, the sides are locked, and other coins can connect to yours. The example coin is called Bulma Dollar. You can use that idea, or write your own. Same six steps either way. Copy [LAUNCH-ANY-COIN-TEMPLATE.md](LAUNCH-ANY-COIN-TEMPLATE.md) and go.
 
 **Start here**
 - Launching your own coin? → [LAUNCH-ANY-COIN-TEMPLATE.md](LAUNCH-ANY-COIN-TEMPLATE.md)
@@ -12,29 +12,32 @@ I'd be happy if you used it to launch Bulma Dollar. Just as happy if the coin is
 - That idea on the map → [interactive galaxy](https://d4trhban3.github.io/d4rth-launch-protocol/galaxy/)
 - Support the protocol (creator fees) → [section below](#support-the-protocol-strongly-encouraged-not-required)
 
-**A launch protocol for any Solana token that should have real liquidity and legs.**
+**A launch guide for any Solana coin that should have real money behind it.**
 
-The d4rth Launch Protocol (DLP) is the six steps below. Launch on pump.fun paired with USDC. That is the main pool. Pair 10% with BTC. Pair 10% with SOL. The new USBD, or a token of your choice, becomes the treasury hub. Fill in [LAUNCH-ANY-COIN-TEMPLATE.md](LAUNCH-ANY-COIN-TEMPLATE.md) and go.
+The d4rth Launch Protocol is the six steps below. Launch on pump.fun paired with USDC. That is the main pool. Lock 10% with BTC. Lock 10% with SOL. Your new coin becomes the hub other coins connect to. The example hub is Bulma Dollar. Yours can be any coin. Fill in [LAUNCH-ANY-COIN-TEMPLATE.md](LAUNCH-ANY-COIN-TEMPLATE.md) and go.
 
-## Quick terms
-- **pump.fun curve** — where the coin first trades. You launch here, paired with USDC. Every buy moves the price up. The curve only sells about 79% of supply. When that part is sold, the coin graduates and leaves the curve.
-- **PumpSwap** — the regular trading pool the coin moves to by itself after the curve is finished. You do not set this up.
-- **Meteora DAMM V2** — where the side pools get locked. This is the 10% paired with BTC and the 10% paired with SOL. Tick permanent lock. That liquidity cannot be pulled back out.
-- **Treasury hub** — the new coin. USBD, or a token of your choice. Other tokens lock a chunk of their own supply against it, so they route through it.
-- **Creator-fee recipient** — optional. A GitHub user, or a wallet, that gets a slice of the launch fees. Holders can still get the rest. Nothing breaks if you skip it.
+## What these words mean
+- **pump.fun** — the site you launch the coin on. Price goes up as people buy.
+- **USDC** — a dollar on Solana. The main pool is priced in dollars.
+- **Lock** — put coins in a pool and freeze them so they cannot be removed.
+- **Meteora** — the site where those locked pools are made.
+- **Hub** — the new coin that other coins connect to. Bulma Dollar is the example. Yours can be any coin.
+- **Creator fee** — optional. A slice of the launch fees. Holders can still get the rest.
+- **pump.fun curve** — the first trading pool. It only sells about 79% of the coins. Then the coin moves on by itself.
+- **PumpSwap** — the regular pool it moves to after that. You do not set this up.
 
 ---
 
 ### @slingoorio — this is the important part for you
 
-The protocol is for any token. The idea I brought you is the Bulma dollar.
+The guide works for any coin. The idea I brought you is Bulma Dollar.
 
-If you run **this** idea, the key is pairing a chunk of **every token in the Big Titty ecosystem** with Bulma ($USBD Ultimate Super Bulma Dragonballs).
+If you run **this** idea, the key is locking a piece of **every coin in the Big Titty group** against Bulma Dollar ($USBD).
 
-Once $USBD is launched on USDC, 20% bought, and the $BTC + SOL locks are in place, you take a chunk from each titty token and permanently lock a Meteora pool of that chunk against the new USBD (or token of your choice).  
-Every eco token gets a pool with it. It becomes the "treasury" hub.
+Once it is launched on USDC, 20% bought, and the BTC and SOL locks are in place, you take a piece from each coin in the group and lock it in a Meteora pool against Bulma.  
+Every coin in the group gets a pool with it. Bulma becomes the hub they all connect through.
 
-Open the map and hit **Add Bulma**. $BTC and Bulma become twin suns. That map is the example of the treasury hub. Same shape if the treasury hub is a token of your choice.
+Open the map and hit **Add Bulma**. $BTC and Bulma become twin suns. That map is the example. Same shape if the hub is a coin of your choice.
 
 **Live map:** [Big Titty Galaxy](https://d4trhban3.github.io/d4rth-launch-protocol/galaxy/)
 
@@ -43,12 +46,12 @@ Full sequence and the example pack: [BULMA-USBD-READY-TO-LAUNCH/](BULMA-USBD-REA
 ---
 
 ## The 6 steps
-1. Launch on pump.fun paired with USDC. That is the main pool. *(The curve is the bonding curve that sells ~79% of supply before graduation.)*
-2. Dev buy about 20% of supply.
-3. Pair 10% with the ecosystem anchor token BTC on Meteora. *(DAMM V2 standard pool, permanently locked.)*
-4. Pair 10% with SOL on Meteora.
-5. The rest stays on USDC, through the curve and after graduation. *(Then it moves to PumpSwap.)*
-6. Then partner tokens pair a chunk of their supply to the new USBD (or token of your choice). It becomes the "treasury" hub. *(Each partner token gets its own permanent pool against it.)*
+1. Launch the coin on pump.fun, paired with USDC. USDC is a dollar on Solana. That is the main pool. *(The first pool only sells about 79% of the coins. Then the coin moves on by itself.)*
+2. Buy about 20% of the coins yourself. That leaves most of the rest for other people.
+3. Lock 10% in a pool with BTC on Meteora. BTC is the main coin of this group. Lock means the money cannot be pulled back out.
+4. Lock 10% in a pool with SOL on Meteora. Same thing, with Solana's own coin.
+5. Leave the rest in the USDC pool. That stays the main pool, during the launch and after. *(Then it moves to PumpSwap.)*
+6. Then other coins lock a piece of their supply against your new coin. Your coin becomes the hub they all connect through. The example hub is Bulma Dollar. Yours can be any coin.
 
 Plus: add GitHub `d4trhban3` as a creator-fee recipient (strongly encouraged, see below).
 
@@ -71,16 +74,16 @@ It's optional. Nothing breaks without it. It only works if creator fees stay on,
 
 Credit line: `d4rth Launch Protocol by @d4rthban3 (GitHub d4trhban3)`.
 
-## The idea I used
-### $USBD · Ultimate Super Bulma Dragonballs
+## The example coin
+### Bulma Dollar · $USBD
 ![USBD](BULMA-USBD-READY-TO-LAUNCH/USBD-ART/coin-images-and-logos/usbd-logo-lockup.png)
 
-This is the coin I wrote in. USBD, or a token of your choice. Same six steps. It becomes the treasury hub.
+This is the coin I wrote in. I liked the sound of it. I'd be happy if you launched it. Just as happy if the coin is yours. If you use this one, the ticker is $USBD.
 
 **Name:** $USBD Ultimate Super Bulma Dragonballs  
-**Concept:** the Bulma dollar. Treasury hub of the Big Titty Coin ($BTC) ecosystem.
+**Concept:** the Bulma dollar. The example hub for the Big Titty Coin ($BTC) group.
 
-Sequence: launch paired with USDC. That is the main pool. Dev buy about 20%. Pair 10% with BTC. Pair 10% with SOL. The rest stays on USDC. Then partner tokens pair a chunk of their supply to it.
+Same six steps. Launch paired with USDC. Buy about 20%. Lock 10% with BTC. Lock 10% with SOL. Leave the rest on USDC. Then other coins lock a piece of their supply against it.
 
 Interactive map of that idea: [galaxy](https://d4trhban3.github.io/d4rth-launch-protocol/galaxy/)
 
