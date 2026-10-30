@@ -118,7 +118,44 @@
   .master p { margin: 0 0 10px; font-size: 11px; color: #8b93a3; line-height: 1.4; }
   .mh { display: flex; justify-content: space-between; font-size: 11px; color: #c5ccd8; margin: 8px 0 4px; }
   .mh b { color: #f5d78a; font-weight: 600; }
-  input[type=range] { width: 100%; accent-color: #d6b4ff; }
+  input[type=range] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 40px;
+    margin: 0;
+    background: transparent;
+    touch-action: pan-y;
+  }
+  input[type=range]::-webkit-slider-runnable-track {
+    height: 4px;
+    background: rgba(214,180,255,0.4);
+    border-radius: 4px;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 28px;
+    height: 28px;
+    margin-top: -12px;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 5px rgba(0,0,0,0.5);
+  }
+  input[type=range]::-moz-range-track {
+    height: 4px;
+    background: rgba(214,180,255,0.4);
+    border-radius: 4px;
+    border: 0;
+  }
+  input[type=range]::-moz-range-thumb {
+    width: 28px;
+    height: 28px;
+    border: 0;
+    border-radius: 50%;
+    background: #fff;
+  }
   .ends { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #6d7585; }
   .bondline { margin-top: 8px; font-size: 12px; color: #d8ffe8; }
   .rows { overflow: auto; padding: 8px 12px 18px; }
@@ -132,8 +169,6 @@
   .row .delta { color: #9aa3b2; font-weight: 500; }
   .row .delta.on { color: #b6f7cf; }
 
-  input[type=range] { height: 28px; touch-action: pan-x; }
-  .panel, .rows { touch-action: pan-y; -webkit-overflow-scrolling: touch; }
   .dock { display: contents; }
   @media (max-width: 800px) {
     .kicker, .sub, .hint, .readout, .key-kicker { display: none !important; }
@@ -154,8 +189,11 @@
       background: rgba(8,10,14,0.96);
       border-top: 1px solid rgba(255,255,255,0.12);
       border-radius: 18px 18px 0 0;
-      overflow: auto;
+      overflow-x: hidden;
+      overflow-y: scroll;
       -webkit-overflow-scrolling: touch;
+      overscroll-behavior: contain;
+      touch-action: pan-y;
       backdrop-filter: blur(14px);
       padding-bottom: max(12px, env(safe-area-inset-bottom));
     }
@@ -188,7 +226,7 @@
       display: flex;
       border-top: 1px solid rgba(255,255,255,0.08);
     }
-    .dock .panel.open .rows { overflow: visible; padding-bottom: 8px; }
+    .dock .key, .dock .panel, .dock .rows, .dock .master { touch-action: pan-y; }
   }
 </style>
 </head>
@@ -378,7 +416,7 @@ orbiters.forEach(t => {
   if (t.image) { img.src = t.image.src; img.alt = t.ticker; }
   else { img.className = 'ph'; }
   const maxV = Math.max(20000, Math.round(t.baseVol * 4));
-  const step = Math.max(1000, Math.round(t.baseVol / 40));
+  const step = Math.max(100, Math.round(t.baseVol / 200));
   const body = document.createElement('div');
   body.innerHTML = '<div class="nm"><b>' + t.ticker + '</b><span class="delta" data-d="' + t.ticker + '">0% paired</span></div>'
     + '<div class="sl">Volume <b data-v="' + t.ticker + '">' + money(t.vol) + '</b></div>'
@@ -400,7 +438,52 @@ orbiters.forEach(t => {
     body.querySelector('[data-s]').textContent = e.target.value + '%';
     paintDeltas();
   });
+  body.querySelectorAll('input[type=range]').forEach(wireSliderTouch);
 });
+
+function wireSliderTouch(input) {
+  let active = false;
+  let locked = null;
+  let sx = 0;
+  let sy = 0;
+  const apply = (clientX) => {
+    const rect = input.getBoundingClientRect();
+    const min = Number(input.min) || 0;
+    const max = Number(input.max) || 100;
+    const step = Number(input.step) || 1;
+    const ratio = Math.max(0, Math.min(1, (clientX - rect.left) / Math.max(1, rect.width)));
+    let value = min + ratio * (max - min);
+    value = Math.round((value - min) / step) * step + min;
+    if (value < min) value = min;
+    if (value > max) value = max;
+    if (Number(input.value) === value) return;
+    input.value = String(value);
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+  };
+  input.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    active = true;
+    locked = null;
+    sx = e.touches[0].clientX;
+    sy = e.touches[0].clientY;
+  }, { passive: true });
+  input.addEventListener('touchmove', (e) => {
+    if (!active || e.touches.length !== 1) return;
+    const t = e.touches[0];
+    const dx = t.clientX - sx;
+    const dy = t.clientY - sy;
+    if (!locked) {
+      if (Math.abs(dx) < 8 && Math.abs(dy) < 8) return;
+      locked = Math.abs(dx) >= Math.abs(dy) ? 'x' : 'y';
+    }
+    if (locked === 'y') return;
+    if (e.cancelable) e.preventDefault();
+    apply(t.clientX);
+  }, { passive: false });
+  const end = () => { active = false; locked = null; };
+  input.addEventListener('touchend', end);
+  input.addEventListener('touchcancel', end);
+}
 
 function paintDeltas() {
   const bond = bondNow();
@@ -556,7 +639,7 @@ document.getElementById('btn').addEventListener('click', () => {
   mode = mode === 'current' ? 'bulma' : 'current';
   const on = mode === 'bulma';
   orbiters.forEach(t => {
-    const step = Math.max(1000, Math.round(t.baseVol / 40));
+    const step = Math.max(100, Math.round(t.baseVol / 200));
     const raw = on ? t.baseVol * 1.2 : t.baseVol;
     t.vol = Math.max(0, Math.round(raw / step) * step);
     t.share = on ? 0.05 : 0;
