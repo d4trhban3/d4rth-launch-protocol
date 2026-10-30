@@ -11,11 +11,11 @@ Part of the d4rth Launch Protocol (DLP). The anchor is BTC. The new coin is USBD
 - Wrapped SOL: `So11111111111111111111111111111111111111112`
 
 ## Quick terms
-- **pump.fun curve** — the bonding curve you launch on. Price rises with every buy. It sells about 79% of supply, then the coin graduates.
-- **PumpSwap** — the pool the coin moves to automatically once the curve finishes.
-- **Meteora DAMM V2** — the permanent liquidity pool you lock against. Once locked, the liquidity cannot be removed.
-- **Treasury hub** — the new coin that other tokens lock a chunk of supply against, so they all route through it.
-- **Creator-fee recipient** — an optional wallet or GitHub user that receives a slice of the launch fees. Holder rewards stay on.
+- **pump.fun curve** — where the coin first trades. You launch here, paired with USDC. Every buy moves the price up. The curve only sells about 79% of supply. When that part is sold, the coin graduates and leaves the curve.
+- **PumpSwap** — the regular trading pool the coin moves to by itself after the curve is finished. You do not set this up.
+- **Meteora DAMM V2** — where the side pools get locked. This is the 10% paired with BTC and the 10% paired with SOL. Tick permanent lock. That liquidity cannot be pulled back out.
+- **Treasury hub** — the new coin. USBD, or a token of your choice. Other tokens lock a chunk of their own supply against it, so they route through it.
+- **Creator-fee recipient** — optional. A GitHub user, or a wallet, that gets a slice of the launch fees. Holders can still get the rest. Nothing breaks if you skip it.
 
 ## The 6 steps
 1. **Launch on pump.fun paired with USDC. That is the main pool.** Name [NAME], ticker [TICKER].
