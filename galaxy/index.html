@@ -42,16 +42,65 @@
   }
   .zoom button { padding: 4px 10px; border: 0; background: transparent; font-size: 14px; }
   .zoom #zPct { min-width: 46px; text-align: center; font-size: 11px; color: #c5ccd8; }
-  .legend {
-    position: absolute; left: 168px; bottom: 26px; z-index: 10;
-    display: flex; gap: 14px; font-size: 11px; color: #8b93a3;
+  .key {
+    position: absolute; left: 18px; bottom: 72px; z-index: 12; width: 372px;
+    background: rgba(8,10,14,0.9);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 14px; padding: 12px 14px 12px;
+    backdrop-filter: blur(12px);
   }
-  .legend i {
-    display: inline-block; width: 7px; height: 7px; border-radius: 50%;
-    background: #5c6573; margin-right: 6px; vertical-align: 1px;
+  .key-kicker {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #6d7585;
   }
-  .legend i.on { background: #3dff8a; box-shadow: 0 0 6px #3dff8a; }
-  .legend i.bul { background: #b794f6; }
+  .rk { display: flex; align-items: center; gap: 8px; margin: 8px 0 4px; }
+  .rk-end { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #8b93a3; }
+  .rk-end.deep { color: #f5d78a; }
+  .rk-track {
+    position: relative; flex: 1; height: 22px;
+  }
+  .rk-track::before {
+    content: ""; position: absolute; left: 0; right: 18px; top: 10px; height: 2px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.18), #f5d78a);
+  }
+  .rk-pip {
+    position: absolute; top: 6px; width: 10px; height: 10px; border-radius: 50%;
+    background: #9aa3b2; border: 1px solid #fff;
+  }
+  .rk-pip.far { left: 0; width: 7px; height: 7px; top: 7px; opacity: 0.55; }
+  .rk-pip.mid { left: 38%; opacity: 0.8; }
+  .rk-pip.near { left: 68%; background: #f5d78a; }
+  .rk-sun {
+    position: absolute; right: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%;
+    background: #f5d78a; color: #1a1408; font-size: 7px; font-weight: 750;
+    display: grid; place-items: center; letter-spacing: 0;
+  }
+  .key-rule {
+    margin: 2px 0 8px; font-size: 15px; font-weight: 720; line-height: 1.25; color: #f5d78a;
+  }
+  .key-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+  .key-list li {
+    display: flex; align-items: flex-start; gap: 8px;
+    font-size: 12px; line-height: 1.35; color: #d5dbe6;
+  }
+  .sw { width: 22px; height: 14px; position: relative; flex: none; margin-top: 1px; }
+  .sw.btc-line::before, .sw.usbd-line::before, .sw.bond::before {
+    content: ""; position: absolute; left: 0; right: 0; top: 6px; height: 2px;
+    background: #d5dde8; border-radius: 2px;
+  }
+  .sw.usbd-line::before { background: #c4a8ff; height: 3px; top: 5px; }
+  .sw.bond::before { background: #ffd68c; height: 6px; top: 4px; box-shadow: 0 0 8px #ffc45a; }
+  .sw.ghost::before {
+    content: ""; position: absolute; width: 11px; height: 11px; left: 5px; top: 1px;
+    border: 1.5px solid rgba(255,255,255,0.7); border-radius: 50%;
+  }
+  .sw.size::before {
+    content: ""; position: absolute; width: 12px; height: 12px; left: 5px; top: 1px;
+    border-radius: 50%; background: #e8eef8;
+  }
+  .sw.dist::before {
+    content: ""; position: absolute; left: 0; right: 4px; top: 6px; height: 2px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.25), #f5d78a);
+  }
   .hint {
     position: absolute; right: 18px; bottom: 22px; z-index: 10;
     font-size: 10px; letter-spacing: 0.16em; color: #6d7585; text-transform: uppercase;
@@ -91,33 +140,58 @@
 
   input[type=range] { height: 28px; touch-action: pan-x; }
   .panel, .rows { touch-action: pan-y; -webkit-overflow-scrolling: touch; }
+  .dock { display: contents; }
   @media (max-width: 800px) {
-    .kicker { display: none; }
+    .kicker, .sub, .hint, .readout { display: none !important; }
     .top {
-      top: max(10px, env(safe-area-inset-top));
-      left: 12px; right: 12px;
+      top: 0; left: 0; right: 0;
+      padding: max(12px, env(safe-area-inset-top)) 176px 12px 14px;
+      background: linear-gradient(180deg, rgba(7,9,14,0.97) 0%, rgba(7,9,14,0.92) 70%, rgba(7,9,14,0) 100%);
     }
-    .sub, .hint, .legend, .readout { display: none !important; }
     h1 { font-size: 17px; }
-    .pills { margin-top: 8px; }
+    .pills { margin-top: 8px; flex-wrap: wrap; }
     .pills button { padding: 10px 14px; font-size: 13px; min-height: 42px; }
     .zoom {
-      top: auto;
-      left: 12px;
-      right: auto;
-      bottom: max(14px, env(safe-area-inset-bottom));
+      top: max(10px, env(safe-area-inset-top));
+      right: 10px; left: auto; bottom: auto;
       z-index: 30;
     }
-    .zoom button { min-width: 40px; min-height: 40px; padding: 6px 10px; font-size: 18px; }
-    body:has(#panel.open) .zoom {
-      bottom: calc(40vh + 16px + env(safe-area-inset-bottom));
+    .zoom button { min-width: 36px; min-height: 40px; padding: 4px 8px; font-size: 18px; }
+    .dock {
+      display: flex; flex-direction: column;
+      position: absolute; left: 0; right: 0; bottom: 0; z-index: 20;
+      max-height: 46vh;
+      background: rgba(8,10,14,0.96);
+      border-top: 1px solid rgba(255,255,255,0.12);
+      border-radius: 18px 18px 0 0;
+      overflow: hidden;
+      backdrop-filter: blur(14px);
+      padding-bottom: env(safe-area-inset-bottom);
     }
-    .panel {
-      top: auto; left: 8px; right: 8px; width: auto;
-      bottom: max(8px, env(safe-area-inset-bottom));
-      max-height: 40vh;
+    body.bulma .dock { max-height: 52vh; }
+    .dock .key {
+      position: relative; left: auto; right: auto; bottom: auto; width: auto;
+      border: 0; border-radius: 0; background: transparent; backdrop-filter: none;
+      flex: none;
+      padding: 12px 14px 8px;
     }
+    .key-rule { font-size: 16px; }
+    .key-list { grid-template-columns: 1fr 1fr; gap: 7px 12px; }
+    .key-list li { font-size: 11px; }
     .master p { display: none; }
+    .dock .panel {
+      position: relative; top: auto; right: auto; bottom: auto; left: auto;
+      width: auto; flex: none; min-height: 0;
+      border: 0; border-radius: 0; background: transparent;
+      display: none;
+    }
+    .dock .panel.open {
+      display: flex;
+      height: 24vh;
+      overflow: hidden;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .dock .panel.open .rows { flex: 1; min-height: 0; overflow: auto; }
   }
 </style>
 </head>
@@ -138,11 +212,30 @@
   <button id="zIn" type="button">+</button>
   <button id="zReset" type="button">◎</button>
 </div>
-<div class="legend">
-  <span><i class="dot on"></i>Bonded</span>
-  <span><i class="dot bul"></i>Bulma link</span>
-</div>
 <div class="hint">Drag to rotate · Pinch or scroll to zoom</div>
+<div class="dock" id="dock">
+<aside class="key" id="key">
+  <div class="key-kicker">Key</div>
+  <div class="rk" aria-hidden="true">
+    <span class="rk-end">thin</span>
+    <span class="rk-track">
+      <span class="rk-pip far"></span>
+      <span class="rk-pip mid"></span>
+      <span class="rk-pip near"></span>
+      <span class="rk-sun">BTC</span>
+    </span>
+    <span class="rk-end deep">deep</span>
+  </div>
+  <p class="key-rule">Closer to $BTC = stronger liquidity pool</p>
+  <ul class="key-list">
+    <li><i class="sw dist"></i><span>Distance from $BTC is pool strength.</span></li>
+    <li><i class="sw size"></i><span>Bigger disc means more volume.</span></li>
+    <li><i class="sw btc-line"></i><span>Pale line is that coin's pool with $BTC.</span></li>
+    <li><i class="sw usbd-line"></i><span>Purple line is supply paired through $USBD.</span></li>
+    <li><i class="sw bond"></i><span>Gold bar is the $USBD–$BTC bond.</span></li>
+    <li><i class="sw ghost"></i><span>Empty ring is where it sat before USBD.</span></li>
+  </ul>
+</aside>
 <div class="readout" id="readout"></div>
 
 <aside class="panel" id="panel">
@@ -159,6 +252,7 @@
   </div>
   <div class="rows" id="rows"></div>
 </aside>
+</div>
 
 
 <script>
@@ -353,16 +447,21 @@ document.getElementById('allShare').addEventListener('input', (e) => {
 });
 
 let userZoomed = false;
-function fittedZoom() {
-  const open = document.getElementById('panel').classList.contains('open');
+function chromeBox() {
+  const open = document.body.classList.contains('bulma');
   const narrow = W < 800;
-  const header = narrow ? 96 : 20;
-  const sheet = (narrow && open) ? H * 0.40 : 0;
-  const side = (!narrow && open) ? 348 : 20;
-  const availW = Math.max(180, W - side);
-  const availH = Math.max(180, H - header - sheet);
+  if (narrow) {
+    const dock = document.getElementById('dock');
+    return { side: 0, header: 108, bottom: dock ? dock.offsetHeight : 220 };
+  }
+  return { side: open ? 348 : 24, header: 16, bottom: 16 };
+}
+function fittedZoom() {
+  const c = chromeBox();
+  const availW = Math.max(160, W - c.side);
+  const availH = Math.max(160, H - c.header - c.bottom);
   const fit = Math.min(availW, availH) / 1000;
-  return Math.max(0.36, Math.min(narrow ? 0.92 : 1.15, fit));
+  return Math.max(0.28, Math.min(W < 800 ? 0.9 : 1.15, fit));
 }
 function resize() {
   W = canvas.width = window.innerWidth;
@@ -373,7 +472,7 @@ window.addEventListener('resize', resize);
 resize();
 
 function setZoom(next) {
-  scale = Math.max(0.45, Math.min(2.4, next));
+  scale = Math.max(0.28, Math.min(2.4, next));
   const el = document.getElementById('zPct');
   if (el) el.textContent = Math.round(scale * 100) + '%';
 }
@@ -454,6 +553,9 @@ function refreshCopy() {
     ? 'Slide a coin left to drop USBD. Slide right and it falls in toward $BTC.'
     : 'One sun. Add USBD and the same coins sit closer.';
   document.getElementById('panel').classList.toggle('open', on);
+  document.body.classList.toggle('bulma', on);
+  const keyEl = document.getElementById('key');
+  if (keyEl) document.documentElement.style.setProperty('--key-h', keyEl.offsetHeight + 'px');
   const box = document.getElementById('readout');
   box.classList.toggle('show', on);
   if (!on) box.textContent = '';
@@ -494,13 +596,9 @@ function rotate(p, rx, ry, rz) {
 }
 
 function focus() {
-  const open = document.getElementById('panel').classList.contains('open');
-  const narrow = W < 800;
-  const side = (open && !narrow) ? 332 : 0;
-  const header = narrow ? 100 : 0;
-  const sheet = (open && narrow) ? H * 0.40 : 0;
-  cx = (W - side) / 2;
-  cy = header + (H - header - sheet) / 2;
+  const c = chromeBox();
+  cx = (W - c.side) / 2;
+  cy = c.header + (H - c.header - c.bottom) / 2;
 }
 
 function project(p) {
