@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Launch template · Bulma Dollar is only a sample</title>
+<title>Launch template · my coin or yours</title>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
@@ -240,12 +240,12 @@
 <body>
 <canvas id="canvas"></canvas>
 <div class="top">
-  <div class="kicker" id="kicker">ANY COIN</div>
+  <div class="kicker" id="kicker">THE TEMPLATE</div>
   <h1 id="title">Launch template</h1>
-  <div class="sub" id="subtitle">One sun. Show the sample and the coins sit closer.</div>
-  <p class="idea">Sample only. I liked the sound of Bulma Dollar. Use your own coin.</p>
+  <div class="sub" id="subtitle">One sun. Add Bulma, or picture your own coin there.</div>
+  <p class="idea">My coin or yours. This is the template.</p>
   <div class="pills">
-    <button id="btn">Show sample</button>
+    <button id="btn">Add Bulma</button>
     <button id="btnSpin">Auto-Rotate</button>
     <button id="zReset" type="button">Fit</button>
   </div>
@@ -269,9 +269,9 @@
     <li><i class="sw dist"></i><span>Distance from $BTC is pool strength.</span></li>
     <li><i class="sw size"></i><span>Bigger disc means a bigger market cap.</span></li>
     <li><i class="sw btc-line"></i><span>Pale line is that coin's pool with $BTC.</span></li>
-    <li><i class="sw usbd-line"></i><span>Purple line is supply paired through the sample hub.</span></li>
-    <li><i class="sw bond"></i><span>Gold bar is the sample hub’s bond with $BTC.</span></li>
-    <li><i class="sw ghost"></i><span>Empty ring is where it sat before the sample.</span></li>
+    <li><i class="sw usbd-line"></i><span>Purple line is supply paired through Bulma.</span></li>
+    <li><i class="sw bond"></i><span>Gold bar is the Bulma–$BTC bond.</span></li>
+    <li><i class="sw ghost"></i><span>Empty ring is where it sat before Bulma.</span></li>
   </ul>
 </aside>
 <div class="readout" id="readout"></div>
@@ -279,7 +279,7 @@
 <aside class="panel" id="panel">
   <div class="master">
     <h2>Each coin</h2>
-    <p>Increase runs that coin's market cap from where it is now up to +2000%. Supply paired is the slice locked with the sample hub, up to 50%, which pulls it toward $BTC.</p>
+    <p>Increase runs that coin's market cap from where it is now up to +2000%. Supply paired is the slice locked with Bulma, up to 50%, which pulls it toward $BTC.</p>
     <div class="bondline" id="bondNote"></div>
   </div>
   <div class="rows" id="rows"></div>
@@ -436,7 +436,7 @@ orbiters.forEach(t => {
     + '<div class="sl">Market cap increase <b data-v="' + t.ticker + '">' + boostLabel(t) + '</b></div>'
     + '<input type="range" data-kind="vol" min="0" max="2000" step="1" value="0" aria-label="' + t.ticker + ' volume">'
     + '<div class="ends"><span>0%</span><span>2000%</span></div>'
-    + '<div class="sl pair">Supply paired to the sample <b data-s="' + t.ticker + '">0%</b></div>'
+    + '<div class="sl pair">Supply paired to Bulma <b data-s="' + t.ticker + '">0%</b></div>'
     + '<input type="range" data-kind="share" min="0" max="50" step="1" value="0" aria-label="' + t.ticker + ' supply paired to USBD">'
     + '<div class="ends"><span>0%</span><span>50%</span></div>';
   row.appendChild(img);
@@ -523,7 +523,7 @@ function paintDeltas() {
   }
   const lift = bond / baseEco * 100;
   const btcLift = bond / btc.liq * 100;
-  note.textContent = 'Bond ' + money(bond) + ' · $BTC LP +' + btcLift.toFixed(1) + '% · ecosystem +' + lift.toFixed(1) + '% vs no sample hub';
+  note.textContent = 'Bond ' + money(bond) + ' · $BTC LP +' + btcLift.toFixed(1) + '% · ecosystem +' + lift.toFixed(1) + '% vs no Bulma';
   const box = document.getElementById('readout');
   box.classList.add('show');
   box.textContent = 'Sample hub ' + money(bond) + '  ·  always deeper with a hub in';
@@ -634,13 +634,13 @@ document.getElementById('zReset').onclick = () => { userZoomed = false; setZoom(
 
 function refreshCopy() {
   const on = mode === 'bulma';
-  document.getElementById('btn').textContent = on ? 'Hide sample' : 'Show sample';
+  document.getElementById('btn').textContent = on ? 'Remove Bulma' : 'Add Bulma';
   document.getElementById('btn').classList.toggle('active', on);
-  document.getElementById('kicker').textContent = on ? 'ONE FILLED-IN IDEA' : 'ANY COIN';
-  document.getElementById('title').textContent = on ? 'Sample · Bulma Dollar' : 'Launch template';
+  document.getElementById('kicker').textContent = on ? 'BULMA DOLLAR' : 'THE TEMPLATE';
+  document.getElementById('title').textContent = on ? 'Bulma Dollar' : 'Launch template';
   document.getElementById('subtitle').textContent = on
-    ? 'This second sun is a sample. Your hub can be any coin.'
-    : 'One sun. Show the sample and the coins sit closer.';
+    ? "I'd be happy if you launched this. Or run the same steps with your coin."
+    : 'One sun. Add Bulma, or picture your own coin there.';
   document.getElementById('panel').classList.toggle('open', on);
   document.body.classList.toggle('bulma', on);
   const keyEl = document.getElementById('key');
@@ -867,14 +867,11 @@ function loop() {
       ctx.globalAlpha = s.alpha;
       const ready = usbdImg && usbdImg.ok;
       drawDisc(s.x, s.y, s.r, '#12343f', ready ? usbdImg : null);
-      ctx.fillStyle = '#f5d78a';
-      ctx.font = '700 9px Inter, system-ui';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
-      ctx.fillText('SAMPLE', s.x, s.y + s.r + 3);
       ctx.fillStyle = '#e7f8ff';
       ctx.font = '650 12px Inter, system-ui';
-      ctx.fillText('BULMA', s.x, s.y + s.r + 15);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText('BULMA', s.x, s.y + s.r + 4);
       ctx.restore();
     }
   });
