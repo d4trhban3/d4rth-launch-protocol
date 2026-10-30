@@ -9,6 +9,19 @@
 
 The d4rth Launch Protocol (DLP) is a simple, repeatable way to launch a token so it has real depth from day one. It launches on a USDC pool, locks liquidity against the ecosystem's anchor token and SOL, and sets the token up as a hub other tokens can pair into. It works for any token. Fill in the blanks in [LAUNCH-ANY-COIN-TEMPLATE.md](LAUNCH-ANY-COIN-TEMPLATE.md) and go.
 
+---
+
+### @slingoorio — this is the important part for you
+
+The key to the system is you pairing a chunk of **every token in the Big Titty ecosystem** with Bulma ($USBD Ultimate Super Bulma Dragonballs).
+
+Once $USBD is launched on USDC, 20% bought, and the $BTC + SOL locks are in place, you take a chunk from each titty token and permanently lock a Meteora pool of that chunk against $USBD.  
+Every eco token gets a pool with her. She becomes the hub. The whole system routes through Bulma.
+
+Full sequence and ready-to-launch pack: [BULMA-USBD-READY-TO-LAUNCH/](BULMA-USBD-READY-TO-LAUNCH/README.md).
+
+---
+
 ## The 6 steps
 1. Launch on pump.fun paired with USDC. It's the strongest pool.
 2. Dev buy about 20% of supply.
