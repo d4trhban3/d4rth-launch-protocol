@@ -278,8 +278,14 @@
 
 <aside class="panel" id="panel">
   <div class="master">
-    <h2>Each coin</h2>
-    <p>Increase runs that coin's market cap from where it is now up to +2000%. Supply paired is the slice locked with Bulma, up to 50%, which pulls it toward $BTC.</p>
+    <h2>All tokens</h2>
+    <p>One move sets every coin. Same ranges as the sliders below. Change a single coin after if you want it different.</p>
+    <div class="sl">Market cap increase <b id="allBoostLabel">+0%</b></div>
+    <input id="allBoost" type="range" min="0" max="2000" step="1" value="0" aria-label="All tokens market cap increase">
+    <div class="ends"><span>0%</span><span>2000%</span></div>
+    <div class="sl pair">Supply paired to Bulma <b id="allShareLabel">0%</b></div>
+    <input id="allShare" type="range" min="0" max="50" step="1" value="0" aria-label="All tokens supply paired">
+    <div class="ends"><span>0%</span><span>50%</span></div>
     <div class="bondline" id="bondNote"></div>
   </div>
   <div class="rows" id="rows"></div>
@@ -456,6 +462,37 @@ orbiters.forEach(t => {
   });
   body.querySelectorAll('input[type=range]').forEach(wireSliderTouch);
 });
+
+function applyAllBoost(v) {
+  orbiters.forEach(t => {
+    t.boost = v;
+    t.vol = levelOf(t);
+    const inp = rows.querySelector('input[aria-label="' + t.ticker + ' volume"]');
+    if (inp) inp.value = v;
+    const lab = rows.querySelector('[data-v="' + t.ticker + '"]');
+    if (lab) lab.textContent = boostLabel(t);
+  });
+  const label = document.getElementById('allBoostLabel');
+  if (label) label.textContent = '+' + v + '%';
+  rescale();
+  paintDeltas();
+}
+function applyAllShare(v) {
+  orbiters.forEach(t => {
+    t.share = v / 100;
+    const inp = rows.querySelector('input[aria-label="' + t.ticker + ' supply paired to USBD"]');
+    if (inp) inp.value = v;
+    const lab = rows.querySelector('[data-s="' + t.ticker + '"]');
+    if (lab) lab.textContent = v + '%';
+  });
+  const label = document.getElementById('allShareLabel');
+  if (label) label.textContent = v + '%';
+  paintDeltas();
+}
+document.getElementById('allBoost').addEventListener('input', (e) => applyAllBoost(Number(e.target.value)));
+document.getElementById('allShare').addEventListener('input', (e) => applyAllShare(Number(e.target.value)));
+wireSliderTouch(document.getElementById('allBoost'));
+wireSliderTouch(document.getElementById('allShare'));
 
 function wireSliderTouch(input) {
   let active = false;
@@ -667,6 +704,14 @@ document.getElementById('btn').addEventListener('click', () => {
     if (vLab) vLab.textContent = boostLabel(t);
     if (sLab) sLab.textContent = (on ? 5 : 0) + '%';
   });
+  const allBoost = document.getElementById('allBoost');
+  const allShare = document.getElementById('allShare');
+  if (allBoost) allBoost.value = on ? 20 : 0;
+  if (allShare) allShare.value = on ? 5 : 0;
+  const allBoostLabel = document.getElementById('allBoostLabel');
+  const allShareLabel = document.getElementById('allShareLabel');
+  if (allBoostLabel) allBoostLabel.textContent = on ? '+20%' : '+0%';
+  if (allShareLabel) allShareLabel.textContent = (on ? 5 : 0) + '%';
   rescale();
   refreshCopy();
 });
