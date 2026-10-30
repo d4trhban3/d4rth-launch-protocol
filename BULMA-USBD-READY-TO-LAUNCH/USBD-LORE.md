@@ -1,3 +1,5 @@
+**USBD was just my idea. Use any token you want.** I used the Bulma dollar. This file is that example, not the protocol.
+
 # $USBD · Ultimate Super Bulma Dragonballs
 ## The Gospel of Bulma Labs
 

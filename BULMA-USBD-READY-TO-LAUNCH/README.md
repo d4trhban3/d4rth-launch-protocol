@@ -1,4 +1,4 @@
-**This folder is the ready-to-launch $USBD coin: steps, art, lore and posts.**
+**This folder is one idea, not the protocol.** USBD was just my idea. Use any token you want. I used the Bulma dollar. Everything below is that example, ready to launch.
 
 # $USBD · Ultimate Super Bulma Dragonballs
 

@@ -1,4 +1,6 @@
-# Launch Template (any coin): copy this, fill in the blanks, launch.
+# Launch any coin
+
+**USBD was just my idea. Use any token you want.** I used the Bulma dollar. This page is the protocol. Copy it, fill in the blanks, launch your own idea.
 
 Part of the d4rth Launch Protocol (DLP). Works for any Solana token. Replace every [BLANK] and follow the steps.
 

@@ -1,3 +1,5 @@
+**USBD was just my idea. Use any token you want.** I used the Bulma dollar. This file is that example, not the protocol.
+
 # $USBD art pack
 
 All text on images is the composited lockup PNG or PIL-rendered (Anton / Inter). Stickers are transparent PNGs with rounded gold-bordered badges.

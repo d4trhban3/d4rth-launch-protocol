@@ -1,5 +1,7 @@
 # Launch $USBD · Ultimate Super Bulma Dragonballs
 
+**Example only.** The protocol works for any token. USBD was just my idea. Use any token you want. I used the Bulma dollar. This page is that idea, step by step.
+
 *Built with the [d4rth Launch Protocol](../LAUNCH-ANY-COIN-TEMPLATE.md).*
 
 **Addresses**

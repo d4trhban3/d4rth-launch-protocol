@@ -1,3 +1,5 @@
+**USBD was just my idea. Use any token you want.** I used the Bulma dollar. This file is that example, not the protocol.
+
 # $USBD posts
 All ≤280 chars. Fill [PLACEHOLDERS] before posting and recount if they grow.
 
