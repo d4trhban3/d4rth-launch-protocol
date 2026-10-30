@@ -32,18 +32,9 @@
   }
   button:hover { border-color: rgba(255,255,255,0.28); color: #fff; }
   button.active { border-color: rgba(120,220,160,0.7); color: #d8ffe8; }
-  .zoom {
-    position: absolute; left: 18px; bottom: 18px; z-index: 10;
-    display: flex; align-items: center; gap: 2px;
-    background: rgba(12,14,18,0.78);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 10px; padding: 4px;
-    backdrop-filter: blur(8px);
-  }
-  .zoom button { padding: 4px 10px; border: 0; background: transparent; font-size: 14px; }
-  .zoom #zPct { min-width: 46px; text-align: center; font-size: 11px; color: #c5ccd8; }
+  #zReset { letter-spacing: 0.04em; }
   .key {
-    position: absolute; left: 18px; bottom: 72px; z-index: 12; width: 372px;
+    position: absolute; left: 18px; bottom: 18px; z-index: 12; width: 372px;
     background: rgba(8,10,14,0.9);
     border: 1px solid rgba(255,255,255,0.12);
     border-radius: 14px; padding: 12px 14px 12px;
@@ -142,56 +133,60 @@
   .panel, .rows { touch-action: pan-y; -webkit-overflow-scrolling: touch; }
   .dock { display: contents; }
   @media (max-width: 800px) {
-    .kicker, .sub, .hint, .readout { display: none !important; }
+    .kicker, .sub, .hint, .readout, .key-kicker { display: none !important; }
+    html, body, #canvas { height: var(--app-h, 100dvh); }
     .top {
       top: 0; left: 0; right: 0;
-      padding: max(12px, env(safe-area-inset-top)) 176px 12px 14px;
-      background: linear-gradient(180deg, rgba(7,9,14,0.97) 0%, rgba(7,9,14,0.92) 70%, rgba(7,9,14,0) 100%);
+      padding: max(8px, env(safe-area-inset-top)) 14px 8px;
+      background: linear-gradient(180deg, rgba(7,9,14,0.96) 0%, rgba(7,9,14,0.88) 78%, rgba(7,9,14,0) 100%);
     }
-    h1 { font-size: 17px; }
-    .pills { margin-top: 8px; flex-wrap: wrap; }
-    .pills button { padding: 10px 14px; font-size: 13px; min-height: 42px; }
-    .zoom {
-      top: max(10px, env(safe-area-inset-top));
-      right: 10px; left: auto; bottom: auto;
-      z-index: 30;
-    }
-    .zoom button { min-width: 36px; min-height: 40px; padding: 4px 8px; font-size: 18px; }
+    h1 { font-size: 18px; }
+    .pills { margin-top: 10px; display: flex; gap: 8px; }
+    .pills button { flex: 1; min-height: 42px; padding: 10px 8px; font-size: 13px; }
+    #zReset { flex: 0 0 72px; }
     .dock {
       display: flex; flex-direction: column;
       position: absolute; left: 0; right: 0; bottom: 0; z-index: 20;
-      max-height: 46vh;
+      max-height: 54%;
       background: rgba(8,10,14,0.96);
       border-top: 1px solid rgba(255,255,255,0.12);
       border-radius: 18px 18px 0 0;
-      overflow: hidden;
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
       backdrop-filter: blur(14px);
-      padding-bottom: env(safe-area-inset-bottom);
+      padding-bottom: max(12px, env(safe-area-inset-bottom));
     }
-    body.bulma .dock { max-height: 52vh; }
+    .dock::before {
+      content: "";
+      display: block;
+      width: 36px; height: 4px; border-radius: 4px;
+      background: rgba(255,255,255,0.22);
+      margin: 8px auto 0;
+      flex: none;
+    }
     .dock .key {
       position: relative; left: auto; right: auto; bottom: auto; width: auto;
       border: 0; border-radius: 0; background: transparent; backdrop-filter: none;
-      flex: none;
-      padding: 12px 14px 8px;
+      padding: 4px 16px 8px;
     }
-    .key-rule { font-size: 16px; }
-    .key-list { grid-template-columns: 1fr 1fr; gap: 7px 12px; }
-    .key-list li { font-size: 11px; }
-    .master p { display: none; }
+    .rk { margin-top: 0; }
+    .key-rule { font-size: 16px; margin-bottom: 8px; }
+    .key-list { grid-template-columns: 1fr 1fr; gap: 6px 12px; }
+    .key-list li { font-size: 12px; }
+    body.bulma .key-list { display: none; }
+    .master { padding-bottom: 8px; }
+    .master p, .rows { display: none; }
     .dock .panel {
       position: relative; top: auto; right: auto; bottom: auto; left: auto;
-      width: auto; flex: none; min-height: 0;
+      width: auto; height: auto; max-height: none;
       border: 0; border-radius: 0; background: transparent;
-      display: none;
+      display: none; overflow: visible;
     }
     .dock .panel.open {
       display: flex;
-      height: 24vh;
-      overflow: hidden;
       border-top: 1px solid rgba(255,255,255,0.08);
     }
-    .dock .panel.open .rows { flex: 1; min-height: 0; overflow: auto; }
+    .dock .panel.open .rows { overflow: visible; padding-bottom: 8px; }
   }
 </style>
 </head>
@@ -204,15 +199,10 @@
   <div class="pills">
     <button id="btn">Add USBD</button>
     <button id="btnSpin">Auto-Rotate</button>
+    <button id="zReset" type="button">Fit</button>
   </div>
 </div>
-<div class="zoom">
-  <button id="zOut" type="button">−</button>
-  <span id="zPct">100%</span>
-  <button id="zIn" type="button">+</button>
-  <button id="zReset" type="button">◎</button>
-</div>
-<div class="hint">Drag to rotate · Pinch or scroll to zoom</div>
+<div class="hint">Drag to spin · Fit puts the map back</div>
 <div class="dock" id="dock">
 <aside class="key" id="key">
   <div class="key-kicker">Key</div>
@@ -464,17 +454,25 @@ function fittedZoom() {
   return Math.max(0.28, Math.min(W < 800 ? 0.9 : 1.15, fit));
 }
 function resize() {
-  W = canvas.width = window.innerWidth;
-  H = canvas.height = window.innerHeight;
+  const vv = window.visualViewport;
+  const h = Math.round(vv ? vv.height : window.innerHeight);
+  const w = Math.round(vv ? vv.width : window.innerWidth);
+  const off = vv ? Math.round(vv.offsetTop) : 0;
+  document.documentElement.style.setProperty('--app-h', h + 'px');
+  document.body.style.transform = off ? 'translateY(' + off + 'px)' : '';
+  W = canvas.width = w;
+  H = canvas.height = h;
   if (!userZoomed) setZoom(fittedZoom());
 }
 window.addEventListener('resize', resize);
+if (window.visualViewport) {
+  window.visualViewport.addEventListener('resize', resize);
+  window.visualViewport.addEventListener('scroll', resize);
+}
 resize();
 
 function setZoom(next) {
   scale = Math.max(0.28, Math.min(2.4, next));
-  const el = document.getElementById('zPct');
-  if (el) el.textContent = Math.round(scale * 100) + '%';
 }
 
 function dragBy(dx, dy) {
@@ -539,8 +537,6 @@ canvas.addEventListener('touchend', e => {
   }
 }, { passive: false });
 canvas.addEventListener('touchcancel', () => { dragging = false; pinchDist = 0; });
-document.getElementById('zIn').onclick = () => { userZoomed = true; setZoom(scale + 0.12); };
-document.getElementById('zOut').onclick = () => { userZoomed = true; setZoom(scale - 0.12); };
 document.getElementById('zReset').onclick = () => { userZoomed = false; setZoom(fittedZoom()); rotX = 0.38; rotY = -0.1; rotZ = 0.02; };
 
 function refreshCopy() {
