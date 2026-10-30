@@ -95,6 +95,11 @@ layout: null
   }
   .mini b { display: block; margin-bottom: 4px; font-size: 13px; }
   .mini span { color: #8b93a3; font-size: 13px; line-height: 1.4; }
+  .index { margin: 8px 0 0; padding: 0; list-style: none; }
+  .index a { display: grid; grid-template-columns: 1fr; gap: 2px; padding: 12px 0; border-top: 1px solid rgba(255,255,255,0.08); color: inherit; text-decoration: none; }
+  .index a:hover b { color: #f5d78a; }
+  .index b { color: #fff; font-size: 14px; }
+  .index span { color: #8b93a3; font-size: 13px; line-height: 1.4; }
   footer { margin-top: 40px; color: #6d7585; font-size: 12px; line-height: 1.5; }
   @media (max-width: 720px) {
     .hero { grid-template-columns: 1fr; }
@@ -156,21 +161,19 @@ layout: null
     <div class="go"><a class="btn primary" href="galaxy/">Open the map</a></div>
   </div>
 
-  <h3>Also</h3>
-  <div class="grid">
-    <div class="mini">
-      <b>Why 20%</b>
-      <span>A pump.fun curve sells about 79% before graduation. 10% side pools stay smaller than USDC, so USDC stays the main pool.</span>
-    </div>
-    <div class="mini">
-      <b><a href="ANNOUNCEMENT-POSTS.html">Posts</a></b>
-      <span>Ready-to-send copy. The sample is named. The template is not.</span>
-    </div>
-    <div class="mini">
-      <b>Support the protocol</b>
-      <span>Optional. If you launch with it, add GitHub <b>d4trhban3</b> as a pump.fun creator-fee recipient. Nothing breaks if you don't.</span>
-    </div>
-  </div>
+  <h3>All of it</h3>
+  <ul class="index">
+    <li><a href="LAUNCH-ANY-COIN-TEMPLATE.html"><b>Launch any coin</b><span>The template. USBD, or a token of your choice.</span></a></li>
+    <li><a href="README.html"><b>The writeup</b><span>Six steps, glossary, and why 20%.</span></a></li>
+    <li><a href="galaxy/"><b>Galaxy</b><span>The map. Click Add Bulma.</span></a></li>
+    <li><a href="ANNOUNCEMENT-POSTS.html"><b>Posts</b><span>Ready-to-send copy.</span></a></li>
+    <li><a href="BULMA-USBD-READY-TO-LAUNCH/README.html"><b>Bulma Dollar</b><span>The coin I wrote in. Pack cover.</span></a></li>
+    <li><a href="BULMA-USBD-READY-TO-LAUNCH/HOW-TO-LAUNCH-USBD.html"><b>How to launch</b><span>The six steps, filled in.</span></a></li>
+    <li><a href="BULMA-USBD-READY-TO-LAUNCH/USBD-LORE.html"><b>Lore</b><span>The Bulma Dollar story.</span></a></li>
+    <li><a href="BULMA-USBD-READY-TO-LAUNCH/USBD-POSTS.html"><b>Bulma posts</b><span>Short posts for that coin.</span></a></li>
+    <li><a href="BULMA-USBD-READY-TO-LAUNCH/USBD-ART/README.html"><b>Art pack</b><span>Logos, banners, scenes, stickers.</span></a></li>
+    <li><a href="BULMA-USBD-READY-TO-LAUNCH/USBD-ART/ART-NOTE.html"><b>Art note</b><span>What the art is, and what it isn't.</span></a></li>
+  </ul>
 
   <footer>
     d4rth Launch Protocol by @d4rthban3. MIT. Not financial advice. Check live prices on pump.fun before buying. Never share keys or seed phrases.<br>
