@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>Big Titty Galaxy → Bulma Hub</title>
 <style>
   :root { color-scheme: dark; }
@@ -11,7 +12,7 @@
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
     overflow: hidden; letter-spacing: 0.01em;
   }
-  #canvas { display: block; width: 100vw; height: 100vh; }
+  #canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
   .top {
     position: absolute; top: 18px; left: 22px; z-index: 10;
     pointer-events: none;
@@ -87,6 +88,20 @@
   .row .nm b { font-weight: 650; }
   .row .delta { color: #9aa3b2; font-weight: 500; }
   .row .delta.on { color: #b6f7cf; }
+
+  input[type=range] { height: 28px; touch-action: pan-x; }
+  .panel, .rows { touch-action: pan-y; -webkit-overflow-scrolling: touch; }
+  @media (max-width: 800px) {
+    .top { top: 10px; left: 12px; right: 12px; }
+    .sub, .hint, .legend, .readout { display: none !important; }
+    h1 { font-size: 15px; }
+    button { padding: 11px 14px; font-size: 13px; }
+    .zoom { top: 72px; bottom: auto; left: 12px; }
+    .panel {
+      top: auto; left: 8px; right: 8px; bottom: 8px; width: auto;
+      max-height: 48vh;
+    }
+  }
 </style>
 </head>
 <body>
@@ -110,7 +125,7 @@
   <span><i class="dot on"></i>Bonded</span>
   <span><i class="dot bul"></i>Bulma link</span>
 </div>
-<div class="hint">Drag to rotate · Scroll to zoom</div>
+<div class="hint">Drag to rotate · Pinch or scroll to zoom</div>
 <div class="readout" id="readout"></div>
 
 <aside class="panel" id="panel">
@@ -334,6 +349,10 @@ function setZoom(next) {
 }
 setZoom(0.86);
 
+function dragBy(dx, dy) {
+  rotY += dx * 0.005;
+  rotX += dy * 0.004;
+}
 canvas.addEventListener('mousedown', e => {
   if (e.target !== canvas) return;
   dragging = true; lastX = e.clientX; lastY = e.clientY;
@@ -341,8 +360,7 @@ canvas.addEventListener('mousedown', e => {
 window.addEventListener('mouseup', () => dragging = false);
 window.addEventListener('mousemove', e => {
   if (!dragging) return;
-  rotY += (e.clientX - lastX) * 0.005;
-  rotX += (e.clientY - lastY) * 0.004;
+  dragBy(e.clientX - lastX, e.clientY - lastY);
   lastX = e.clientX;
   lastY = e.clientY;
 });
@@ -350,6 +368,47 @@ canvas.addEventListener('wheel', e => {
   setZoom(scale + e.deltaY * -0.001);
   e.preventDefault();
 }, { passive: false });
+
+let pinchDist = 0;
+function touchDist(t) {
+  const dx = t[0].clientX - t[1].clientX;
+  const dy = t[0].clientY - t[1].clientY;
+  return Math.hypot(dx, dy);
+}
+canvas.addEventListener('touchstart', e => {
+  if (e.touches.length === 1) {
+    dragging = true;
+    lastX = e.touches[0].clientX;
+    lastY = e.touches[0].clientY;
+  } else if (e.touches.length === 2) {
+    dragging = false;
+    pinchDist = touchDist(e.touches);
+  }
+  e.preventDefault();
+}, { passive: false });
+canvas.addEventListener('touchmove', e => {
+  if (e.touches.length === 1 && dragging) {
+    const t = e.touches[0];
+    dragBy(t.clientX - lastX, t.clientY - lastY);
+    lastX = t.clientX;
+    lastY = t.clientY;
+  } else if (e.touches.length === 2 && pinchDist) {
+    const d = touchDist(e.touches);
+    setZoom(scale * (d / pinchDist));
+    pinchDist = d;
+  }
+  e.preventDefault();
+}, { passive: false });
+canvas.addEventListener('touchend', e => {
+  if (e.touches.length === 0) dragging = false;
+  if (e.touches.length < 2) pinchDist = 0;
+  if (e.touches.length === 1) {
+    dragging = true;
+    lastX = e.touches[0].clientX;
+    lastY = e.touches[0].clientY;
+  }
+}, { passive: false });
+canvas.addEventListener('touchcancel', () => { dragging = false; pinchDist = 0; });
 document.getElementById('zIn').onclick = () => setZoom(scale + 0.12);
 document.getElementById('zOut').onclick = () => setZoom(scale - 0.12);
 document.getElementById('zReset').onclick = () => { setZoom(0.86); rotX = 0.38; rotY = -0.1; rotZ = 0.02; };
@@ -403,9 +462,12 @@ function rotate(p, rx, ry, rz) {
 }
 
 function focus() {
-  const panel = document.getElementById('panel').classList.contains('open') ? 320 : 0;
+  const open = document.getElementById('panel').classList.contains('open');
+  const narrow = W < 800;
+  const panel = (open && !narrow) ? 320 : 0;
+  const sheet = (open && narrow) ? H * 0.2 : 0;
   cx = (W - panel) / 2;
-  cy = H / 2;
+  cy = (H - sheet) / 2;
 }
 
 function project(p) {
