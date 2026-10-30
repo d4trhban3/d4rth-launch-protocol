@@ -1,3 +1,5 @@
+**Read this on the dark page:** https://d4trhban3.github.io/d4rth-launch-protocol/BULMA-USBD-READY-TO-LAUNCH/USBD-ART/ART-NOTE.html
+
 **USBD was just my idea. Use any token you want.** I used the Bulma dollar. This file is that example, not the protocol.
 
 # Art note

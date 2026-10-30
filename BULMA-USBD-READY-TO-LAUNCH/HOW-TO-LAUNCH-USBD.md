@@ -1,3 +1,5 @@
+**Read this on the dark page:** https://d4trhban3.github.io/d4rth-launch-protocol/BULMA-USBD-READY-TO-LAUNCH/HOW-TO-LAUNCH-USBD.html
+
 # Launch $USBD · Ultimate Super Bulma Dragonballs
 
 **This is the template, filled in with Bulma Dollar.** USBD, or a token of your choice. Same six steps. I'd be happy if you launched this one.

@@ -1,3 +1,5 @@
+**Read this on the dark page:** https://d4trhban3.github.io/d4rth-launch-protocol/BULMA-USBD-READY-TO-LAUNCH/README.html
+
 **This folder is the coin I wrote in.** USBD, or a token of your choice. Same six steps. I'd be happy if you launched Bulma Dollar. Just as happy if the coin is yours.
 
 # $USBD · Ultimate Super Bulma Dragonballs

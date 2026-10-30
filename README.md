@@ -1,3 +1,5 @@
+**Read this on the dark page:** https://d4trhban3.github.io/d4rth-launch-protocol/README.html
+
 # d4rth Launch Protocol
 
 **This is the template. My coin or yours.**
