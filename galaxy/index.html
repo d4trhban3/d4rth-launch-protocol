@@ -79,6 +79,7 @@
     color: var(--tv-ink); font-size: 12px; font-weight: 700; letter-spacing: -0.2px;
   }
   .hub-btn.on { background: transparent; color: var(--tv-acid); }
+  #openProtocol[aria-pressed="true"] { color: var(--tv-acid); border-color: var(--tv-acid); }
   .hub-btn:hover { background: var(--tv-paper); color: var(--tv-ink); border-color: var(--tv-paper); }
 
   .tv-home {
@@ -344,7 +345,7 @@
         <div id="tvDirectory"></div>
       </div>
       <div id="paneProtocol" hidden>
-        <p class="proto-lead">These sliders are the protocol, laid on the orbit. Market cap increase grows the planet. Supply paired is the chunk locked to that stable. USDT is the thinner pool. The seat that used to be a SOL lock is Bulma, so the center is a three-way pair.</p>
+        <p class="proto-lead">Add USDC brings Bulma in on the protocol: the main pool is USDC, 10% locks to BTC, and 10% locks to SOL. The other coins lock a chunk to Bulma. Add USDT is that same protocol, except the SOL lock is Bulma. USDT is the thinner pool, so the same chunk pulls less. Open this with the Sliders button. It does not cover the map.</p>
         <div class="sl">Market cap increase <b id="allBoostLabel">+0%</b></div>
         <input id="allBoost" type="range" min="0" max="2000" step="1" value="0">
         <div class="ends"><span>0%</span><span>2000%</span></div>
@@ -452,8 +453,9 @@ function stepCamera() {
 }
 function centerCluster() {
   const gap = 16;
-  if (usdcT > 0.02 && usdtT > 0.02) {
-    const s = gap * (0.45 + 0.55 * Math.min(usdcT, usdtT));
+  const bulmaIn = usdcT > 0.02 || usdtT > 0.02;
+  if (bulmaIn && usdtT > 0.02) {
+    const s = gap * (0.45 + 0.55 * Math.max(usdcT, usdtT));
     return {
       btc: [0, 0.25, s * 0.42],
       usdc: [-s * 0.62, 0, -s * 0.28],
@@ -463,10 +465,6 @@ function centerCluster() {
   if (usdcT > 0.02) {
     const s = gap * usdcT;
     return { btc: [s * 0.42, 0, 0], usdc: [-s * 0.48, 0, 0], usdt: null };
-  }
-  if (usdtT > 0.02) {
-    const s = gap * 0.82 * usdtT;
-    return { btc: [-s * 0.36, 0, 0], usdc: null, usdt: [s * 0.4, 0, 0] };
   }
   return { btc: [0, 0, 0], usdc: null, usdt: null };
 }
@@ -538,10 +536,9 @@ function worldOf(t) {
   const ring = t.ring || 0;
   return [Math.cos(ang) * R, Math.sin(ang * 2 + ring) * R * 0.13, Math.sin(ang) * R];
 }
-function screenRadius(world, radius) {
-  const a = project(world);
-  const b = project([world[0], world[1] + radius, world[2]]);
-  return Math.max(3.5, Math.hypot(a.x - b.x, a.y - b.y));
+function screenRadius(_world, radius) {
+  const tan = Math.tan(46 * Math.PI / 360);
+  return Math.max(3.5, (radius * (H || 1)) / (2 * Math.max(dist, 1) * tan));
 }
 function disc(x, y, r, img) {
   ctx.save();
@@ -607,8 +604,9 @@ function paintDeltas() {
     return;
   }
   let text = 'USDC ' + money(bu) + ' · USDT ' + money(bd) + ' · BTC LP +' + (bond / base * 100).toFixed(1) + '%';
-  if (usdcOn && usdtOn) text += '. Three-way center. That 10% locks to Bulma, not to SOL.';
-  else if (usdtOn) text += '. USDT is the thinner side.';
+  if (usdcOn && usdtOn) text += '. Bulma is the USDC hub. USDT locks its SOL chunk to Bulma.';
+  else if (usdcOn) text += '. Bulma: USDC pool, lock to BTC, lock to SOL.';
+  else text += '. USDT: same protocol, and the SOL lock is Bulma.';
   note.textContent = text;
   chip.hidden = false;
   chip.textContent = 'USDC ' + money(bu) + ' · USDT ' + money(bd) + ' · +' + (bond / base * 100).toFixed(0) + '%';
@@ -693,12 +691,15 @@ function setScreen() {
 }
 function setPanel(name) {
   app.dataset.panel = name;
-  document.getElementById('tvScrim').hidden = name === 'none';
+  document.getElementById('tvScrim').hidden = name !== 'catalog';
   document.getElementById('paneCatalog').hidden = name !== 'catalog';
   document.getElementById('paneProtocol').hidden = name !== 'protocol';
   document.getElementById('paneSettings').hidden = name !== 'settings';
-  const titles = { catalog: 'The collection', protocol: 'The protocol', settings: 'View settings', none: '' };
+  const titles = { catalog: 'The collection', protocol: 'Sliders', settings: 'View settings', none: '' };
   document.getElementById('tvPanelTitle').textContent = titles[name] || '';
+  const sl = document.getElementById('openProtocol');
+  sl.classList.toggle('on', name === 'protocol');
+  sl.setAttribute('aria-pressed', String(name === 'protocol'));
   if (name === 'catalog') setTimeout(() => document.getElementById('tvSearch').focus(), 30);
 }
 function selectMint(mint) {
@@ -740,8 +741,6 @@ function toggleHub(which) {
   applyAllBoost(turningOn || other ? (planets[0].boost || 0) : 0);
   syncShareInputs();
   paintHubButtons();
-  if (turningOn) setPanel('protocol');
-  else if (!usdcOn && !usdtOn && app.dataset.panel === 'protocol') setPanel('none');
 }
 function setStars(on) {
   view = on ? 'constellations' : 'orbit';
@@ -984,7 +983,7 @@ function loop() {
   link(btcP, hubU, 'rgba(38,161,123,0.85)', 1.3);
   if (hubB && hubU) link(hubB, hubU, 'rgba(232,255,88,0.75)', 1.4);
   if (hubB) {
-    const r = screenRadius(centers.usdc, 6.4 * (0.35 + 0.65 * usdcT));
+    const r = screenRadius(centers.usdc, 6.4 * (0.35 + 0.65 * Math.max(usdcT, usdtT)));
     disc(hubB.x, hubB.y, r, bulmaImg.complete ? bulmaImg : null);
     ctx.fillStyle = '#f4f1ea'; ctx.font = '600 11px "DM Sans", sans-serif'; ctx.textAlign = 'center';
     ctx.fillText('BULMA', hubB.x, hubB.y + r + 13);
