@@ -11,34 +11,39 @@ layout: null
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
-  html, body { margin: 0; background: #07090e; color: #e7ebf3; }
+  html, body { margin: 0; background: #070b14; color: #e8ebf2; }
   body {
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
     letter-spacing: 0.01em;
     min-height: 100vh;
+    background-image: radial-gradient(ellipse 80% 50% at 110% -10%, rgba(42, 72, 110, 0.45), transparent 55%);
   }
-  a { color: #d6b4ff; text-decoration: none; }
+  a { color: #c9d4e4; text-decoration: none; }
   a:hover { color: #fff; }
-  .wrap { max-width: 920px; margin: 0 auto; padding: 28px 22px 64px; }
-  nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 22px; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 36px 22px 72px; }
+  nav { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 36px; }
   nav a {
     display: inline-flex; align-items: center; justify-content: center;
-    color: #f4f6fb; text-decoration: none; font-size: 13px; font-weight: 650; letter-spacing: 0.06em; text-transform: uppercase;
-    background: #222836; border: 1px solid #8b93a7;
-    padding: 10px 16px; border-radius: 999px; min-height: 40px;
+    color: #d5dbe6; text-decoration: none; font-size: 13px; font-weight: 560; letter-spacing: 0.04em;
+    background: rgba(16, 22, 34, 0.72); border: 1px solid rgba(255,255,255,0.1);
+    padding: 9px 14px; border-radius: 999px; min-height: 38px;
   }
-  nav a:hover { background: #2c3446; border-color: #f5d78a; color: #f5d78a; }
-  nav a.on { background: #f5d78a; color: #1a1408; border-color: #f5d78a; }
+  nav a:hover { border-color: rgba(255,255,255,0.28); color: #fff; }
   .kicker {
-    font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase;
-    color: #6d7585; margin-bottom: 10px;
+    font-size: 12px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: #8b93a3; margin-bottom: 12px;
   }
-  h1 { margin: 0; font-size: 34px; font-weight: 600; letter-spacing: -0.02em; }
-  .lede { margin: 12px 0 0; max-width: 640px; color: #c5ccd8; font-size: 17px; line-height: 1.5; }
-  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 18px; }
+  h1 { margin: 0; font-size: 40px; font-weight: 560; letter-spacing: -0.03em; line-height: 1.15; max-width: 16ch; }
+  .lede { margin: 16px 0 0; max-width: 38rem; color: #b7c0ce; font-size: 17px; line-height: 1.55; }
+  .apart {
+    margin-top: 18px; max-width: 38rem;
+    color: #8b93a3; font-size: 13px; line-height: 1.5;
+  }
+  .apart a { color: #e7ebf3; border-bottom: 1px solid rgba(255,255,255,0.25); }
+  .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 22px; }
   .chips div {
     padding: 8px 12px; border-radius: 999px;
-    border: 1px solid rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.08);
     background: rgba(255,255,255,0.03);
     font-size: 13px; color: #d5dbe6;
   }
@@ -76,12 +81,12 @@ layout: null
     justify-self: end;
   }
   .card {
-    margin-top: 28px; padding: 18px 18px 16px;
-    background: rgba(12,14,18,0.85);
-    border: 1px solid rgba(245,215,138,0.28);
-    border-radius: 14px;
+    margin-top: 28px; padding: 20px 20px 18px;
+    background: rgba(14, 18, 28, 0.88);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 18px;
   }
-  .card h2 { margin: 0 0 8px; font-size: 15px; font-weight: 600; color: #f5d78a; }
+  .card h2 { margin: 0 0 8px; font-size: 15px; font-weight: 600; color: #f4f6fb; }
   .card p { margin: 0; color: #c5ccd8; font-size: 14px; line-height: 1.55; }
   .card .go { margin-top: 14px; }
   h3 { margin: 36px 0 12px; font-size: 13px; letter-spacing: 0.16em; text-transform: uppercase; color: #6d7585; font-weight: 600; }
@@ -124,9 +129,10 @@ layout: null
     <a href="ANNOUNCEMENT-POSTS.html">Support</a>
     <a href="galaxy/">Galaxy</a>
   </nav>
-  <div class="kicker">Free launch guide</div>
+  <div class="kicker">d4rth launch protocol</div>
   <h1>Launch a Solana coin that has real money behind it.</h1>
   <p class="lede">Most new coins start thin and die. This is a six-step way to launch so the main pool is real dollars, the sides are locked, and other coins can connect to yours. The example coin is called Bulma Dollar. You can use that idea, or write your own. Same six steps either way.</p>
+  <p class="apart">This is a launch template, not the live map. The Big Titty ecosystem itself is <a href="https://tittyverse.fun">Tittyverse</a>.</p>
   <div class="chips">
     <div><b>01</b>Real dollars</div>
     <div><b>02</b>Locked sides</div>

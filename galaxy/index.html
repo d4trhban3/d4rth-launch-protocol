@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Big Titty Galaxy</title>
+<title>Example map · d4rth Launch Protocol</title>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
@@ -47,6 +47,12 @@
   }
   .zoom button:hover { background: rgba(255,255,255,0.06); color: #fff; }
   #zPct { min-width: 44px; text-align: center; font-size: 12px; color: #c5ccd8; }
+  .note {
+    margin: 8px 0 0; max-width: 340px;
+    font-size: 12px; line-height: 1.45; color: #8b93a3;
+    pointer-events: auto;
+  }
+  .note a { color: #e7ebf3; }
   .legend {
     position: absolute; left: 22px; bottom: 64px; z-index: 12;
     display: flex; gap: 16px; align-items: center;
@@ -277,18 +283,18 @@
 <body>
 <canvas id="canvas"></canvas>
 <div class="top">
-  <div class="kicker" id="kicker">01 / HOME SYSTEM</div>
+  <div class="kicker" id="kicker">D4RTH · LAUNCH TEMPLATE</div>
   <div class="title-row">
-    <h1 id="title">Big Titty Galaxy</h1>
+    <h1 id="title">Example map</h1>
     <a class="home" href="https://d4trhban3.github.io/d4rth-launch-protocol/">Home</a>
   </div>
+  <p class="note">A picture of the idea. Not the live map. That is <a href="https://tittyverse.fun">Tittyverse</a>.</p>
   <div class="pills">
     <button id="btn">Add Bulma</button>
     <button id="btnSpin">Auto-Rotate</button>
   </div>
 </div>
 <div class="legend">
-  <span><i class="dot bond"></i>Bonded</span>
   <span class="rule">Closer to BTC = stronger pool</span>
 </div>
 <div class="zoom">
@@ -726,8 +732,8 @@ function refreshCopy() {
   const on = mode === 'bulma';
   document.getElementById('btn').textContent = on ? 'Remove Bulma' : 'Add Bulma';
   document.getElementById('btn').classList.toggle('active', on);
-  document.getElementById('kicker').textContent = '01 / HOME SYSTEM';
-  document.getElementById('title').textContent = 'Big Titty Galaxy';
+  document.getElementById('kicker').textContent = 'D4RTH · LAUNCH TEMPLATE';
+  document.getElementById('title').textContent = 'Example map';
   document.getElementById('panel').classList.toggle('open', on);
   document.body.classList.toggle('bulma', on);
   const keyEl = document.getElementById('key');
