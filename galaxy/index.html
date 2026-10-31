@@ -3,25 +3,25 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-<title>Launch template · the example map</title>
+<title>Big Titty Galaxy</title>
 <style>
   :root { color-scheme: dark; }
   * { box-sizing: border-box; }
   body {
-    margin: 0; background: #07090e; color: #e7ebf3;
+    margin: 0; background: #06080f; color: #e8ebf2;
     font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
     overflow: hidden; letter-spacing: 0.01em;
   }
   #canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
   .top {
-    position: absolute; top: 18px; left: 22px; z-index: 10;
+    position: absolute; top: 22px; left: 28px; z-index: 10;
     pointer-events: none;
   }
   .kicker {
-    font-size: 10px; letter-spacing: 0.22em; color: #6d7585;
-    text-transform: uppercase; margin-bottom: 6px;
+    font-size: 11px; letter-spacing: 0.18em; color: #8b93a3;
+    text-transform: uppercase; margin-bottom: 8px; font-weight: 500;
   }
-  h1 { margin: 0; font-size: 16px; font-weight: 560; letter-spacing: 0.01em; }
+  h1 { margin: 0; font-size: 18px; font-weight: 560; letter-spacing: -0.01em; color: #f4f6fb; }
   .title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
   a.home {
     pointer-events: auto; text-decoration: none; flex: none;
@@ -32,13 +32,30 @@
   }
   a.home:hover { border-color: rgba(255,255,255,0.28); color: #fff; }
   .sub { margin-top: 4px; font-size: 11px; color: #8b93a3; max-width: 420px; }
-  .idea {
-    display: inline-block; margin: 8px 0 0; max-width: 520px;
-    padding: 4px 10px; border-radius: 999px;
-    border: 1px solid rgba(245,215,138,0.45);
-    background: rgba(245,215,138,0.1);
-    color: #f5d78a; font-size: 11px; line-height: 1.35;
+  .idea, .sub, .key { display: none !important; }
+  .zoom {
+    position: absolute; left: 22px; bottom: 18px; z-index: 12;
+    display: flex; align-items: center; gap: 2px;
+    background: rgba(12,16,24,0.72);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 10px; padding: 4px;
+    backdrop-filter: blur(10px);
   }
+  .zoom button {
+    width: 32px; height: 32px; padding: 0; border: 0; border-radius: 8px;
+    background: transparent; color: #d5dbe6; font-size: 16px;
+  }
+  .zoom button:hover { background: rgba(255,255,255,0.06); color: #fff; }
+  #zPct { min-width: 44px; text-align: center; font-size: 12px; color: #c5ccd8; }
+  .legend {
+    position: absolute; left: 22px; bottom: 64px; z-index: 12;
+    display: flex; gap: 16px; align-items: center;
+    font-size: 12px; color: #9aa3b2;
+  }
+  .legend .rule { color: #c5ccd8; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+  .dot.bond { background: #7dcea0; }
+  .dot.hub { background: #f5d78a; }
   .pills { margin-top: 12px; display: flex; gap: 8px; pointer-events: auto; }
   button {
     background: rgba(16,18,24,0.72); color: #d5dbe6;
@@ -260,20 +277,27 @@
 <body>
 <canvas id="canvas"></canvas>
 <div class="top">
-  <div class="kicker" id="kicker">THE TEMPLATE</div>
+  <div class="kicker" id="kicker">01 / HOME SYSTEM</div>
   <div class="title-row">
-    <h1 id="title">Launch template</h1>
+    <h1 id="title">Big Titty Galaxy</h1>
     <a class="home" href="https://d4trhban3.github.io/d4rth-launch-protocol/">Home</a>
   </div>
-  <div class="sub" id="subtitle">This map is the example. Nothing moves until you click Add Bulma.</div>
-  <p class="idea" id="idea">Click Add Bulma. That's the whole point.</p>
   <div class="pills">
     <button id="btn">Add Bulma</button>
     <button id="btnSpin">Auto-Rotate</button>
-    <button id="zReset" type="button">Fit</button>
   </div>
 </div>
-<div class="hint">Drag to spin · Fit puts the map back</div>
+<div class="legend">
+  <span><i class="dot bond"></i>Bonded</span>
+  <span class="rule">Closer to BTC = stronger pool</span>
+</div>
+<div class="zoom">
+  <button type="button" id="zOut" aria-label="Zoom out">−</button>
+  <span id="zPct">100%</span>
+  <button type="button" id="zIn" aria-label="Zoom in">+</button>
+  <button type="button" id="zReset" aria-label="Fit">⌖</button>
+</div>
+<div class="hint">Drag to rotate · Scroll to zoom</div>
 <div class="dock" id="dock">
 <aside class="key" id="key">
   <div class="key-kicker">Key</div>
@@ -402,12 +426,12 @@ ranked.forEach((t, i) => {
   const idx = t.inner ? i : i - innerN;
   t.angle = (idx / n) * Math.PI * 2 + (t.inner ? 0.42 : 0.08);
   const strength = t.liq / maxLiq;
-  t.baseR = t.inner ? (200 + (1 - strength) * 70) : (340 + (1 - strength) * 110);
+  t.baseR = (t.inner ? (310 + (1 - strength) * 70) : (490 + (1 - strength) * 110)) + ((idx % 3) - 1) * 26;
   t.boost = 0;
   t.share = 0;
   t.vol = t.mc;
 });
-btc.size = 56;
+btc.size = 68;
 
 function money(n) {
   if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
@@ -417,7 +441,7 @@ function money(n) {
 
 function rescale() {
   const maxV = Math.max(...orbiters.map(t => t.vol), 1);
-  orbiters.forEach(t => { t.size = 12 + 7 * Math.sqrt(t.vol / maxV); });
+  orbiters.forEach(t => { t.size = 10 + 3.2 * Math.sqrt(t.vol / maxV); });
 }
 rescale();
 
@@ -604,7 +628,7 @@ function fittedZoom() {
   const c = chromeBox();
   const availW = Math.max(160, W - c.side);
   const availH = Math.max(160, H - c.header - c.bottom);
-  const fit = Math.min(availW, availH) / 1000;
+  const fit = Math.min(availW, availH) / 1760;
   return Math.max(0.28, Math.min(W < 800 ? 0.9 : 1.15, fit));
 }
 function resize() {
@@ -627,6 +651,8 @@ resize();
 
 function setZoom(next) {
   scale = Math.max(0.28, Math.min(2.4, next));
+  const el = document.getElementById('zPct');
+  if (el) el.textContent = Math.round(scale * 100) + '%';
 }
 
 function dragBy(dx, dy) {
@@ -691,20 +717,17 @@ canvas.addEventListener('touchend', e => {
   }
 }, { passive: false });
 canvas.addEventListener('touchcancel', () => { dragging = false; pinchDist = 0; });
-document.getElementById('zReset').onclick = () => { userZoomed = false; setZoom(fittedZoom()); rotX = 0.38; rotY = -0.1; rotZ = 0.02; };
+const HOME_X = 0.92, HOME_Y = 0.02, HOME_Z = 0;
+document.getElementById('zReset').onclick = () => { userZoomed = false; setZoom(fittedZoom()); rotX = HOME_X; rotY = HOME_Y; rotZ = HOME_Z; };
+document.getElementById('zIn').onclick = () => { userZoomed = true; setZoom(scale * 1.12); };
+document.getElementById('zOut').onclick = () => { userZoomed = true; setZoom(scale / 1.12); };
 
 function refreshCopy() {
   const on = mode === 'bulma';
   document.getElementById('btn').textContent = on ? 'Remove Bulma' : 'Add Bulma';
   document.getElementById('btn').classList.toggle('active', on);
-  document.getElementById('kicker').textContent = on ? 'BULMA DOLLAR' : 'THE TEMPLATE';
-  document.getElementById('title').textContent = on ? 'Bulma Dollar' : 'Launch template';
-  document.getElementById('subtitle').textContent = on
-    ? "I'd be happy if you launched this. Or run the same steps with your coin."
-    : 'This map is the example. Nothing moves until you click Add Bulma.';
-  document.getElementById('idea').textContent = on
-    ? 'My coin or yours. This is the template.'
-    : "Click Add Bulma. That's the whole point.";
+  document.getElementById('kicker').textContent = '01 / HOME SYSTEM';
+  document.getElementById('title').textContent = 'Big Titty Galaxy';
   document.getElementById('panel').classList.toggle('open', on);
   document.body.classList.toggle('bulma', on);
   const keyEl = document.getElementById('key');
@@ -749,9 +772,9 @@ document.getElementById('btnSpin').addEventListener('click', () => {
   b.classList.toggle('active', autoRotate);
 });
 
-rotX = 0.38;
-rotY = -0.1;
-rotZ = 0.02;
+rotX = HOME_X;
+rotY = HOME_Y;
+rotZ = HOME_Z;
 
 function rotate(p, rx, ry, rz) {
   let y = p.y * Math.cos(rx) - p.z * Math.sin(rx);
@@ -788,7 +811,7 @@ function drawOrbit(radius) {
     if (i === 0) ctx.moveTo(pr.x, pr.y);
     else ctx.lineTo(pr.x, pr.y);
   }
-  ctx.strokeStyle = 'rgba(255,255,255,0.07)';
+  ctx.strokeStyle = 'rgba(176,188,206,0.16)';
   ctx.lineWidth = 1;
   ctx.stroke();
 }
@@ -816,15 +839,34 @@ function loop() {
   else bulmaT = Math.max(0, bulmaT - 0.02);
   if (autoRotate && !dragging) { rotY += 0.003; rotX += 0.0006; rotZ += 0.0004; }
 
-  ctx.fillStyle = '#07090e';
+  ctx.fillStyle = '#06080f';
   ctx.fillRect(0, 0, W, H);
   focus();
+  const vg = ctx.createRadialGradient(cx, cy, 40, cx, cy, Math.max(W, H) * 0.62);
+  vg.addColorStop(0, 'rgba(18,26,40,0.28)');
+  vg.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = vg;
+  ctx.fillRect(0, 0, W, H);
+  if (!window.__stars) {
+    window.__stars = Array.from({ length: 70 }, (_, i) => ({
+      x: ((i * 137) % 997) / 997,
+      y: ((i * 89) % 991) / 991,
+      a: 0.05 + (i % 6) * 0.025
+    }));
+  }
+  window.__stars.forEach(s => {
+    ctx.fillStyle = 'rgba(220,226,236,' + s.a + ')';
+    ctx.fillRect(s.x * W, s.y * H, 1.2, 1.2);
+  });
+  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(12.5, 12.5, W - 25, H - 25);
 
-  [210, 280, 360, 470].forEach(drawOrbit);
+  [260, 330, 400, 480, 560, 640].forEach(drawOrbit);
 
   const bond = bondNow();
   const closeness = bond / (bond + btc.liq);
-  const sep = 168 * bulmaT * (1 - 0.46 * closeness);
+  const sep = 240 * bulmaT * (1 - 0.28 * closeness);
   const btcWorld = { x: -sep / 2, y: 0, z: 0 };
   const usbdWorld = { x: sep / 2, y: 0, z: 0 };
 
@@ -872,78 +914,68 @@ function loop() {
   ghosts.forEach(g => {
     ctx.beginPath();
     ctx.arc(g.x, g.y, g.r, 0, Math.PI * 2);
-    ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.10)';
     ctx.lineWidth = 1;
     ctx.stroke();
-  });
-
-  const maxAdd = Math.max(1, ...orbiters.map(addedOf));
-  sprites.forEach(s => {
-    if (s.kind !== 'token' || s.token.isCenter) return;
-    ctx.beginPath();
-    ctx.moveTo(btcSprite.x, btcSprite.y);
-    ctx.lineTo(s.x, s.y);
-    ctx.strokeStyle = 'rgba(226,232,240,' + (0.1 + 0.25 * (s.add / (s.token.liq + s.add + 1))) + ')';
-    ctx.lineWidth = 1;
-    ctx.stroke();
-    if (bulma && s.add > 1) {
-      ctx.beginPath();
-      ctx.moveTo(bulma.x, bulma.y);
-      ctx.lineTo(s.x, s.y);
-      ctx.strokeStyle = 'rgba(196,168,255,' + (0.25 + 0.55 * s.add / maxAdd) + ')';
-      ctx.lineWidth = 1 + 4.5 * (s.add / maxAdd);
-      ctx.stroke();
-    }
   });
 
   if (bulma) {
-    const w = 8 + closeness * 26;
     ctx.save();
     ctx.lineCap = 'round';
-    ctx.shadowColor = 'rgba(255,196,90,0.95)';
-    ctx.shadowBlur = 16 + closeness * 30;
-    ctx.strokeStyle = 'rgba(255,214,140,' + (0.45 + 0.5 * bulmaT) + ')';
-    ctx.lineWidth = w;
+    ctx.strokeStyle = 'rgba(245,215,138,' + (0.35 * bulmaT) + ')';
+    ctx.lineWidth = 1.25;
     ctx.beginPath();
     ctx.moveTo(btcSprite.x, btcSprite.y);
     ctx.lineTo(bulma.x, bulma.y);
     ctx.stroke();
-    ctx.shadowBlur = 0;
-    ctx.strokeStyle = 'rgba(255,248,230,' + (0.8 * bulmaT) + ')';
-    ctx.lineWidth = Math.max(2, w * 0.28);
-    ctx.stroke();
     ctx.restore();
-    const mx = (btcSprite.x + bulma.x) / 2;
-    const my = (btcSprite.y + bulma.y) / 2 - 18;
-    ctx.fillStyle = '#ffe7b0';
-    ctx.font = '650 12px Inter, system-ui';
-    ctx.textAlign = 'center';
-    ctx.fillText(money(bond) + ' bond', mx, my);
   }
+  const halo = ctx.createRadialGradient(btcSprite.x, btcSprite.y, btcSprite.r * 0.4, btcSprite.x, btcSprite.y, btcSprite.r * 2.8);
+  halo.addColorStop(0, 'rgba(255,176,70,0.16)');
+  halo.addColorStop(1, 'rgba(255,176,70,0)');
+  ctx.fillStyle = halo;
+  ctx.beginPath();
+  ctx.arc(btcSprite.x, btcSprite.y, btcSprite.r * 2.8, 0, Math.PI * 2);
+  ctx.fill();
 
   sprites.sort((a, b) => b.z - a.z);
+  const taken = [];
+  function clearY(x, y) {
+    let yy = y;
+    for (let n = 0; n < 4; n++) {
+      if (!taken.some(p => Math.abs(p.x - x) < 54 && Math.abs(p.y - yy) < 30)) break;
+      yy += 15;
+    }
+    taken.push({ x, y: yy });
+    return yy;
+  }
   const usbdImg = window.__usbdImg;
   sprites.forEach(s => {
     if (s.kind === 'token') {
       drawDisc(s.x, s.y, s.r, s.token.color, s.token.loaded ? s.token.image : null);
+      const ly = clearY(s.x, s.y + s.r + 6);
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.fillStyle = '#f4f7fb';
-      ctx.font = '650 ' + Math.max(10, Math.min(13, s.r * 0.32)) + 'px Inter, system-ui';
-      ctx.fillText(s.token.ticker, s.x, s.y + s.r + 4);
-      ctx.fillStyle = '#8b93a3';
-      ctx.font = '500 10px Inter, system-ui';
-      ctx.fillText(s.token.sub || '', s.x, s.y + s.r + 18);
+      ctx.fillStyle = '#f4f6fb';
+      ctx.font = '600 ' + (s.token.isCenter ? 13 : 11) + 'px Inter, system-ui';
+      ctx.fillText(s.token.ticker, s.x, ly);
+      ctx.fillStyle = 'rgba(154,163,178,0.95)';
+      ctx.font = '500 11px Inter, system-ui';
+      ctx.fillText(s.token.isCenter ? (s.token.sub || '') : money(levelOf(s.token)), s.x, ly + 15);
     } else {
       ctx.save();
       ctx.globalAlpha = s.alpha;
       const ready = usbdImg && usbdImg.ok;
       drawDisc(s.x, s.y, s.r, '#12343f', ready ? usbdImg : null);
-      ctx.fillStyle = '#e7f8ff';
-      ctx.font = '650 12px Inter, system-ui';
+      const ly = clearY(s.x, s.y + s.r + 6);
+      ctx.fillStyle = '#f4f6fb';
+      ctx.font = '600 12px Inter, system-ui';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.fillText('BULMA', s.x, s.y + s.r + 4);
+      ctx.fillText('BULMA', s.x, ly);
+      ctx.fillStyle = 'rgba(154,163,178,0.95)';
+      ctx.font = '500 11px Inter, system-ui';
+      ctx.fillText('HUB', s.x, ly + 15);
       ctx.restore();
     }
   });
