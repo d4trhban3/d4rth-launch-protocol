@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#10100e">
-<title>BTC system · launch template</title>
+<title>d4rth Launch Protocol · Galaxy</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Manrope:wght@500;600;700;800&display=swap">
 <style>
   :root {
@@ -57,6 +57,14 @@
   .tv-experience[data-view=home] #tvHome::after,
   .tv-experience[data-view=universe] #tvExplore::after,
   .tv-experience[data-panel=catalog] #tvCatalog::after { transform: scaleX(1); }
+  .site-nav { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-left: 4px; }
+  .site-nav a {
+    display: inline-flex; align-items: center; height: 32px; padding: 0 12px; border-radius: 999px;
+    border: 1px solid rgba(255,255,255,0.14); background: #101622; color: #d5dbe6;
+    font-size: 12px; font-weight: 600; letter-spacing: 0.02em;
+  }
+  .site-nav a.here, .site-nav a:hover { border-color: #f5d78a; color: #f5d78a; }
+  .tv-brand b { letter-spacing: 0.08em; }
   .tv-header-tools { display: flex; align-items: center; gap: 8px; flex: none; }
   .tv-search-trigger, .tv-icon-button {
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
@@ -244,6 +252,7 @@
   @media (max-width: 760px) {
     :root { --tv-header-h: 64px; --tv-footer-h: 32px; }
     .tv-brand b { font-size: 16px; }
+    .site-nav a { height: 28px; padding: 0 8px; font-size: 11px; }
     .tv-brand small { display: none; }
     .tv-primary button .lbl { display: none; }
     .tv-search-trigger span, .tv-search-trigger kbd { display: none; }
@@ -272,49 +281,31 @@
 </style>
 </head>
 <body>
-<div class="tv-experience" id="app" data-view="home" data-panel="none" data-details="closed">
+<div class="tv-experience" id="app" data-view="universe" data-panel="none" data-details="closed">
   <header class="tv-header">
-    <a class="tv-brand" href="#sleeve" id="brandHome">
-      <svg viewBox="0 0 48 48" fill="none" aria-hidden="true"><circle cx="24" cy="24" r="8" fill="currentColor"/><ellipse cx="24" cy="24" rx="23" ry="10" transform="rotate(-40 24 24)" stroke="currentColor" stroke-width="1.4"/><path d="M24 1v8M24 39v8M1 24h8M39 24h8" stroke="currentColor" stroke-width="1.4"/></svg>
-      <span><b>BTC SYSTEM</b><small>THE TEMPLATE</small></span>
+    <a class="tv-brand" href="https://d4trhban3.github.io/d4rth-launch-protocol/">
+      <span><b>D4RTH</b><small>LAUNCH PROTOCOL</small></span>
     </a>
-    <nav class="tv-primary" aria-label="Main">
-      <button type="button" id="tvHome"><em>01</em> <span class="lbl">The sleeve</span></button>
-      <button type="button" id="tvExplore"><em>02</em> <span class="lbl">The universe</span></button>
-      <button type="button" id="tvCatalog"><em>03</em> <span class="lbl">The collection</span></button>
+    <nav class="site-nav" aria-label="Site">
+      <a href="https://d4trhban3.github.io/d4rth-launch-protocol/">Home</a>
+      <a href="https://d4trhban3.github.io/d4rth-launch-protocol/LAUNCH-ANY-COIN-TEMPLATE.html">Template</a>
+      <a href="https://d4trhban3.github.io/d4rth-launch-protocol/BULMA-USBD-READY-TO-LAUNCH/README.html">Bulma</a>
+      <a href="https://d4trhban3.github.io/d4rth-launch-protocol/ANNOUNCEMENT-POSTS.html">Support</a>
+      <a class="here" href="https://d4trhban3.github.io/d4rth-launch-protocol/galaxy/">Galaxy</a>
     </nav>
     <div class="tv-header-tools">
-      <button type="button" id="tvSearchToggle" class="tv-search-trigger" aria-label="Find a planet">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="10.5" cy="10.5" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="m15 15 5 5" stroke="currentColor" stroke-width="1.5"/></svg>
-        <span>Find a planet</span><kbd>/</kbd>
-      </button>
       <button type="button" id="btn" class="hub-btn" aria-pressed="false">Add USDC</button>
       <button type="button" id="btnUsdt" class="hub-btn" aria-pressed="false">Add USDT</button>
-      <button type="button" id="tvSettingsToggle" class="tv-icon-button" aria-label="View settings">
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7h16M4 17h16M9 4v6M15 14v6" stroke="currentColor" stroke-width="1.5"/></svg>
-      </button>
+      <button type="button" id="openProtocol" class="tv-icon-button" aria-label="Protocol sliders" style="width:auto;padding:0 10px;font-size:11px;font-weight:700">Sliders</button>
+      <button type="button" id="openStars" class="tv-icon-button" aria-label="Constellations" style="width:auto;padding:0 10px;font-size:11px">Stars</button>
     </div>
   </header>
 
-  <section id="tvHomeView" class="tv-home" aria-label="Introduction">
-    <div class="tv-home-kicker"><span>A Solana launch template</span><span>Vol. 01 / the BTC system</span></div>
-    <h1 class="tv-home-title"><span>BTC</span><span>SYSTEM<i>*</i></span></h1>
-    <p class="tv-home-copy">The home orbit, with the launch protocol laid on top.<br><strong>Add USDC. Add USDT.</strong> The center becomes a three-way pair, and every planet pulls closer to BTC.</p>
-    <div class="tv-home-art" aria-hidden="true">
-      <img class="tv-home-earth" id="homeEarth" alt="">
-      <img class="tv-home-moon" id="homeMoon" alt="">
-      <span class="tv-art-caption">EARTH: BTC<br>MOON: LTC</span>
-    </div>
-    <button type="button" id="tvLaunch" class="tv-launch"><span>Enter the system</span><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 12h15M12 5l7 7-7 7" stroke="currentColor" stroke-width="1.5"/></svg></button>
-    <div class="tv-home-meta"><span id="tvHomeCount"></span><span>Not tittyverse.fun</span></div>
-    <div class="tv-home-roster" id="tvHomeRoster"></div>
-  </section>
-
-  <section id="tvUniverse" class="tv-universe" hidden>
+  <section id="tvUniverse" class="tv-universe">
     <div class="tv-chapter">
-      <nav class="tv-breadcrumb" aria-label="System path"><span>Orbit</span><b>BTC system</b></nav>
-      <button type="button" id="openProtocol" class="tv-link-button">Protocol ↗</button>
-      <button type="button" id="openStars" class="tv-link-button">Constellations</button>
+      <nav class="tv-breadcrumb" aria-label="System path"><span>d4rth protocol</span><b>BTC orbit</b></nav>
+      <a class="tv-link-button" href="https://d4trhban3.github.io/d4rth-launch-protocol/LAUNCH-ANY-COIN-TEMPLATE.html">Template</a>
+      <a class="tv-link-button" href="https://d4trhban3.github.io/d4rth-launch-protocol/BULMA-USBD-READY-TO-LAUNCH/README.html">Bulma Dollar</a>
     </div>
     <div class="tv-stage">
       <canvas id="canvas"></canvas>
@@ -335,9 +326,9 @@
     <aside class="tv-inspector" id="inspector" aria-label="Selected token"></aside>
   </section>
 
-  <footer class="tv-statusbar" id="tvStatus" hidden>
-    <span id="tvFreshness">Example of the launch protocol on the public BTC orbit. <a href="https://d4trhban3.github.io/d4rth-launch-protocol/">Template home</a></span>
-    <span class="tv-hints">Drag to rotate / scroll to zoom</span>
+  <footer class="tv-statusbar" id="tvStatus">
+    <span id="tvFreshness"><a href="https://d4trhban3.github.io/d4rth-launch-protocol/">Home</a> · <a href="https://d4trhban3.github.io/d4rth-launch-protocol/LAUNCH-ANY-COIN-TEMPLATE.html">Template</a> · <a href="https://d4trhban3.github.io/d4rth-launch-protocol/BULMA-USBD-READY-TO-LAUNCH/README.html">Bulma</a> · <a href="https://d4trhban3.github.io/d4rth-launch-protocol/ANNOUNCEMENT-POSTS.html">Support</a></span>
+    <span class="tv-hints">The map is the example. Drag to rotate / scroll to zoom</span>
   </footer>
 
   <button type="button" id="tvScrim" class="tv-scrim" hidden aria-label="Close panel"></button>
@@ -633,18 +624,13 @@ function renderInspector() {
 
 function setCaption() {
   const stars = view === 'constellations';
-  document.getElementById('kicker').textContent = stars ? '03 / Constellations' : '01 / Home orbit';
+  document.getElementById('kicker').textContent = stars ? 'Constellations' : 'd4rth · example map';
   document.getElementById('title').textContent = stars ? 'The chart' : 'BTC system';
   document.getElementById('openStars').classList.toggle('on', stars);
 }
-function setScreen(next) {
-  app.dataset.view = next;
-  document.getElementById('tvHomeView').hidden = next !== 'home';
-  document.getElementById('tvUniverse').hidden = next !== 'universe';
-  document.getElementById('tvStatus').hidden = next !== 'universe';
-  document.body.style.overflow = next === 'universe' ? 'hidden' : '';
-  if (next === 'universe' && location.hash !== '#universe' && location.hash !== '#protocol') history.replaceState(null, '', '#universe');
-  if (next === 'home') history.replaceState(null, '', '#sleeve');
+function setScreen() {
+  app.dataset.view = 'universe';
+  document.body.style.overflow = 'hidden';
   requestAnimationFrame(() => { resize(); requestAnimationFrame(resize); });
 }
 function setPanel(name) {
@@ -668,7 +654,7 @@ function renderCatalog(q) {
     '<button type="button" class="tv-directory-row" data-mint="' + esc(t.mint) + '"><span class="tv-row-index">' + String(i + 1).padStart(2, '0') + '</span><img alt="" src="' + esc(t.image || '') + '"><span class="tv-row-name"><strong>' + esc(t.symbol) + '</strong><small>' + esc(t.name || '') + '</small></span><span class="tv-row-metric">' + money(t.mc) + '</span></button>'
   ).join('') || '<p class="proto-lead">No planet matches that.</p>';
   document.querySelectorAll('#tvDirectory button').forEach(b => {
-    b.onclick = () => { selectMint(b.dataset.mint); setScreen('universe'); setPanel('none'); };
+    b.onclick = () => { selectMint(b.dataset.mint); setPanel('none'); };
   });
 }
 function paintHubButtons() {
@@ -696,7 +682,6 @@ function toggleHub(which) {
   applyAllBoost(turningOn || other ? (planets[0].boost || 0) : 0);
   syncShareInputs();
   paintHubButtons();
-  setScreen('universe');
   if (turningOn) setPanel('protocol');
   else if (!usdcOn && !usdtOn && app.dataset.panel === 'protocol') setPanel('none');
 }
@@ -710,15 +695,8 @@ document.getElementById('btn').onclick = () => toggleHub('usdc');
 document.getElementById('btnUsdt').onclick = () => toggleHub('usdt');
 document.getElementById('tabUsdc').onclick = () => { hubTab = 'usdc'; document.getElementById('tabUsdc').classList.add('on'); document.getElementById('tabUsdt').classList.remove('on'); syncShareInputs(); };
 document.getElementById('tabUsdt').onclick = () => { hubTab = 'usdt'; document.getElementById('tabUsdt').classList.add('on'); document.getElementById('tabUsdc').classList.remove('on'); syncShareInputs(); };
-document.getElementById('tvHome').onclick = () => { setPanel('none'); setScreen('home'); };
-document.getElementById('brandHome').onclick = (e) => { e.preventDefault(); setPanel('none'); setScreen('home'); };
-document.getElementById('tvExplore').onclick = () => { setPanel('none'); setScreen('universe'); };
-document.getElementById('tvLaunch').onclick = () => setScreen('universe');
-document.getElementById('tvCatalog').onclick = () => { setScreen('universe'); setPanel(app.dataset.panel === 'catalog' ? 'none' : 'catalog'); };
-document.getElementById('tvSearchToggle').onclick = () => { setScreen('universe'); setPanel('catalog'); };
-document.getElementById('tvSettingsToggle').onclick = () => { setScreen('universe'); setPanel(app.dataset.panel === 'settings' ? 'none' : 'settings'); };
-document.getElementById('openProtocol').onclick = () => { setScreen('universe'); setPanel(app.dataset.panel === 'protocol' ? 'none' : 'protocol'); };
-document.getElementById('openStars').onclick = () => { setScreen('universe'); setStars(view !== 'constellations'); };
+document.getElementById('openProtocol').onclick = () => setPanel(app.dataset.panel === 'protocol' ? 'none' : 'protocol');
+document.getElementById('openStars').onclick = () => setStars(view !== 'constellations');
 document.getElementById('bondChip').onclick = () => setPanel('protocol');
 document.getElementById('tvPanelClose').onclick = () => setPanel('none');
 document.getElementById('tvScrim').onclick = () => setPanel('none');
@@ -965,22 +943,13 @@ canvas.addEventListener('click', e => {
   renderInspector();
 });
 
-document.getElementById('homeEarth').src = anchor.image;
-const moon = planets.find(t => t.moon) || planets[0];
-document.getElementById('homeMoon').src = moon.image;
-document.getElementById('tvHomeCount').textContent = SNAP.orbitCount.toLocaleString() + ' in this orbit · ' + planets.length + ' in view';
 document.getElementById('orbitCount').textContent = SNAP.orbitCount.toLocaleString() + ' in this orbit / ' + planets.length + ' in view';
-document.getElementById('tvHomeRoster').innerHTML = bodies.slice(0, 10).map(t =>
-  '<button type="button" data-mint="' + esc(t.mint) + '" aria-label="' + esc(t.symbol) + '"><img alt="" src="' + esc(t.image || '') + '"></button>'
-).join('');
-document.querySelectorAll('#tvHomeRoster button').forEach(b => b.onclick = () => { selectMint(b.dataset.mint); setScreen('universe'); });
 renderCatalog('');
 selected = anchor;
 renderInspector();
 paintDeltas();
 paintHubButtons();
-if (location.hash === '#universe' || location.hash === '#protocol') setScreen('universe');
-else setScreen('home');
+setScreen();
 resize();
 requestAnimationFrame(loop);
 </script>
