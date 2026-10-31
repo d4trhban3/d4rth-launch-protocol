@@ -155,6 +155,18 @@
     border: 1px solid var(--tv-acid); background: #10100ee6; color: var(--tv-acid);
     font-size: 11px; line-height: 1.35; padding: 8px 10px; text-align: left;
   }
+  .map-key {
+    position: absolute; left: 24px; bottom: 66px; z-index: 4; width: 250px;
+    padding: 10px 12px 12px; background: #10100ee8; border: 1px solid #3a3934;
+    color: #f4f1ea; font: 12px/1.35 "DM Sans", sans-serif; pointer-events: none;
+  }
+  .map-key b { display: block; margin-bottom: 6px; color: #e8ff58; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }
+  .map-key div { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
+  .map-key i { width: 22px; height: 0; border-top: 2px solid #e8ff58; flex: none; }
+  .map-key i.green { border-top-color: #26a17b; }
+  .map-key i.spoke { border-top-color: rgba(244,241,234,.75); }
+  .map-key i.ghost { border-top-style: dashed; border-top-color: #f4f1ea; }
+  .map-key p { margin: 8px 0 0; color: #e8ff58; }
   .tv-inspector {
     min-width: 0; min-height: 0; overflow: auto; padding: 24px 22px 18px;
     border-left: 1px solid var(--tv-rule); background: var(--tv-ink);
@@ -316,6 +328,14 @@
         <small id="orbitCount"></small>
       </div>
       <button type="button" id="bondChip" class="bond-chip" hidden></button>
+      <aside id="mapKey" class="map-key" hidden>
+        <b>Key</b>
+        <div><i></i> USDC line, through Bulma</div>
+        <div><i class="green"></i> USDT line, the thinner pool</div>
+        <div><i class="spoke"></i> Each coin's link to the center</div>
+        <div><i class="ghost"></i> Where that coin sat before the pull</div>
+        <p>Closer to BTC = stronger liquidity pool.</p>
+      </aside>
       <div class="tv-stage-controls">
         <button type="button" id="zOut" aria-label="Zoom out">−</button>
         <output id="zPct">100%</output>
@@ -489,19 +509,22 @@ function stepCamera() {
   if (el && el.textContent !== pct + '%') el.textContent = pct + '%';
 }
 function centerCluster() {
-  const gap = 20;
-  const bulmaIn = usdcT > 0.02 || usdtT > 0.02;
-  if (bulmaIn && usdtT > 0.02) {
-    const s = gap * (0.55 + 0.45 * Math.max(usdcT, usdtT));
+  const btcR = studioRadius(anchor.mc, 0.9);
+  const bulmaR = btcR * 0.72;
+  const usdtR = btcR * 0.58;
+  const line = 4.2;
+  const showBulma = usdcT > 0.02 || usdtT > 0.02;
+  const showUsdt = usdtT > 0.02;
+  if (showBulma && showUsdt) {
     return {
-      btc: [0, 0.2, s * 0.46],
-      usdc: [-s * 0.7, 0, -s * 0.3],
-      usdt: [s * 0.58, 0, -s * 0.24]
+      btc: [0, 0, 0],
+      usdc: [-(btcR + bulmaR + line), 0, 0],
+      usdt: [btcR + usdtR + line, 0, 0]
     };
   }
-  if (usdcT > 0.02) {
-    const s = gap * 0.72 * usdcT;
-    return { btc: [s * 0.5, 0, 0], usdc: [-s * 0.55, 0, 0], usdt: null };
+  if (showBulma) {
+    const gap = (btcR + bulmaR + line) * Math.max(usdcT, usdtT);
+    return { btc: [gap * 0.45, 0, 0], usdc: [-gap * 0.55, 0, 0], usdt: null };
   }
   return { btc: [0, 0, 0], usdc: null, usdt: null };
 }
@@ -981,11 +1004,12 @@ function loop() {
     });
   }
   const centers = centerCluster();
-  const members = [centers.btc, centers.usdc, centers.usdt].filter(Boolean);
-  const mid = members.reduce((a, p) => [a[0] + p[0], a[1] + p[1], a[2] + p[2]], [0, 0, 0]).map(v => v / members.length);
-  const midP = project(mid);
   const btcP = project(centers.btc);
   const btcR = screenRadius(centers.btc, studioRadius(anchor.mc, 0.9));
+  const hubB = centers.usdc ? project(centers.usdc) : null;
+  const hubU = centers.usdt ? project(centers.usdt) : null;
+  const rB = hubB ? screenRadius(centers.usdc, studioRadius(anchor.mc, 0.9) * 0.72) : 0;
+  const rU = hubU ? screenRadius(centers.usdt, studioRadius(anchor.mc, 0.9) * 0.58) : 0;
   const drawn = planets.map(t => {
     const world = worldOf(t);
     const p = project(world);
@@ -1021,20 +1045,24 @@ function loop() {
   const spokes = showPairs || usdcT > 0.04 || usdtT > 0.04;
   if (spokes) {
     drawn.forEach(p => {
-      ctx.strokeStyle = p.pull > 0.02 ? 'rgba(232,255,88,' + (0.72 + p.pull * 0.28) + ')' : 'rgba(236,232,220,0.4)';
-      ctx.lineWidth = p.pull > 0.02 ? 1.15 : 1;
-      strokeBetween(midP, p, btcR + 22, p.r + 3);
+      const usdc = addedUsdc(p.t), usdt = addedUsdt(p.t);
+      let target = btcP, tr = btcR, color = 'rgba(244,241,234,0.45)';
+      if (p.pull >= 0.02 && usdt > usdc && hubU) {
+        target = hubU; tr = rU; color = 'rgba(38,161,123,0.9)';
+      } else if (p.pull >= 0.02 && hubB) {
+        target = hubB; tr = rB; color = 'rgba(232,255,88,0.9)';
+      }
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 1;
+      strokeBetween(target, p, tr + 2, p.r + 2);
     });
   }
+  document.getElementById('mapKey').hidden = !(usdcT > 0.02 || usdtT > 0.02);
   drawn.sort((a, b) => a.p - b.p);
   drawn.forEach(p => {
     disc(p.x, p.y, p.r, p.t.loaded ? p.t.img : null);
     hits.push({ t: p.t, x: p.x, y: p.y, r: p.r });
   });
-  const hubB = centers.usdc ? project(centers.usdc) : null;
-  const hubU = centers.usdt ? project(centers.usdt) : null;
-  const rB = hubB ? screenRadius(centers.usdc, studioRadius(anchor.mc, 0.9) * 0.72) : 0;
-  const rU = hubU ? screenRadius(centers.usdt, studioRadius(anchor.mc, 0.9) * 0.58) : 0;
   if (hubB) {
     ctx.strokeStyle = 'rgba(232,255,88,0.9)';
     ctx.lineWidth = 1.15;
