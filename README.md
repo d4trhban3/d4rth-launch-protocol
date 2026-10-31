@@ -14,7 +14,7 @@ Most new coins start thin and die. This is a six-step way to launch so the main 
 
 **A launch guide for any Solana coin that should have real money behind it.**
 
-The d4rth Launch Protocol is the six steps below. Launch on pump.fun paired with USDC. That is the main pool. Lock 10% with BTC. Lock 10% with SOL. Your new coin becomes the hub other coins connect to. The example hub is Bulma Dollar. Yours can be any coin. Fill in [LAUNCH-ANY-COIN-TEMPLATE.md](LAUNCH-ANY-COIN-TEMPLATE.md) and go.
+The d4rth Launch Protocol is the six steps below. Launch on pump.fun paired with USDC. That is the main pool. Lock 10% with BTC. Lock the next 10% with the other hub, not with SOL. Your new coin becomes the hub other coins connect to. The example hub is Bulma Dollar. Yours can be any coin. Fill in [LAUNCH-ANY-COIN-TEMPLATE.md](LAUNCH-ANY-COIN-TEMPLATE.md) and go.
 
 ## What these words mean
 - **pump.fun** — the site you launch the coin on. Price goes up as people buy.
@@ -49,7 +49,7 @@ Full sequence and the example pack: [BULMA-USBD-READY-TO-LAUNCH/](BULMA-USBD-REA
 1. Launch the coin on pump.fun, paired with USDC. USDC is a dollar on Solana. That is the main pool. *(The first pool only sells about 79% of the coins. Then the coin moves on by itself.)*
 2. Buy about 20% of the coins yourself. That leaves most of the rest for other people.
 3. Lock 10% in a pool with BTC on Meteora. BTC is the main coin of this group. Lock means the money cannot be pulled back out.
-4. Lock 10% in a pool with SOL on Meteora. Same thing, with Solana's own coin.
+4. Lock 10% with the other hub, not with SOL. That is the chunk the old step put in SOL. The second hub locks it to the first hub. On this map the USDT hub locks it to Bulma. The center is a three-way pair: BTC, Bulma, and USDT. USDT is the thinner side.
 5. Leave the rest in the USDC pool. That stays the main pool, during the launch and after. *(Then it moves to PumpSwap.)*
 6. Then other coins lock a piece of their supply against your new coin. Your coin becomes the hub they all connect through. The example hub is Bulma Dollar. Yours can be any coin.
 
@@ -83,7 +83,7 @@ This is the coin I wrote in. I liked the sound of it. I'd be happy if you launch
 **Name:** $USBD Ultimate Super Bulma Dragonballs  
 **Concept:** the Bulma dollar. The example hub for the Big Titty Coin ($BTC) group.
 
-Same six steps. Launch paired with USDC. Buy about 20%. Lock 10% with BTC. Lock 10% with SOL. Leave the rest on USDC. Then other coins lock a piece of their supply against it.
+Same six steps. Launch paired with USDC. Buy about 20%. Lock 10% with BTC. Lock the next 10% with the other hub, not with SOL. Leave the rest on USDC. Then other coins lock a piece of their supply against it.
 
 Interactive map of that idea: [galaxy](https://d4trhban3.github.io/d4rth-launch-protocol/galaxy/)
 

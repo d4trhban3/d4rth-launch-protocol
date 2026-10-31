@@ -161,7 +161,7 @@
   <aside class="panel" id="panel">
   <div class="master">
     <h2>All tokens</h2>
-    <p>A bigger market cap makes a bigger disc. The tab picks the hub. Bulma is the USDC hub. USDT is the same lock, with less depth on Solana, so the same percent pulls less. One slider sets every coin. Change a single coin after if you want it different.</p>
+    <p>A bigger market cap makes a bigger disc. The tab picks the hub. Bulma is the USDC hub. USDT takes the seat that used to be a SOL lock, and that 10% locks to Bulma instead. The center is a three-way pair: BTC, Bulma, and USDT. USDT is the thinner side. One slider sets every coin. Change a single coin after if you want it different.</p>
     <div class="sl">Market cap increase <b id="allBoostLabel">+0%</b></div>
     <input id="allBoost" type="range" min="0" max="2000" step="1" value="0" aria-label="All tokens market cap increase">
     <div class="ends"><span>0%</span><span>2000%</span></div>
@@ -173,7 +173,7 @@
     <input id="allShare" type="range" min="0" max="50" step="1" value="0" aria-label="All tokens supply paired">
     <div class="ends"><span>0%</span><span>50%</span></div>
     <div class="bondline" id="bondNote"></div>
-    <p class="weightline">On Solana, USDC is $6.83B and USDT is $2.40B. The same percent paired adds about 35% as much through USDT.</p>
+    <p class="weightline">On Solana, USDC is $6.83B and USDT is $2.40B. The same 10% adds about 35% as much through USDT. That 10% locks to Bulma, not to SOL.</p>
   </div>
   <div class="rows" id="rows"></div>
 </aside>
@@ -533,6 +533,8 @@ function paintDeltas() {
   const lift = bond / baseEco * 100;
   const btcLift = bond / btc.liq * 100;
   note.textContent = 'USDC ' + money(bu) + ' · USDT ' + money(bd) + ' · $BTC LP +' + btcLift.toFixed(1) + '% · ecosystem +' + lift.toFixed(1) + '%';
+  if (usdcOn && usdtOn) note.textContent += ' · Three-way center. The 10% SOL slot locks to Bulma.';
+  else if (usdtOn) note.textContent += ' · USDT takes the SOL slot. It locks to Bulma when USDC is on.';
   box.classList.add('show');
   box.textContent = 'USDC ' + money(bu) + '  ·  USDT ' + money(bd) + '  ·  USDT pool is ' + Math.round(USDT_WEIGHT * 100) + '% of USDC';
 }
@@ -854,8 +856,20 @@ function drawConstellations() {
     });
   });
   const suns = [{ token: btc, x: center.x, y: center.y, r: 46 * Math.min(1.15, scale), kind: 'token' }];
-  if (usdcT > 0.05) suns.push({ kind: 'hub', label: 'BULMA', x: center.x - 78, y: center.y, r: 28, color: '#12343f', img: window.__usbdImg });
-  if (usdtT > 0.05) suns.push({ kind: 'hub', label: 'USDT', x: center.x + 78, y: center.y, r: 22, color: '#26a17b' });
+  if (usdcT > 0.05) suns.push({ kind: 'hub', label: 'BULMA', x: center.x - 96, y: center.y - 58, r: 28, color: '#12343f', img: window.__usbdImg });
+  if (usdtT > 0.05) suns.push({ kind: 'hub', label: 'USDT', x: center.x + 96, y: center.y - 58, r: 18, color: '#26a17b' });
+  if (usdcT > 0.05 && usdtT > 0.05) {
+    ctx.strokeStyle = 'rgba(228,255,71,0.85)';
+    ctx.lineWidth = 1.4;
+    ctx.beginPath();
+    ctx.moveTo(center.x - 96, center.y - 58);
+    ctx.lineTo(center.x + 96, center.y - 58);
+    ctx.stroke();
+    ctx.fillStyle = '#e4ff47';
+    ctx.font = '600 11px "DM Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('10% · was SOL', center.x, center.y - 78);
+  }
   suns.forEach(s => {
     if (s.kind === 'token') {
       drawDisc(s.x, s.y, s.r, s.token.color, s.token.loaded ? s.token.image : null);
@@ -1028,9 +1042,36 @@ function loop() {
     ctx.stroke();
     ctx.restore();
   }
-  link(btcSprite, bulma, 'rgba(245,215,138,' + (0.45 * usdcT) + ')', 1.7);
-  link(btcSprite, usdtSprite, 'rgba(80,200,160,' + (0.4 * usdtT) + ')', 1.15);
-  if (bulma && usdtSprite) link(bulma, usdtSprite, 'rgba(255,255,255,0.18)', 1);
+  if (bulma && usdtSprite) {
+    btcSprite.x = cx;
+    btcSprite.y = cy + 34;
+    bulma.x = cx - 132;
+    bulma.y = cy - 52;
+    usdtSprite.x = cx + 132;
+    usdtSprite.y = cy - 52;
+    btcSprite.z = 0;
+    bulma.z = 8;
+    usdtSprite.z = 16;
+  }
+  link(btcSprite, bulma, 'rgba(228,255,71,' + (0.7 * usdcT) + ')', 1.7);
+  link(btcSprite, usdtSprite, 'rgba(80,200,160,' + (0.55 * usdtT) + ')', 1.15);
+  if (bulma && usdtSprite) link(bulma, usdtSprite, 'rgba(228,255,71,0.95)', 2.2);
+  function edgeLabel(a, b, text, yNudge) {
+    if (!a || !b) return;
+    const x = (a.x + b.x) / 2;
+    const y = (a.y + b.y) / 2 + (yNudge || 0);
+    ctx.font = '600 11px "DM Sans", sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    const w = ctx.measureText(text).width + 12;
+    ctx.fillStyle = 'rgba(16,16,14,0.88)';
+    ctx.fillRect(x - w / 2, y - 8, w, 16);
+    ctx.fillStyle = '#e4ff47';
+    ctx.fillText(text, x, y);
+  }
+  if (bulma && usdtSprite) {
+    edgeLabel(bulma, usdtSprite, 'was SOL · now Bulma', 0);
+  }
   const halo = ctx.createRadialGradient(btcSprite.x, btcSprite.y, btcSprite.r * 0.4, btcSprite.x, btcSprite.y, btcSprite.r * 2.8);
   halo.addColorStop(0, 'rgba(255,176,70,0.16)');
   halo.addColorStop(1, 'rgba(255,176,70,0)');
