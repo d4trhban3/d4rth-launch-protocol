@@ -3,339 +3,162 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap">
 <title>Example map · d4rth Launch Protocol</title>
 <style>
-  :root { color-scheme: dark; }
+  :root { color-scheme: dark; --lime: #e4ff47; --line: rgba(255,255,255,0.14); --ink: #10100e; }
   * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: var(--ink); color: #f3f1ea; }
   body {
-    margin: 0; background: #06080f; color: #e8ebf2;
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
-    overflow: hidden; letter-spacing: 0.01em;
+    font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+    overflow: hidden; height: var(--app-h, 100dvh);
   }
-  #canvas { display: block; width: 100vw; height: 100vh; touch-action: none; }
-  .top {
-    position: absolute; top: 22px; left: 28px; z-index: 10;
-    pointer-events: none;
+  button, input { font-family: inherit; }
+  a { color: inherit; }
+  .bar {
+    position: absolute; top: 0; left: 0; right: 0; z-index: 20; height: 58px;
+    display: grid; grid-template-columns: 220px 1fr auto; align-items: center;
+    padding: 0 16px 0 18px;
+    border-bottom: 1px solid var(--line);
+    background: var(--ink);
   }
-  .kicker {
-    font-size: 11px; letter-spacing: 0.18em; color: #8b93a3;
-    text-transform: uppercase; margin-bottom: 8px; font-weight: 500;
+  .mark { display: flex; gap: 10px; align-items: center; text-decoration: none; }
+  .orb {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #fff 0 2px, var(--lime) 3px 9px, transparent 10px);
+    box-shadow: inset 0 0 0 1.5px var(--lime);
   }
-  h1 { margin: 0; font-size: 18px; font-weight: 560; letter-spacing: -0.01em; color: #f4f6fb; }
-  .title-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-  a.home {
-    pointer-events: auto; text-decoration: none; flex: none;
-    background: rgba(16,18,24,0.72); color: #d5dbe6;
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 7px 12px; border-radius: 8px;
-    font-size: 11px; letter-spacing: 0.04em;
+  .mark b { display: block; font-size: 13px; letter-spacing: 0.14em; font-weight: 700; }
+  .mark small { display: block; font-size: 9px; letter-spacing: 0.16em; color: #9a978e; }
+  .tabs { display: flex; justify-content: center; gap: 22px; height: 100%; }
+  .tabs button {
+    background: none; border: 0; color: #c8c4b8; height: 100%;
+    padding: 0 2px; font-size: 14px; cursor: pointer; position: relative;
   }
-  a.home:hover { border-color: rgba(255,255,255,0.28); color: #fff; }
-  .sub { margin-top: 4px; font-size: 11px; color: #8b93a3; max-width: 420px; }
-  .idea, .sub, .key { display: none !important; }
-  .zoom {
-    position: absolute; left: 22px; bottom: 18px; z-index: 12;
-    display: flex; align-items: center; gap: 2px;
-    background: rgba(12,16,24,0.72);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 10px; padding: 4px;
-    backdrop-filter: blur(10px);
+  .tabs button i { font-style: normal; color: #8d897e; margin-right: 6px; font-size: 12px; }
+  .tabs button.on { color: var(--lime); }
+  .tabs button.on::after {
+    content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; background: var(--lime);
   }
-  .zoom button {
-    width: 32px; height: 32px; padding: 0; border: 0; border-radius: 8px;
-    background: transparent; color: #d5dbe6; font-size: 16px;
-  }
-  .zoom button:hover { background: rgba(255,255,255,0.06); color: #fff; }
-  #zPct { min-width: 44px; text-align: center; font-size: 12px; color: #c5ccd8; }
-  .note {
-    margin: 8px 0 0; max-width: 340px;
-    font-size: 12px; line-height: 1.45; color: #8b93a3;
-    pointer-events: auto;
-  }
-  .note a { color: #e7ebf3; }
-  .legend {
-    position: absolute; left: 22px; bottom: 64px; z-index: 12;
-    display: flex; gap: 16px; align-items: center;
-    font-size: 12px; color: #9aa3b2;
-  }
-  .legend .rule { color: #c5ccd8; }
-  .dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; margin-right: 6px; }
-  .dot.bond { background: #7dcea0; }
-  .dot.hub { background: #f5d78a; }
-  .pills { margin-top: 12px; display: flex; gap: 8px; pointer-events: auto; }
-  button {
-    background: rgba(16,18,24,0.72); color: #d5dbe6;
-    border: 1px solid rgba(255,255,255,0.1);
-    padding: 7px 12px; border-radius: 8px; cursor: pointer;
-    font-size: 11px; letter-spacing: 0.04em;
-  }
-  button:hover { border-color: rgba(255,255,255,0.28); color: #fff; }
+  .bar-right { display: flex; gap: 8px; }
   #btn, #btnUsdt {
-    background: #f5d78a; color: #1a1408; border-color: #f5d78a;
-    font-weight: 750; font-size: 13px; padding: 10px 16px;
+    background: var(--lime); color: var(--ink); border: 0; border-radius: 2px;
+    font-weight: 700; font-size: 13px; padding: 8px 12px; cursor: pointer;
   }
-  #btn:hover, #btnUsdt:hover { color: #1a1408; filter: brightness(1.06); }
   #btn.active, #btnUsdt.active {
-    background: rgba(16,18,24,0.72); color: #d8ffe8;
-    border-color: rgba(120,220,160,0.7); font-weight: 560; filter: none;
+    background: transparent; color: #d8ffe8; box-shadow: inset 0 0 0 1px rgba(120,220,160,0.7);
   }
-  .hubtabs { display: flex; gap: 6px; margin: 12px 0 2px; }
-  .hubtabs button { flex: 1; font-weight: 650; }
-  .hubtabs button.on { background: #f5d78a; color: #1a1408; border-color: #f5d78a; }
-  .weightline { margin-top: 8px; font-size: 11px; line-height: 1.4; color: #9aa3b2; }
-  #zReset { letter-spacing: 0.04em; }
-  .key {
-    position: absolute; left: 18px; bottom: 18px; z-index: 12; width: 372px;
-    background: rgba(8,10,14,0.9);
-    border: 1px solid rgba(255,255,255,0.12);
-    border-radius: 14px; padding: 12px 14px 12px;
-    backdrop-filter: blur(12px);
+  .stage { position: absolute; inset: 0; }
+  #canvas { display: block; width: 100%; height: 100%; }
+  .orbit-label {
+    position: absolute; top: 74px; left: 22px; z-index: 5; pointer-events: none;
   }
-  .key-kicker {
-    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: #6d7585;
+  .kicker { font-size: 11px; letter-spacing: 0.16em; color: #9a978e; text-transform: uppercase; }
+  h1 { margin: 6px 0 0; font-size: 34px; font-weight: 500; letter-spacing: -0.03em; }
+  .count { margin: 6px 0 0; font-size: 11px; letter-spacing: 0.12em; color: #9a978e; }
+  .side {
+    position: absolute; top: 58px; right: 0; bottom: 0; width: 340px; z-index: 12;
+    border-left: 1px solid var(--line); background: var(--ink);
+    display: flex; flex-direction: column; overflow: hidden;
   }
-  .rk { display: flex; align-items: center; gap: 8px; margin: 8px 0 4px; }
-  .rk-end { font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #8b93a3; }
-  .rk-end.deep { color: #f5d78a; }
-  .rk-track {
-    position: relative; flex: 1; height: 22px;
-  }
-  .rk-track::before {
-    content: ""; position: absolute; left: 0; right: 18px; top: 10px; height: 2px;
-    background: linear-gradient(90deg, rgba(255,255,255,0.18), #f5d78a);
-  }
-  .rk-pip {
-    position: absolute; top: 6px; width: 10px; height: 10px; border-radius: 50%;
-    background: #9aa3b2; border: 1px solid #fff;
-  }
-  .rk-pip.far { left: 0; width: 7px; height: 7px; top: 7px; opacity: 0.55; }
-  .rk-pip.mid { left: 38%; opacity: 0.8; }
-  .rk-pip.near { left: 68%; background: #f5d78a; }
-  .rk-sun {
-    position: absolute; right: 0; top: 1px; width: 20px; height: 20px; border-radius: 50%;
-    background: #f5d78a; color: #1a1408; font-size: 7px; font-weight: 750;
-    display: grid; place-items: center; letter-spacing: 0;
-  }
-  .key-rule {
-    margin: 2px 0 8px; font-size: 15px; font-weight: 720; line-height: 1.25; color: #f5d78a;
-  }
-  .key-note { margin: 8px 0 0; font-size: 12px; line-height: 1.4; color: #c5ccd8; }
-  .key-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
-  .key-list li {
-    display: flex; align-items: flex-start; gap: 8px;
-    font-size: 12px; line-height: 1.35; color: #d5dbe6;
-  }
-  .sw { width: 22px; height: 14px; position: relative; flex: none; margin-top: 1px; }
-  .sw.btc-line::before, .sw.usbd-line::before, .sw.bond::before {
-    content: ""; position: absolute; left: 0; right: 0; top: 6px; height: 2px;
-    background: #d5dde8; border-radius: 2px;
-  }
-  .sw.usbd-line::before { background: #c4a8ff; height: 3px; top: 5px; }
-  .sw.bond::before { background: #ffd68c; height: 6px; top: 4px; box-shadow: 0 0 8px #ffc45a; }
-  .sw.ghost::before {
-    content: ""; position: absolute; width: 11px; height: 11px; left: 5px; top: 1px;
-    border: 1.5px solid rgba(255,255,255,0.7); border-radius: 50%;
-  }
-  .sw.size::before {
-    content: ""; position: absolute; width: 12px; height: 12px; left: 5px; top: 1px;
-    border-radius: 50%; background: #e8eef8;
-  }
-  .sw.dist::before {
-    content: ""; position: absolute; left: 0; right: 4px; top: 6px; height: 2px;
-    background: linear-gradient(90deg, rgba(255,255,255,0.25), #f5d78a);
-  }
-  .hint {
-    position: absolute; right: 18px; bottom: 22px; z-index: 10;
-    font-size: 10px; letter-spacing: 0.16em; color: #6d7585; text-transform: uppercase;
-  }
-  .readout {
-    position: absolute; left: 50%; bottom: 58px; transform: translateX(-50%);
-    z-index: 10; font-size: 12px; color: #d6ffe8; letter-spacing: 0.02em;
-    background: rgba(8,10,14,0.72); border: 1px solid rgba(120,220,160,0.25);
-    padding: 8px 14px; border-radius: 10px; display: none; white-space: nowrap;
-  }
-  .readout.show { display: block; }
-
-  .panel {
-    position: absolute; top: 14px; right: 14px; bottom: 14px; width: 360px;
-    z-index: 20; display: none; flex-direction: column;
-    background: rgba(8,10,14,0.9);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 14px; overflow: hidden;
-    backdrop-filter: blur(10px);
-  }
+  .inspector { padding: 18px 18px 12px; overflow: auto; }
+  .insp-top, .stat { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+  .insp-top { font-size: 11px; letter-spacing: 0.14em; color: #9a978e; }
+  .insp-id { display: flex; gap: 12px; align-items: center; margin: 16px 0 12px; }
+  .insp-id img, .insp-id .ph { width: 54px; height: 54px; border-radius: 50%; object-fit: cover; background: #222; }
+  .insp-id b { font-size: 28px; font-weight: 560; letter-spacing: -0.03em; }
+  .insp-id small { display: block; color: #bdb8ac; font-size: 13px; }
+  .insp-desc { margin: 0 0 8px; color: #d9d4c8; font-size: 14px; line-height: 1.45; }
+  .stat { padding: 11px 0; border-top: 1px solid var(--line); font-size: 14px; }
+  .stat span { color: #bdb8ac; }
+  .stat i { font-style: normal; color: #8d897e; margin-right: 8px; font-size: 12px; }
+  .stat b { font-weight: 560; font-variant-numeric: tabular-nums; }
+  .insp-note { margin: 14px 0 0; color: #8d897e; font-size: 12px; line-height: 1.4; }
+  .panel { display: none; flex-direction: column; min-height: 0; flex: 1; }
   .panel.open { display: flex; }
-  .master { padding: 12px 14px 10px; border-bottom: 1px solid rgba(255,255,255,0.06); }
-  .master h2 { margin: 0 0 4px; font-size: 13px; font-weight: 600; }
-  .master p { margin: 0 0 10px; font-size: 11px; color: #8b93a3; line-height: 1.4; }
-  .mh { display: flex; justify-content: space-between; font-size: 11px; color: #c5ccd8; margin: 8px 0 4px; }
-  .mh b { color: #f5d78a; font-weight: 600; }
-  input[type=range] {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 100%;
-    height: 40px;
-    margin: 0;
-    background: transparent;
-    touch-action: pan-y;
+  .master { padding: 16px 16px 8px; border-bottom: 1px solid var(--line); }
+  .master h2 { margin: 0 0 6px; font-size: 16px; font-weight: 560; }
+  .master p, .weightline { margin: 0; color: #bdb8ac; font-size: 12px; line-height: 1.45; }
+  .hubtabs { display: flex; gap: 6px; margin: 12px 0 4px; }
+  .hubtabs button {
+    flex: 1; background: transparent; color: #d9d4c8; border: 1px solid var(--line);
+    padding: 8px 8px; cursor: pointer; font-size: 12px; font-weight: 650;
   }
-  input[type=range]::-webkit-slider-runnable-track {
-    height: 4px;
-    background: rgba(214,180,255,0.4);
-    border-radius: 4px;
-  }
-  input[type=range]::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    appearance: none;
-    width: 28px;
-    height: 28px;
-    margin-top: -12px;
-    border: 0;
-    border-radius: 50%;
-    background: #fff;
-    box-shadow: 0 1px 5px rgba(0,0,0,0.5);
-  }
-  input[type=range]::-moz-range-track {
-    height: 4px;
-    background: rgba(214,180,255,0.4);
-    border-radius: 4px;
-    border: 0;
-  }
-  input[type=range]::-moz-range-thumb {
-    width: 28px;
-    height: 28px;
-    border: 0;
-    border-radius: 50%;
-    background: #fff;
-  }
-  .ends { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #6d7585; }
-  .bondline { margin-top: 8px; font-size: 12px; color: #d8ffe8; }
-  .rows { overflow: auto; padding: 8px 12px 18px; }
+  .hubtabs button.on { background: var(--lime); color: var(--ink); border-color: var(--lime); }
+  .rows { overflow: auto; padding: 8px 14px 18px; }
   .row { display: grid; grid-template-columns: 32px 1fr; gap: 8px; align-items: start; margin: 0 0 14px; }
   .row img, .row .ph { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; background: #222; margin-top: 2px; }
-  .sl { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.04em; text-transform: uppercase; color: #8b93a3; margin: 6px 0 2px; }
-  .sl b { color: #e7ebf3; font-weight: 650; letter-spacing: 0; text-transform: none; font-size: 11px; }
-  .sl.pair b { color: #f5d78a; }
-  .row .nm { display: flex; justify-content: space-between; font-size: 11px; }
-  .row .nm b { font-weight: 650; }
-  .row .delta { color: #9aa3b2; font-weight: 500; }
-  .row .delta.on { color: #b6f7cf; }
-
-  .dock { display: contents; }
+  .sl { display: flex; justify-content: space-between; font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: #9a978e; margin: 6px 0 2px; }
+  .sl b { color: #f3f1ea; font-weight: 650; letter-spacing: 0; text-transform: none; font-size: 11px; }
+  .sl.pair b { color: var(--lime); }
+  .row .nm { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; }
+  .row .delta { color: #9a978e; }
+  .row .delta.on { color: var(--lime); }
+  .ends { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: 0.08em; text-transform: uppercase; color: #6f6b62; }
+  .bondline { margin-top: 8px; font-size: 12px; line-height: 1.4; color: #e7ffb0; }
+  .weightline { margin-top: 8px; }
+  input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 22px; background: transparent; margin: 0; touch-action: pan-y; }
+  input[type=range]::-webkit-slider-runnable-track { height: 2px; background: rgba(255,255,255,0.28); }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 16px; height: 16px; margin-top: -7px; border-radius: 50%; background: #fff; border: 0; }
+  .star-key { padding: 8px 18px 18px; overflow: auto; border-top: 1px solid var(--line); }
+  .star-key h2 { margin: 10px 0 8px; font-size: 13px; font-weight: 560; letter-spacing: 0.08em; }
+  .star-key div { display: flex; gap: 8px; align-items: center; font-size: 12px; color: #d9d4c8; margin: 6px 0; }
+  .star-key i { width: 18px; height: 2px; display: inline-block; }
+  .zoom {
+    position: absolute; left: 18px; bottom: 36px; z-index: 12;
+    display: flex; align-items: center; gap: 0;
+    border: 1px solid var(--line); background: var(--ink);
+  }
+  .zoom button, .zoom span {
+    background: transparent; color: #f3f1ea; border: 0; border-right: 1px solid var(--line);
+    min-width: 36px; height: 34px; padding: 0 10px; cursor: pointer; font-size: 13px;
+  }
+  .zoom span { display: inline-flex; align-items: center; justify-content: center; cursor: default; }
+  #btnSpin { border-right: 0; padding: 0 12px; }
+  .foot {
+    position: absolute; left: 18px; right: 358px; bottom: 8px; z-index: 6;
+    display: flex; justify-content: space-between; gap: 12px;
+    color: #6f6b62; font-size: 10px; letter-spacing: 0.08em; pointer-events: none;
+  }
+  .foot a { pointer-events: auto; color: #bdb8ac; }
   @media (max-width: 800px) {
-    .kicker, .sub, .hint, .readout, .key-kicker { display: none !important; }
-    html, body, #canvas { height: var(--app-h, 100dvh); }
-    .top {
-      top: 0; left: 0; right: 0;
-      padding: max(8px, env(safe-area-inset-top)) 14px 8px;
-      background: linear-gradient(180deg, rgba(7,9,14,0.96) 0%, rgba(7,9,14,0.88) 78%, rgba(7,9,14,0) 100%);
-    }
-    h1 { font-size: 18px; }
-    a.home { min-height: 42px; padding: 10px 14px; font-size: 13px; display: inline-flex; align-items: center; }
-    .pills { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
-    #btn, #btnUsdt { flex: 1 1 46%; min-height: 48px; font-size: 15px; }
-    .pills button { flex: 1; min-height: 42px; padding: 10px 8px; font-size: 12px; white-space: nowrap; }
-    #zReset { flex: 0 0 72px; }
-    .dock {
-      display: flex; flex-direction: column;
-      position: absolute; left: 0; right: 0; bottom: 0; z-index: 20;
-      max-height: 54%;
-      background: rgba(8,10,14,0.96);
-      border-top: 1px solid rgba(255,255,255,0.12);
-      border-radius: 18px 18px 0 0;
-      overflow-x: hidden;
-      overflow-y: scroll;
-      -webkit-overflow-scrolling: touch;
-      overscroll-behavior: contain;
-      touch-action: pan-y;
-      backdrop-filter: blur(14px);
-      padding-bottom: max(12px, env(safe-area-inset-bottom));
-    }
-    .dock::before {
-      content: "";
-      display: block;
-      width: 36px; height: 4px; border-radius: 4px;
-      background: rgba(255,255,255,0.22);
-      margin: 8px auto 0;
-      flex: none;
-    }
-    .dock .key {
-      position: relative; left: auto; right: auto; bottom: auto; width: auto;
-      border: 0; border-radius: 0; background: transparent; backdrop-filter: none;
-      padding: 4px 16px 8px;
-    }
-    .rk { margin-top: 0; }
-    .key-rule { font-size: 16px; margin-bottom: 8px; }
-    .key-list { grid-template-columns: 1fr 1fr; gap: 6px 12px; }
-    .key-list li { font-size: 12px; }
-    body.bulma .key-list { display: none; }
-    .master { padding-bottom: 8px; }
-    .dock .panel {
-      position: relative; top: auto; right: auto; bottom: auto; left: auto;
-      width: auto; height: auto; max-height: none;
-      border: 0; border-radius: 0; background: transparent;
-      display: none; overflow: visible;
-    }
-    .dock .panel.open {
-      display: flex;
-      border-top: 1px solid rgba(255,255,255,0.08);
-    }
-    .dock .key, .dock .panel, .dock .rows, .dock .master { touch-action: pan-y; }
+    .bar { height: auto; grid-template-columns: 1fr; gap: 8px; padding: 8px 12px 10px; }
+    .tabs { justify-content: flex-start; height: 36px; overflow: auto; }
+    .orbit-label { top: 118px; }
+    h1 { font-size: 26px; }
+    .side { top: auto; width: auto; left: 0; max-height: 46vh; border-left: 0; border-top: 1px solid var(--line); }
+    .foot { display: none; }
+    .zoom { bottom: calc(46vh + 8px); }
+    #btn, #btnUsdt { flex: 1; }
+    .bar-right { display: flex; }
   }
 </style>
 </head>
 <body>
 <canvas id="canvas"></canvas>
-<div class="top">
-  <div class="kicker" id="kicker">D4RTH · LAUNCH TEMPLATE</div>
-  <div class="title-row">
-    <h1 id="title">Example map</h1>
-    <a class="home" href="https://d4trhban3.github.io/d4rth-launch-protocol/">Home</a>
+<header class="bar">
+  <a class="mark" href="https://d4trhban3.github.io/d4rth-launch-protocol/">
+    <span class="orb"></span>
+    <span><b>EXAMPLE MAP</b><small>NOT THE LIVE SITE</small></span>
+  </a>
+  <nav class="tabs">
+    <button type="button" id="tabOrbit" class="on"><i>01</i>Orbit</button>
+    <button type="button" id="tabProtocol"><i>02</i>Protocol</button>
+    <button type="button" id="tabStars"><i>03</i>Constellations</button>
+  </nav>
+  <div class="bar-right">
+    <button type="button" id="btn">Add USDC</button>
+    <button type="button" id="btnUsdt">Add USDT</button>
   </div>
-  <p class="note">A picture of the idea. Not the live map. That is <a href="https://tittyverse.fun">Tittyverse</a>.</p>
-  <div class="pills">
-    <button id="btn">Add USDC</button>
-    <button id="btnUsdt">Add USDT</button>
-    <button id="btnSpin">Auto-Rotate</button>
-  </div>
+</header>
+<div class="orbit-label">
+  <div class="kicker" id="kicker">01 / HOME ORBIT</div>
+  <h1 id="title">BTC system</h1>
+  <p class="count" id="orbitCount"></p>
 </div>
-<div class="legend">
-  <span class="rule">Closer to BTC = stronger pool</span>
-</div>
-<div class="zoom">
-  <button type="button" id="zOut" aria-label="Zoom out">−</button>
-  <span id="zPct">100%</span>
-  <button type="button" id="zIn" aria-label="Zoom in">+</button>
-  <button type="button" id="zReset" aria-label="Fit">⌖</button>
-</div>
-<div class="hint">Drag to rotate · Scroll to zoom</div>
-<div class="dock" id="dock">
-<aside class="key" id="key">
-  <div class="key-kicker">Key</div>
-  <div class="rk" aria-hidden="true">
-    <span class="rk-end">thin</span>
-    <span class="rk-track">
-      <span class="rk-pip far"></span>
-      <span class="rk-pip mid"></span>
-      <span class="rk-pip near"></span>
-      <span class="rk-sun">BTC</span>
-    </span>
-    <span class="rk-end deep">deep</span>
-  </div>
-  <p class="key-rule">Closer to $BTC = stronger liquidity pool</p>
-  <ul class="key-list">
-    <li><i class="sw dist"></i><span>Distance from $BTC is pool strength.</span></li>
-    <li><i class="sw size"></i><span>Bigger disc means a bigger market cap.</span></li>
-    <li><i class="sw btc-line"></i><span>Pale line is that coin's pool with $BTC.</span></li>
-    <li><i class="sw usbd-line"></i><span>Purple line is supply paired through Bulma.</span></li>
-    <li><i class="sw bond"></i><span>Gold bar is the Bulma–$BTC bond.</span></li>
-    <li><i class="sw ghost"></i><span>Empty ring is where it sat before Bulma.</span></li>
-  </ul>
-  <p class="key-note">Closer to the center means a stronger pool with BTC. The purple line is how much of that coin is locked with Bulma. More locked means it sits closer to BTC.</p>
-</aside>
-<div class="readout" id="readout"></div>
-
-<aside class="panel" id="panel">
+<aside class="side" id="side">
+  <div class="inspector" id="inspector"></div>
+  <aside class="panel" id="panel">
   <div class="master">
     <h2>All tokens</h2>
     <p>A bigger market cap makes a bigger disc. The tab picks the hub. Bulma is the USDC hub. USDT is the same lock, with less depth on Solana, so the same percent pulls less. One slider sets every coin. Change a single coin after if you want it different.</p>
@@ -354,8 +177,28 @@
   </div>
   <div class="rows" id="rows"></div>
 </aside>
+  <div class="star-key" id="starKey" hidden>
+    <h2>GROUPS</h2>
+    <div><i style="background:#7eb6ff"></i>The Majors</div>
+    <div><i style="background:#ff7ad9"></i>Slingoor's Belt</div>
+    <div><i style="background:#c4a6ff"></i>The Shadow Coins</div>
+    <div><i style="background:#e6c15a"></i>Wall Street</div>
+    <div><i style="background:#f0a060"></i>Little Siblings</div>
+    <p class="insp-note">The chart is the groups. The protocol is what pulls them toward BTC. Stables are the suns, not a constellation.</p>
+  </div>
+</aside>
+<div class="zoom">
+  <button type="button" id="zOut" aria-label="Zoom out">−</button>
+  <span id="zPct">100%</span>
+  <button type="button" id="zIn" aria-label="Zoom in">+</button>
+  <button type="button" id="zReset" aria-label="Fit">⌖</button>
+  <button type="button" id="btnSpin">Rotate</button>
 </div>
-
+<footer class="foot">
+  <span>Example figures, not live prices. The live map is <a href="https://tittyverse.fun">tittyverse.fun</a></span>
+  <span>DRAG TO ROTATE / SCROLL TO ZOOM</span>
+</footer>
+<div id="readout" hidden></div>
 
 <script>
 const IMGDATA = {
@@ -394,6 +237,8 @@ let W, H, cx, cy;
 let scale = 1;
 let rotX = 0.25, rotY = 0.35, rotZ = 0;
 let dragging = false, lastX = 0, lastY = 0;
+let view = 'orbit';
+let selected = null;
 let usdcOn = false;
 let usdtOn = false;
 let hubTab = 'usdc';
@@ -503,7 +348,7 @@ tokens.forEach(t => {
   if (t.key && IMGDATA[t.key]) {
     const im = new Image();
     t.image = im;
-    im.onload = () => { t.loaded = true; };
+    im.onload = () => { t.loaded = true; if (!selected || selected === t) renderInspector(); };
     im.src = IMGDATA[t.key];
   }
 });
@@ -694,13 +539,12 @@ function paintDeltas() {
 
 let userZoomed = false;
 function chromeBox() {
-  const open = document.body.classList.contains('bulma');
   const narrow = W < 800;
   if (narrow) {
-    const dock = document.getElementById('dock');
-    return { side: 0, header: 180, bottom: dock ? dock.offsetHeight : 220 };
+    const side = document.getElementById('side');
+    return { side: 0, header: 132, bottom: side ? Math.min(side.offsetHeight, Math.round(H * 0.46)) : 240 };
   }
-  return { side: open ? 388 : 24, header: 16, bottom: 16 };
+  return { side: 340, header: 58, bottom: 28 };
 }
 function fittedZoom() {
   const c = chromeBox();
@@ -823,7 +667,8 @@ function toggleHub(which) {
   });
   setHubTab(which === 'usdt' ? 'usdt' : 'usdc');
   syncBoostInputs();
-  refreshCopy();
+  if (turningOn && view === 'orbit') setView('protocol');
+  else refreshCopy();
 }
 function refreshCopy() {
   const on = usdcOn || usdtOn;
@@ -833,19 +678,35 @@ function refreshCopy() {
   ut.textContent = usdtOn ? 'Remove USDT' : 'Add USDT';
   uc.classList.toggle('active', usdcOn);
   ut.classList.toggle('active', usdtOn);
-  document.getElementById('kicker').textContent = 'D4RTH · LAUNCH TEMPLATE';
-  document.getElementById('title').textContent = 'Example map';
-  document.getElementById('panel').classList.toggle('open', on);
-  document.body.classList.toggle('bulma', on);
+  document.getElementById('panel').classList.toggle('open', view === 'protocol');
+  document.getElementById('inspector').hidden = view === 'protocol';
+  const starKey = document.getElementById('starKey');
+  if (starKey) starKey.hidden = view !== 'constellations';
   document.getElementById('tabUsdc').classList.toggle('on', hubTab === 'usdc');
   document.getElementById('tabUsdt').classList.toggle('on', hubTab === 'usdt');
-  const keyEl = document.getElementById('key');
-  if (keyEl) document.documentElement.style.setProperty('--key-h', keyEl.offsetHeight + 'px');
   const box = document.getElementById('readout');
-  box.classList.toggle('show', on);
-  if (!on) box.textContent = '';
+  if (box) box.classList.toggle('show', on);
   paintDeltas();
   if (!userZoomed) setZoom(fittedZoom());
+}
+function setView(next) {
+  view = next;
+  document.getElementById('tabOrbit').classList.toggle('on', view === 'orbit');
+  document.getElementById('tabProtocol').classList.toggle('on', view === 'protocol');
+  document.getElementById('tabStars').classList.toggle('on', view === 'constellations');
+  const kicker = document.getElementById('kicker');
+  const title = document.getElementById('title');
+  if (view === 'constellations') {
+    kicker.textContent = '03 / CONSTELLATIONS';
+    title.textContent = 'The chart';
+  } else if (view === 'protocol') {
+    kicker.textContent = '02 / PROTOCOL';
+    title.textContent = 'BTC system';
+  } else {
+    kicker.textContent = '01 / HOME ORBIT';
+    title.textContent = 'BTC system';
+  }
+  refreshCopy();
 }
 document.getElementById('btn').addEventListener('click', () => toggleHub('usdc'));
 document.getElementById('btnUsdt').addEventListener('click', () => toggleHub('usdt'));
@@ -854,7 +715,7 @@ document.getElementById('tabUsdt').addEventListener('click', () => setHubTab('us
 document.getElementById('btnSpin').addEventListener('click', () => {
   autoRotate = !autoRotate;
   const b = document.getElementById('btnSpin');
-  b.textContent = autoRotate ? 'Stop Rotate' : 'Auto-Rotate';
+  b.textContent = autoRotate ? 'Pause' : 'Rotate';
   b.classList.toggle('active', autoRotate);
 });
 
@@ -897,7 +758,7 @@ function drawOrbit(radius) {
     if (i === 0) ctx.moveTo(pr.x, pr.y);
     else ctx.lineTo(pr.x, pr.y);
   }
-  ctx.strokeStyle = 'rgba(176,188,206,0.16)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.16)';
   ctx.lineWidth = 1;
   ctx.stroke();
 }
@@ -920,12 +781,128 @@ function drawDisc(x, y, r, fill, image) {
   ctx.stroke();
 }
 
+
+const CONSTELLATIONS = [
+  { id: 'majors', name: 'THE MAJORS', color: '#7eb6ff', tickers: ['SUI','ETH','XRP','BNB','ADA','LINK','INJ'] },
+  { id: 'belt', name: "SLINGOOR'S BELT", color: '#ff7ad9', tickers: ['sling','SLINGOOR','PUMP','OF','GOONER'] },
+  { id: 'shadow', name: 'THE SHADOW COINS', color: '#c4a6ff', tickers: ['XMR','SI','CCC','CF'] },
+  { id: 'street', name: 'WALL STREET', color: '#e6c15a', tickers: ['GLD','NVDA','SPY','SP500'] },
+  { id: 'sibs', name: 'LITTLE SIBLINGS', color: '#f0a060', tickers: ['LTC','bBTC','TTC','HYPE'] },
+  { id: 'field', name: 'THE FIELD', color: '#9aa89a', tickers: ['UHI','ASS'] }
+];
+const SHAPES = {
+  majors: [[0.24,0.18],[0.14,0.26],[0.12,0.38],[0.20,0.46],[0.30,0.42],[0.34,0.32],[0.28,0.22]],
+  belt: [[0.38,0.14],[0.48,0.18],[0.58,0.13],[0.68,0.18],[0.76,0.14]],
+  shadow: [[0.78,0.28],[0.86,0.36],[0.80,0.46],[0.90,0.42]],
+  street: [[0.84,0.56],[0.76,0.66],[0.86,0.74],[0.94,0.64]],
+  sibs: [[0.22,0.78],[0.34,0.72],[0.46,0.80],[0.58,0.74]],
+  field: [[0.10,0.62],[0.18,0.70]]
+};
+function drawConstellations() {
+  const c = chromeBox();
+  const left = 28, top = c.header + 86, right = W - c.side - 20, bottom = H - c.bottom - 18;
+  const w = Math.max(200, right - left), h = Math.max(200, bottom - top);
+  const pt = (fx, fy) => ({ x: left + fx * w, y: top + fy * h });
+  const center = pt(0.50, 0.50);
+  ctx.save();
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  [[0.08,0.18],[0.92,0.16],[0.12,0.88],[0.9,0.84]].forEach(p => {
+    const q = pt(p[0], p[1]);
+    ctx.beginPath();
+    ctx.moveTo(center.x, center.y);
+    ctx.lineTo(q.x, q.y);
+    ctx.stroke();
+  });
+  const hits = [];
+  CONSTELLATIONS.forEach(group => {
+    const members = group.tickers.map(tk => orbiters.find(t => t.ticker === tk)).filter(Boolean);
+    const shape = SHAPES[group.id];
+    if (!members.length) return;
+    ctx.beginPath();
+    members.forEach((t, i) => {
+      const p = shape[Math.min(i, shape.length - 1)];
+      const q = pt(p[0], p[1]);
+      if (i === 0) ctx.moveTo(q.x, q.y); else ctx.lineTo(q.x, q.y);
+    });
+    ctx.strokeStyle = group.color;
+    ctx.globalAlpha = 0.9;
+    ctx.lineWidth = 1.25;
+    ctx.stroke();
+    ctx.globalAlpha = 1;
+    const label = pt(shape[0][0], Math.max(0.04, shape[0][1] - 0.055));
+    ctx.fillStyle = group.color;
+    ctx.font = '600 11px "DM Sans", sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(group.name, label.x, label.y);
+    members.forEach((t, i) => {
+      const p = shape[Math.min(i, shape.length - 1)];
+      const q = pt(p[0], p[1]);
+      const r = Math.max(13, 16 * Math.min(1.2, scale));
+      drawDisc(q.x, q.y, r, t.color, t.loaded ? t.image : null);
+      ctx.fillStyle = '#f4f1ea';
+      ctx.font = '600 11px "DM Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(t.ticker, q.x, q.y + r + 4);
+      if (selected && selected === t) {
+        ctx.fillStyle = '#e4ff47';
+        ctx.fillRect(q.x - 12, q.y + r + 18, 24, 2);
+      }
+      hits.push({ kind: 'token', token: t, x: q.x, y: q.y, r });
+    });
+  });
+  const suns = [{ token: btc, x: center.x, y: center.y, r: 46 * Math.min(1.15, scale), kind: 'token' }];
+  if (usdcT > 0.05) suns.push({ kind: 'hub', label: 'BULMA', x: center.x - 78, y: center.y, r: 28, color: '#12343f', img: window.__usbdImg });
+  if (usdtT > 0.05) suns.push({ kind: 'hub', label: 'USDT', x: center.x + 78, y: center.y, r: 22, color: '#26a17b' });
+  suns.forEach(s => {
+    if (s.kind === 'token') {
+      drawDisc(s.x, s.y, s.r, s.token.color, s.token.loaded ? s.token.image : null);
+      ctx.fillStyle = '#f4f1ea';
+      ctx.font = '600 13px "DM Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText('BTC', s.x, s.y + s.r + 6);
+      ctx.fillStyle = '#e4ff47';
+      ctx.fillRect(s.x - 14, s.y + s.r + 22, 28, 2);
+      hits.push(s);
+    } else {
+      const ready = s.img && s.img.ok;
+      drawDisc(s.x, s.y, s.r, s.color, ready ? s.img : null);
+      ctx.fillStyle = '#f4f1ea';
+      ctx.font = '600 11px "DM Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(s.label, s.x, s.y + s.r + 4);
+    }
+  });
+  window.__hit = hits;
+  ctx.restore();
+}
+function renderInspector() {
+  const tkn = selected || btc;
+  const el = document.getElementById('inspector');
+  if (!el || !tkn) return;
+  const img = tkn.loaded && tkn.image ? '<img src="' + tkn.image.src + '" alt="">' : '<div class="ph"></div>';
+  const desc = tkn.isCenter
+    ? 'The home planet. Every orbit in this example begins here.'
+    : 'Closer to BTC means a stronger pool in this example.';
+  el.innerHTML = '<div class="insp-top"><span>' + (tkn.isCenter ? 'EARTH / 001' : 'PLANET / ' + tkn.ticker) + '</span><span>' + (tkn.isCenter ? 'HOME' : 'EXAMPLE') + '</span></div>'
+    + '<div class="insp-id">' + img + '<div><b>' + tkn.ticker + '</b><small>' + (tkn.isCenter ? 'Big Titty Coin' : 'In the example map') + '</small></div></div>'
+    + '<p class="insp-desc">' + desc + '</p>'
+    + '<div class="stat"><span><i>01</i>Market cap</span><b>' + money(levelOf(tkn)) + '</b></div>'
+    + '<div class="stat"><span><i>02</i>Liquidity</span><b>' + money(tkn.liq) + '</b></div>'
+    + '<div class="stat"><span><i>03</i>Volume used</span><b>' + money(tkn.vol) + '</b></div>'
+    + '<p class="insp-note">Example figures, not a live quote. The live galaxy is tittyverse.fun.</p>';
+}
+
 function loop() {
   usdcT = usdcOn ? Math.min(1, usdcT + 0.02) : Math.max(0, usdcT - 0.02);
   usdtT = usdtOn ? Math.min(1, usdtT + 0.02) : Math.max(0, usdtT - 0.02);
   if (autoRotate && !dragging) { rotY += 0.003; rotX += 0.0006; rotZ += 0.0004; }
 
-  ctx.fillStyle = '#06080f';
+  ctx.fillStyle = '#10100e';
   ctx.fillRect(0, 0, W, H);
   focus();
   const vg = ctx.createRadialGradient(cx, cy, 40, cx, cy, Math.max(W, H) * 0.62);
@@ -944,11 +921,13 @@ function loop() {
     ctx.fillStyle = 'rgba(220,226,236,' + s.a + ')';
     ctx.fillRect(s.x * W, s.y * H, 1.2, 1.2);
   });
-  ctx.strokeStyle = 'rgba(255,255,255,0.05)';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(12.5, 12.5, W - 25, H - 25);
+  if (view === 'constellations') {
+    drawConstellations();
+    requestAnimationFrame(loop);
+    return;
+  }
 
-  [260, 330, 400, 480, 560, 640].forEach(drawOrbit);
+  [180, 250, 330, 420, 510].forEach(drawOrbit);
 
   const bond = bondNow();
   const closeness = bond / (bond + btc.liq);
@@ -1080,10 +1059,13 @@ function loop() {
       ctx.textBaseline = 'top';
       ctx.fillStyle = '#f4f6fb';
       ctx.font = '600 ' + (s.token.isCenter ? 13 : 11) + 'px Inter, system-ui';
+      ctx.font = '600 ' + (s.token.isCenter ? 13 : 11) + 'px "DM Sans", system-ui';
       ctx.fillText(s.token.ticker, s.x, ly);
-      ctx.fillStyle = 'rgba(154,163,178,0.95)';
-      ctx.font = '500 11px Inter, system-ui';
-      ctx.fillText(s.token.isCenter ? (s.token.sub || '') : money(levelOf(s.token)), s.x, ly + 15);
+      if (selected && s.token === selected) {
+        ctx.fillStyle = '#e4ff47';
+        const tw = Math.max(18, ctx.measureText(s.token.ticker).width);
+        ctx.fillRect(s.x - tw / 2, ly + 15, tw, 2);
+      }
     } else {
       ctx.save();
       ctx.globalAlpha = s.alpha;
@@ -1112,6 +1094,7 @@ function loop() {
     }
   });
 
+  window.__hit = sprites;
   if ((usdcOn || usdtOn) && Math.abs(bond - (window.__lastBond || -1)) > 500) {
     window.__lastBond = bond;
     paintDeltas();
@@ -1120,6 +1103,34 @@ function loop() {
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
+
+let pressX = 0, pressY = 0, pressMoved = false;
+canvas.addEventListener('mousedown', e => { pressX = e.clientX; pressY = e.clientY; pressMoved = false; });
+window.addEventListener('mousemove', e => {
+  if (Math.hypot(e.clientX - pressX, e.clientY - pressY) > 5) pressMoved = true;
+});
+canvas.addEventListener('click', e => {
+  if (pressMoved) return;
+  const list = window.__hit || [];
+  const rect = canvas.getBoundingClientRect();
+  const x = e.clientX - rect.left, y = e.clientY - rect.top;
+  let best = null, bestD = 1e9;
+  list.forEach(s => {
+    if (!s.token) return;
+    const d = Math.hypot(s.x - x, s.y - y);
+    if (d < s.r + 10 && d < bestD) { best = s; bestD = d; }
+  });
+  if (!best) return;
+  selected = best.token;
+  renderInspector();
+});
+document.getElementById('tabOrbit').addEventListener('click', () => setView('orbit'));
+document.getElementById('tabProtocol').addEventListener('click', () => setView('protocol'));
+document.getElementById('tabStars').addEventListener('click', () => setView('constellations'));
+selected = btc;
+renderInspector();
+document.getElementById('orbitCount').textContent = orbiters.length + ' IN VIEW';
+setView('orbit');
 
 </script>
 </body>
