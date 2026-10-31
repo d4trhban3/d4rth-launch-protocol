@@ -70,15 +70,19 @@
     font-size: 11px; letter-spacing: 0.04em;
   }
   button:hover { border-color: rgba(255,255,255,0.28); color: #fff; }
-  #btn {
+  #btn, #btnUsdt {
     background: #f5d78a; color: #1a1408; border-color: #f5d78a;
     font-weight: 750; font-size: 13px; padding: 10px 16px;
   }
-  #btn:hover { color: #1a1408; filter: brightness(1.06); }
-  #btn.active {
+  #btn:hover, #btnUsdt:hover { color: #1a1408; filter: brightness(1.06); }
+  #btn.active, #btnUsdt.active {
     background: rgba(16,18,24,0.72); color: #d8ffe8;
     border-color: rgba(120,220,160,0.7); font-weight: 560; filter: none;
   }
+  .hubtabs { display: flex; gap: 6px; margin: 12px 0 2px; }
+  .hubtabs button { flex: 1; font-weight: 650; }
+  .hubtabs button.on { background: #f5d78a; color: #1a1408; border-color: #f5d78a; }
+  .weightline { margin-top: 8px; font-size: 11px; line-height: 1.4; color: #9aa3b2; }
   #zReset { letter-spacing: 0.04em; }
   .key {
     position: absolute; left: 18px; bottom: 18px; z-index: 12; width: 372px;
@@ -229,7 +233,7 @@
     h1 { font-size: 18px; }
     a.home { min-height: 42px; padding: 10px 14px; font-size: 13px; display: inline-flex; align-items: center; }
     .pills { margin-top: 10px; display: flex; gap: 8px; flex-wrap: wrap; }
-    #btn { flex: 1 0 100%; min-height: 48px; font-size: 16px; }
+    #btn, #btnUsdt { flex: 1 1 46%; min-height: 48px; font-size: 15px; }
     .pills button { flex: 1; min-height: 42px; padding: 10px 8px; font-size: 12px; white-space: nowrap; }
     #zReset { flex: 0 0 72px; }
     .dock {
@@ -290,7 +294,8 @@
   </div>
   <p class="note">A picture of the idea. Not the live map. That is <a href="https://tittyverse.fun">Tittyverse</a>.</p>
   <div class="pills">
-    <button id="btn">Add Bulma</button>
+    <button id="btn">Add USDC</button>
+    <button id="btnUsdt">Add USDT</button>
     <button id="btnSpin">Auto-Rotate</button>
   </div>
 </div>
@@ -333,14 +338,19 @@
 <aside class="panel" id="panel">
   <div class="master">
     <h2>All tokens</h2>
-    <p>A bigger market cap makes a bigger disc. Supply paired to Bulma is how much of that coin is locked with her. More locked pulls it closer to BTC. One slider sets every coin. Change a single coin after if you want it different.</p>
+    <p>A bigger market cap makes a bigger disc. The tab picks the hub. Bulma is the USDC hub. USDT is the same lock, with less depth on Solana, so the same percent pulls less. One slider sets every coin. Change a single coin after if you want it different.</p>
     <div class="sl">Market cap increase <b id="allBoostLabel">+0%</b></div>
     <input id="allBoost" type="range" min="0" max="2000" step="1" value="0" aria-label="All tokens market cap increase">
     <div class="ends"><span>0%</span><span>2000%</span></div>
-    <div class="sl pair">Supply paired to Bulma <b id="allShareLabel">0%</b></div>
+    <div class="hubtabs">
+      <button type="button" id="tabUsdc" class="on">USDC · Bulma</button>
+      <button type="button" id="tabUsdt">USDT</button>
+    </div>
+    <div class="sl pair"><span id="pairName">Supply paired to Bulma</span> <b id="allShareLabel">0%</b></div>
     <input id="allShare" type="range" min="0" max="50" step="1" value="0" aria-label="All tokens supply paired">
     <div class="ends"><span>0%</span><span>50%</span></div>
     <div class="bondline" id="bondNote"></div>
+    <p class="weightline">On Solana, USDC is $6.83B and USDT is $2.40B. The same percent paired adds about 35% as much through USDT.</p>
   </div>
   <div class="rows" id="rows"></div>
 </aside>
@@ -384,9 +394,15 @@ let W, H, cx, cy;
 let scale = 1;
 let rotX = 0.25, rotY = 0.35, rotZ = 0;
 let dragging = false, lastX = 0, lastY = 0;
-let mode = 'current';
-let bulmaT = 0;
+let usdcOn = false;
+let usdtOn = false;
+let hubTab = 'usdc';
+let usdcT = 0;
+let usdtT = 0;
 let autoRotate = false;
+const USDC_SUPPLY = 6.828e9;
+const USDT_SUPPLY = 2.403e9;
+const USDT_WEIGHT = USDT_SUPPLY / USDC_SUPPLY;
 
 const tokens = [
   { ticker: 'BTC', key: 'btc', sub: 'EARTH', color: '#f7931a', vol: 500000, liq: 250000, mc: 5000000, isCenter: true },
@@ -435,6 +451,7 @@ ranked.forEach((t, i) => {
   t.baseR = (t.inner ? (310 + (1 - strength) * 70) : (490 + (1 - strength) * 110)) + ((idx % 3) - 1) * 26;
   t.boost = 0;
   t.share = 0;
+  t.shareUsdt = 0;
   t.vol = t.mc;
 });
 btc.size = 68;
@@ -458,11 +475,23 @@ function boostLabel(t) {
   return '+' + t.boost + '% · ' + money(levelOf(t));
 }
 
+function addedUsdc(t) {
+  return (t.share || 0) * t.vol * usdcT;
+}
+function addedUsdt(t) {
+  return (t.shareUsdt || 0) * t.vol * usdtT * USDT_WEIGHT;
+}
 function addedOf(t) {
-  return (t.share || 0) * t.vol * bulmaT;
+  return addedUsdc(t) + addedUsdt(t);
+}
+function bondUsdcNow() {
+  return orbiters.reduce((s, t) => s + addedUsdc(t), 0);
+}
+function bondUsdtNow() {
+  return orbiters.reduce((s, t) => s + addedUsdt(t), 0);
 }
 function bondNow() {
-  return orbiters.reduce((s, t) => s + addedOf(t), 0);
+  return bondUsdcNow() + bondUsdtNow();
 }
 function radiusOf(t) {
   const add = addedOf(t);
@@ -496,7 +525,7 @@ orbiters.forEach(t => {
     + '<div class="sl">Market cap increase <b data-v="' + t.ticker + '">' + boostLabel(t) + '</b></div>'
     + '<input type="range" data-kind="vol" min="0" max="2000" step="1" value="0" aria-label="' + t.ticker + ' volume">'
     + '<div class="ends"><span>0%</span><span>2000%</span></div>'
-    + '<div class="sl pair">Supply paired to Bulma <b data-s="' + t.ticker + '">0%</b></div>'
+    + '<div class="sl pair"><span class="pair-name">Supply paired to Bulma</span> <b data-s="' + t.ticker + '">0%</b></div>'
     + '<input type="range" data-kind="share" min="0" max="50" step="1" value="0" aria-label="' + t.ticker + ' supply paired to USBD">'
     + '<div class="ends"><span>0%</span><span>50%</span></div>';
   row.appendChild(img);
@@ -510,7 +539,7 @@ orbiters.forEach(t => {
     paintDeltas();
   });
   body.querySelector('[data-kind="share"]').addEventListener('input', (e) => {
-    t.share = Number(e.target.value) / 100;
+    t[hubTab === 'usdt' ? 'shareUsdt' : 'share'] = Number(e.target.value) / 100;
     body.querySelector('[data-s]').textContent = e.target.value + '%';
     paintDeltas();
   });
@@ -531,9 +560,11 @@ function applyAllBoost(v) {
   rescale();
   paintDeltas();
 }
+function shareKey() { return hubTab === 'usdt' ? 'shareUsdt' : 'share'; }
 function applyAllShare(v) {
+  const key = shareKey();
   orbiters.forEach(t => {
-    t.share = v / 100;
+    t[key] = v / 100;
     const inp = rows.querySelector('input[aria-label="' + t.ticker + ' supply paired to USBD"]');
     if (inp) inp.value = v;
     const lab = rows.querySelector('[data-s="' + t.ticker + '"]');
@@ -542,6 +573,44 @@ function applyAllShare(v) {
   const label = document.getElementById('allShareLabel');
   if (label) label.textContent = v + '%';
   paintDeltas();
+}
+function syncShareInputs() {
+  const key = shareKey();
+  const name = hubTab === 'usdt' ? 'Supply paired to USDT' : 'Supply paired to Bulma';
+  document.querySelectorAll('.pair-name').forEach(el => { el.textContent = name; });
+  const master = document.getElementById('pairName');
+  if (master) master.textContent = name;
+  const vals = orbiters.map(t => Math.round((t[key] || 0) * 100));
+  const same = vals.every(v => v === vals[0]);
+  orbiters.forEach(t => {
+    const pct = Math.round((t[key] || 0) * 100);
+    const inp = rows.querySelector('input[aria-label="' + t.ticker + ' supply paired to USBD"]');
+    if (inp) inp.value = pct;
+    const lab = rows.querySelector('[data-s="' + t.ticker + '"]');
+    if (lab) lab.textContent = pct + '%';
+  });
+  const allShare = document.getElementById('allShare');
+  if (same && allShare) {
+    allShare.value = vals[0];
+    const label = document.getElementById('allShareLabel');
+    if (label) label.textContent = vals[0] + '%';
+  }
+}
+function syncBoostInputs() {
+  orbiters.forEach(t => {
+    const vol = rows.querySelector('input[aria-label="' + t.ticker + ' volume"]');
+    if (vol) vol.value = t.boost;
+    const vLab = rows.querySelector('[data-v="' + t.ticker + '"]');
+    if (vLab) vLab.textContent = boostLabel(t);
+  });
+  const vals = orbiters.map(t => t.boost);
+  if (vals.every(v => v === vals[0])) {
+    const allBoost = document.getElementById('allBoost');
+    if (allBoost) allBoost.value = vals[0];
+    const label = document.getElementById('allBoostLabel');
+    if (label) label.textContent = '+' + vals[0] + '%';
+  }
+  rescale();
 }
 document.getElementById('allBoost').addEventListener('input', (e) => applyAllBoost(Number(e.target.value)));
 document.getElementById('allShare').addEventListener('input', (e) => applyAllShare(Number(e.target.value)));
@@ -598,8 +667,9 @@ function paintDeltas() {
     const el = rows.querySelector('[data-d="' + t.ticker + '"]');
     if (!el) return;
     const add = addedOf(t);
-    if (add < 1 || mode !== 'bulma') {
-      el.textContent = Math.round((t.share || 0) * 100) + '% paired';
+    const hubs = usdcOn || usdtOn;
+    if (add < 1 || !hubs) {
+      el.textContent = Math.round((t[shareKey()] || 0) * 100) + '% paired';
       el.classList.remove('on');
       return;
     }
@@ -608,16 +678,18 @@ function paintDeltas() {
     el.classList.add('on');
   });
   const note = document.getElementById('bondNote');
-  if (mode !== 'bulma') {
+  const box = document.getElementById('readout');
+  if (!(usdcOn || usdtOn)) {
     note.textContent = '';
     return;
   }
+  const bu = bondUsdcNow();
+  const bd = bondUsdtNow();
   const lift = bond / baseEco * 100;
   const btcLift = bond / btc.liq * 100;
-  note.textContent = 'Bond ' + money(bond) + ' · $BTC LP +' + btcLift.toFixed(1) + '% · ecosystem +' + lift.toFixed(1) + '% vs no Bulma';
-  const box = document.getElementById('readout');
+  note.textContent = 'USDC ' + money(bu) + ' · USDT ' + money(bd) + ' · $BTC LP +' + btcLift.toFixed(1) + '% · ecosystem +' + lift.toFixed(1) + '%';
   box.classList.add('show');
-  box.textContent = 'Sample hub ' + money(bond) + '  ·  always deeper with a hub in';
+  box.textContent = 'USDC ' + money(bu) + '  ·  USDT ' + money(bd) + '  ·  USDT pool is ' + Math.round(USDT_WEIGHT * 100) + '% of USDC';
 }
 
 let userZoomed = false;
@@ -728,14 +800,45 @@ document.getElementById('zReset').onclick = () => { userZoomed = false; setZoom(
 document.getElementById('zIn').onclick = () => { userZoomed = true; setZoom(scale * 1.12); };
 document.getElementById('zOut').onclick = () => { userZoomed = true; setZoom(scale / 1.12); };
 
+function setHubTab(which) {
+  hubTab = which;
+  document.getElementById('tabUsdc').classList.toggle('on', which === 'usdc');
+  document.getElementById('tabUsdt').classList.toggle('on', which === 'usdt');
+  syncShareInputs();
+}
+function toggleHub(which) {
+  const turningOn = which === 'usdt' ? !usdtOn : !usdcOn;
+  if (which === 'usdt') usdtOn = turningOn;
+  else usdcOn = turningOn;
+  const otherOn = which === 'usdt' ? usdcOn : usdtOn;
+  const key = which === 'usdt' ? 'shareUsdt' : 'share';
+  orbiters.forEach(t => {
+    t[key] = turningOn ? 0.05 : 0;
+    if (turningOn) {
+      if (!otherOn || !t.boost) t.boost = 20;
+    } else if (!otherOn) {
+      t.boost = 0;
+    }
+    t.vol = levelOf(t);
+  });
+  setHubTab(which === 'usdt' ? 'usdt' : 'usdc');
+  syncBoostInputs();
+  refreshCopy();
+}
 function refreshCopy() {
-  const on = mode === 'bulma';
-  document.getElementById('btn').textContent = on ? 'Remove Bulma' : 'Add Bulma';
-  document.getElementById('btn').classList.toggle('active', on);
+  const on = usdcOn || usdtOn;
+  const uc = document.getElementById('btn');
+  const ut = document.getElementById('btnUsdt');
+  uc.textContent = usdcOn ? 'Remove USDC' : 'Add USDC';
+  ut.textContent = usdtOn ? 'Remove USDT' : 'Add USDT';
+  uc.classList.toggle('active', usdcOn);
+  ut.classList.toggle('active', usdtOn);
   document.getElementById('kicker').textContent = 'D4RTH · LAUNCH TEMPLATE';
   document.getElementById('title').textContent = 'Example map';
   document.getElementById('panel').classList.toggle('open', on);
   document.body.classList.toggle('bulma', on);
+  document.getElementById('tabUsdc').classList.toggle('on', hubTab === 'usdc');
+  document.getElementById('tabUsdt').classList.toggle('on', hubTab === 'usdt');
   const keyEl = document.getElementById('key');
   if (keyEl) document.documentElement.style.setProperty('--key-h', keyEl.offsetHeight + 'px');
   const box = document.getElementById('readout');
@@ -744,33 +847,10 @@ function refreshCopy() {
   paintDeltas();
   if (!userZoomed) setZoom(fittedZoom());
 }
-document.getElementById('btn').addEventListener('click', () => {
-  mode = mode === 'current' ? 'bulma' : 'current';
-  const on = mode === 'bulma';
-  orbiters.forEach(t => {
-    t.boost = on ? 20 : 0;
-    t.vol = levelOf(t);
-    t.share = on ? 0.05 : 0;
-    const vol = rows.querySelector('input[aria-label="' + t.ticker + ' volume"]');
-    const share = rows.querySelector('input[aria-label="' + t.ticker + ' supply paired to USBD"]');
-    if (vol) vol.value = t.boost;
-    if (share) share.value = on ? 5 : 0;
-    const vLab = rows.querySelector('[data-v="' + t.ticker + '"]');
-    const sLab = rows.querySelector('[data-s="' + t.ticker + '"]');
-    if (vLab) vLab.textContent = boostLabel(t);
-    if (sLab) sLab.textContent = (on ? 5 : 0) + '%';
-  });
-  const allBoost = document.getElementById('allBoost');
-  const allShare = document.getElementById('allShare');
-  if (allBoost) allBoost.value = on ? 20 : 0;
-  if (allShare) allShare.value = on ? 5 : 0;
-  const allBoostLabel = document.getElementById('allBoostLabel');
-  const allShareLabel = document.getElementById('allShareLabel');
-  if (allBoostLabel) allBoostLabel.textContent = on ? '+20%' : '+0%';
-  if (allShareLabel) allShareLabel.textContent = (on ? 5 : 0) + '%';
-  rescale();
-  refreshCopy();
-});
+document.getElementById('btn').addEventListener('click', () => toggleHub('usdc'));
+document.getElementById('btnUsdt').addEventListener('click', () => toggleHub('usdt'));
+document.getElementById('tabUsdc').addEventListener('click', () => setHubTab('usdc'));
+document.getElementById('tabUsdt').addEventListener('click', () => setHubTab('usdt'));
 document.getElementById('btnSpin').addEventListener('click', () => {
   autoRotate = !autoRotate;
   const b = document.getElementById('btnSpin');
@@ -841,8 +921,8 @@ function drawDisc(x, y, r, fill, image) {
 }
 
 function loop() {
-  if (mode === 'bulma') bulmaT = Math.min(1, bulmaT + 0.02);
-  else bulmaT = Math.max(0, bulmaT - 0.02);
+  usdcT = usdcOn ? Math.min(1, usdcT + 0.02) : Math.max(0, usdcT - 0.02);
+  usdtT = usdtOn ? Math.min(1, usdtT + 0.02) : Math.max(0, usdtT - 0.02);
   if (autoRotate && !dragging) { rotY += 0.003; rotX += 0.0006; rotZ += 0.0004; }
 
   ctx.fillStyle = '#06080f';
@@ -872,9 +952,27 @@ function loop() {
 
   const bond = bondNow();
   const closeness = bond / (bond + btc.liq);
-  const sep = 240 * bulmaT * (1 - 0.28 * closeness);
-  const btcWorld = { x: -sep / 2, y: 0, z: 0 };
-  const usbdWorld = { x: sep / 2, y: 0, z: 0 };
+  const both = usdcT > 0.02 && usdtT > 0.02;
+  let btcWorld, usbdWorld, usdtWorld;
+  if (both) {
+    btcWorld = { x: 0, y: 0, z: 0 };
+    usbdWorld = { x: -240, y: 0, z: 0 };
+    usdtWorld = { x: 240, y: 0, z: 0 };
+  } else if (usdcT > 0.02) {
+    const sep = 240 * usdcT * (1 - 0.28 * closeness);
+    btcWorld = { x: -sep / 2, y: 0, z: 0 };
+    usbdWorld = { x: sep / 2, y: 0, z: 0 };
+    usdtWorld = null;
+  } else if (usdtT > 0.02) {
+    const sep = 240 * usdtT * (1 - 0.28 * closeness);
+    btcWorld = { x: -sep / 2, y: 0, z: 0 };
+    usbdWorld = null;
+    usdtWorld = { x: sep / 2, y: 0, z: 0 };
+  } else {
+    btcWorld = { x: 0, y: 0, z: 0 };
+    usbdWorld = null;
+    usdtWorld = null;
+  }
 
   const sprites = [];
   const ghosts = [];
@@ -887,7 +985,7 @@ function loop() {
       r: Math.max(9, t.size * pr.s * scale),
       add: addedOf(t)
     });
-    if (bulmaT > 0.05 && t.share > 0.02) {
+    if ((usdcT > 0.05 && t.share > 0.02) || (usdtT > 0.05 && t.shareUsdt > 0.02)) {
       const ghost = rotate({ x: Math.cos(t.angle) * t.baseR, y: Math.sin(t.angle) * t.baseR, z: 0 }, rotX, rotY, rotZ);
       const g = project(ghost);
       ghosts.push({ x: g.x, y: g.y, r: Math.max(6, t.size * g.s * scale * 0.7) });
@@ -903,18 +1001,32 @@ function loop() {
   sprites.push(btcSprite);
 
   let bulma = null;
-  if (bulmaT > 0.02) {
+  let usdtSprite = null;
+  const pairedUsdc = orbiters.reduce((s, t) => s + (t.share || 0) * t.vol, 0);
+  const pairedUsdt = orbiters.reduce((s, t) => s + (t.shareUsdt || 0) * t.vol, 0);
+  if (usbdWorld && usdcT > 0.02) {
     const usbdSpun = rotate(usbdWorld, rotX, rotY, rotZ);
     const pr = project(usbdSpun);
-    const paired = orbiters.reduce((s, t) => s + (t.share || 0) * t.vol, 0);
-    const volGrow = Math.min(1, paired / 1500000);
+    const volGrow = Math.min(1, pairedUsdc / 1500000);
     const usbdSize = 34 + 18 * volGrow;
     bulma = {
       kind: 'bulma', x: pr.x, y: pr.y, z: usbdSpun.z,
-      r: Math.max(16, usbdSize * pr.s * scale * (0.35 + 0.65 * bulmaT)),
-      alpha: bulmaT
+      r: Math.max(16, usbdSize * pr.s * scale * (0.35 + 0.65 * usdcT)),
+      alpha: usdcT
     };
     sprites.push(bulma);
+  }
+  if (usdtWorld && usdtT > 0.02) {
+    const spun = rotate(usdtWorld, rotX, rotY, rotZ);
+    const pr = project(spun);
+    const volGrow = Math.min(1, pairedUsdt / 1500000);
+    const usdtSize = (34 + 18 * volGrow) * Math.sqrt(USDT_WEIGHT);
+    usdtSprite = {
+      kind: 'usdt', x: pr.x, y: pr.y, z: spun.z,
+      r: Math.max(12, usdtSize * pr.s * scale * (0.35 + 0.65 * usdtT)),
+      alpha: usdtT
+    };
+    sprites.push(usdtSprite);
   }
 
   ghosts.forEach(g => {
@@ -925,17 +1037,21 @@ function loop() {
     ctx.stroke();
   });
 
-  if (bulma) {
+  function link(a, b, color, width) {
+    if (!a || !b) return;
     ctx.save();
     ctx.lineCap = 'round';
-    ctx.strokeStyle = 'rgba(245,215,138,' + (0.35 * bulmaT) + ')';
-    ctx.lineWidth = 1.25;
+    ctx.strokeStyle = color;
+    ctx.lineWidth = width;
     ctx.beginPath();
-    ctx.moveTo(btcSprite.x, btcSprite.y);
-    ctx.lineTo(bulma.x, bulma.y);
+    ctx.moveTo(a.x, a.y);
+    ctx.lineTo(b.x, b.y);
     ctx.stroke();
     ctx.restore();
   }
+  link(btcSprite, bulma, 'rgba(245,215,138,' + (0.45 * usdcT) + ')', 1.7);
+  link(btcSprite, usdtSprite, 'rgba(80,200,160,' + (0.4 * usdtT) + ')', 1.15);
+  if (bulma && usdtSprite) link(bulma, usdtSprite, 'rgba(255,255,255,0.18)', 1);
   const halo = ctx.createRadialGradient(btcSprite.x, btcSprite.y, btcSprite.r * 0.4, btcSprite.x, btcSprite.y, btcSprite.r * 2.8);
   halo.addColorStop(0, 'rgba(255,176,70,0.16)');
   halo.addColorStop(1, 'rgba(255,176,70,0)');
@@ -971,22 +1087,32 @@ function loop() {
     } else {
       ctx.save();
       ctx.globalAlpha = s.alpha;
-      const ready = usbdImg && usbdImg.ok;
-      drawDisc(s.x, s.y, s.r, '#12343f', ready ? usbdImg : null);
       const ly = clearY(s.x, s.y + s.r + 6);
-      ctx.fillStyle = '#f4f6fb';
-      ctx.font = '600 12px Inter, system-ui';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'top';
-      ctx.fillText('BULMA', s.x, ly);
-      ctx.fillStyle = 'rgba(154,163,178,0.95)';
-      ctx.font = '500 11px Inter, system-ui';
-      ctx.fillText('HUB', s.x, ly + 15);
+      if (s.kind === 'usdt') {
+        drawDisc(s.x, s.y, s.r, '#26a17b', null);
+        ctx.fillStyle = '#f4f6fb';
+        ctx.font = '600 12px Inter, system-ui';
+        ctx.fillText('USDT', s.x, ly);
+        ctx.fillStyle = 'rgba(154,163,178,0.95)';
+        ctx.font = '500 11px Inter, system-ui';
+        ctx.fillText('$2.40B', s.x, ly + 15);
+      } else {
+        const ready = usbdImg && usbdImg.ok;
+        drawDisc(s.x, s.y, s.r, '#12343f', ready ? usbdImg : null);
+        ctx.fillStyle = '#f4f6fb';
+        ctx.font = '600 12px Inter, system-ui';
+        ctx.fillText('BULMA', s.x, ly);
+        ctx.fillStyle = 'rgba(154,163,178,0.95)';
+        ctx.font = '500 11px Inter, system-ui';
+        ctx.fillText('USDC', s.x, ly + 15);
+      }
       ctx.restore();
     }
   });
 
-  if (mode === 'bulma' && Math.abs(bond - (window.__lastBond || -1)) > 500) {
+  if ((usdcOn || usdtOn) && Math.abs(bond - (window.__lastBond || -1)) > 500) {
     window.__lastBond = bond;
     paintDeltas();
   }
