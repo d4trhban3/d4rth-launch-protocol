@@ -447,9 +447,9 @@ function buildStars() {
     g.beginPath(); g.arc(rnd() * W, rnd() * H, r, 0, 6.2832); g.fill();
   }
 }
-let lastSig = '';
+let lastSig = '', imgVersion = 0;
 let dive = null;
-const ease = { smooth: p => p * p * (3 - 2 * p), out: p => 1 - Math.pow(1 - p, 3) };
+const ease = { io: p => p < 0.5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2, out: p => 1 - Math.pow(1 - p, 3) };
 let theta = 0, phi = Math.acos(0.72), dTheta = 0, dPhi = 0;
 let dist = 90, distTarget = null;
 let dragging = false, lastX = 0, lastY = 0, userZoomed = false, autoRotate = false;
@@ -504,6 +504,15 @@ function loadImgOld(t) {
   im.src = t.image;
   t.img = im;
 }
+const PLACEHOLDER = { len: 3242, sig: '92d76934e9d1' };
+async function isPlaceholder(url) {
+  try {
+    const b = await (await fetch(url)).arrayBuffer();
+    if (b.byteLength !== PLACEHOLDER.len) return false;
+    const h = [...new Uint8Array(await crypto.subtle.digest('SHA-1', b))].slice(0, 6).map(x => x.toString(16).padStart(2, '0')).join('');
+    return h === PLACEHOLDER.sig;
+  } catch (e) { return false; }
+}
 function loadImg(t) {
   const srcs = [];
   if (LOCAL.has(t.mint)) srcs.push(CLEAN[t.mint] || 'art/m/' + t.mint + '.jpg');
@@ -512,7 +521,16 @@ function loadImg(t) {
   (function next(i) {
     if (i >= srcs.length) return;
     const im = new Image();
-    im.onload = () => { t.img = im; t.loaded = true; t.image = srcs[i]; if (!selected || selected === t) renderInspector(); };
+    im.onload = () => {
+      t.img = im; t.loaded = true; t.image = srcs[i]; imgVersion++;
+      if (!selected || selected === t) renderInspector();
+      if (srcs[i] === t.remote && /pump$/.test(t.mint)) isPlaceholder(t.remote).then(ph => {
+        if (!ph) return;
+        const alt = new Image(), url = 'https://images.pump.fun/coin-image/' + t.mint + '?imageWidth=256&imageHeight=256';
+        alt.onload = () => { t.img = alt; t.image = url; imgVersion++; if (!selected || selected === t) renderInspector(); renderCatalog(document.getElementById('tvSearch').value); };
+        alt.src = url;
+      });
+    };
     im.onerror = () => next(i + 1);
     im.src = srcs[i];
   })(0);
@@ -550,7 +568,8 @@ function radiusOf(t) {
   return t.baseR * (1 - 0.42 * pullOf(t));
 }
 function homeRadius(t) { return t.baseR; }
-function orbitSpread() { return 1; }
+let emergeK = 1, emergeA = 1;
+function orbitSpread() { return emergeK; }
 function camSpread() { return 1; }
 function studioRadius(mc, shrink) {
   const maxMc = SNAP.maxMc || anchor.mc || 1;
@@ -673,7 +692,7 @@ function worldAt(t, R) {
   return [Math.cos(ang) * R, Math.sin(ang * 2 + ring) * R * 0.13, Math.sin(ang) * R];
 }
 function worldOf(t) {
-  return worldAt(t, t.center ? 0 : radiusOf(t));
+  return worldAt(t, t.center ? 0 : radiusOf(t) * emergeK);
 }
 function screenRadius(_world, radius) {
   const tan = Math.tan(46 * Math.PI / 360);
@@ -1153,7 +1172,7 @@ function loop() {
   stepCamera();
   let mix = 0;
   for (const t of bodies) mix += t.boost + t.share + t.shareUsdt + (t.loaded ? 1 : 0);
-  const sig = [theta, phi, dist, usdcT, usdtT, W, H, view, showLabels, showOrbits, showPairs, selected && selected.mint, anchor.mint, dive ? performance.now() : 0, mix, bulmaImg.complete, usdtImg.complete, hubTab].join('|');
+  const sig = [theta, phi, dist, usdcT, usdtT, W, H, view, showLabels, showOrbits, showPairs, selected && selected.mint, anchor.mint, imgVersion, dive ? performance.now() : 0, mix, bulmaImg.complete, usdtImg.complete, hubTab].join('|');
   if (sig === lastSig) { requestAnimationFrame(loop); return; }
   lastSig = sig;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -1161,26 +1180,27 @@ function loop() {
   ctx.fillRect(0, 0, W, H);
   if (starLayer) ctx.drawImage(starLayer, 0, 0, W, H);
   let dFade = 0, dHole = null;
+  emergeK = 1; emergeA = 1;
   if (dive) {
     const cx = W / 2, cy = H / 2, e = Math.min(1, (performance.now() - dive.t0) / dive.dur);
     if (dive.phase === 'in') {
-      const k = Math.pow(e, 1.8);
+      const k = ease.io(e);
       const sc = 1 + (dive.S - 1) * k;
       ctx.save();
       ctx.translate(dive.fx + (cx - dive.fx) * k, dive.fy + (cy - dive.fy) * k);
       ctx.scale(sc, sc);
       ctx.translate(-dive.fx, -dive.fy);
-      dFade = Math.max(0, Math.min(1, (k - 0.5) / 0.5));
+      dFade = Math.min(1, k / 0.75);
       dHole = { x: dive.fx, y: dive.fy, r: dive.r };
     } else {
-      const k = ease.out(e), sc = 1 + (dive.s0 - 1) * (1 - k);
+      const k = ease.out(e);
       ctx.save();
-      ctx.translate(cx, cy); ctx.scale(sc, sc); ctx.translate(-cx, -cy);
-      dFade = Math.max(0, 1 - k * 1.7);
-      dHole = { anchor: true };
+      emergeK = 0.08 + 0.92 * k;
+      emergeA = Math.min(1, Math.max(0, (e - 0.08) / 0.6));
       if (e >= 1) dive.done = true;
     }
   }
+  ctx.globalAlpha = emergeA;
   if (W < 8 || H < 8) { requestAnimationFrame(loop); return; }
   if (view === 'constellations') { drawConstellations(); requestAnimationFrame(loop); return; }
   const hits = [];
@@ -1281,7 +1301,9 @@ function loop() {
     ctx.fillStyle = '#f4f1ea'; ctx.font = '600 11px "DM Sans", sans-serif'; ctx.textAlign = 'center';
     ctx.fillText('USDT', hubU.x, hubU.y + rU + 13);
   }
+  ctx.globalAlpha = 1;
   disc(btcP.x, btcP.y, btcR, anchor.loaded ? anchor.img : null);
+  ctx.globalAlpha = emergeA;
   hits.push({ t: anchor, x: btcP.x, y: btcP.y, r: btcR });
   if (showLabels) {
     const labeled = new Set([anchor.mint, ...(selected ? [selected.mint] : [])]);
@@ -1301,9 +1323,10 @@ function loop() {
       }
     });
   }
+  ctx.globalAlpha = 1;
   if (dive) {
     if (dFade > 0.01) {
-      const hole = dHole.anchor ? { x: btcP.x, y: btcP.y, r: btcR } : dHole, big = (W + H) * 12;
+      const hole = dHole, big = (W + H) * 12;
       ctx.beginPath();
       ctx.rect(-big, -big, big * 2, big * 2);
       ctx.arc(hole.x, hole.y, hole.r, 0, Math.PI * 2);
@@ -1418,7 +1441,7 @@ function renderCrumbs() {
   try { history.replaceState(null, '', trail.length ? hash : location.pathname + location.search); } catch (e) {}
 }
 function goTrail(i) {
-  if (i <= 0) { trail = []; setSystem(home.anchor, home.planets, false); startArrive(0.6); return; }
+  if (i <= 0) { trail = []; setSystem(home.anchor, home.planets, false); startArrive(); return; }
   const target = trail[i - 1].mint;
   trail = trail.slice(0, i - 1);
   enterOrbit(target);
@@ -1437,21 +1460,23 @@ async function fetchSystem(mint) {
   } finally { clearTimeout(timer); }
 }
 let entering = 0;
-function startArrive(s0) {
+function startArrive() {
   if (REDUCED) { dive = null; return; }
-  dive = { phase: 'out', t0: performance.now(), dur: 720, s0 };
+  dive = { phase: 'emerge', t0: performance.now(), dur: 950 };
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function enterOrbit(mint, hit) {
-  if (mint === home.anchor.mint) { trail = []; setSystem(home.anchor, home.planets, false); startArrive(0.6); return; }
+  if (mint === home.anchor.mint) { trail = []; setSystem(home.anchor, home.planets, false); startArrive(); return; }
   const token = ++entering;
   const count = document.getElementById('orbitCount');
   count.textContent = 'Opening orbit…';
   let zoomedR = 0;
   if (hit && !REDUCED) {
-    const S = Math.max(2, Math.min(18, Math.min(W, H) * 0.3 / Math.max(hit.r, 3)));
-    dive = { phase: 'in', t0: performance.now(), dur: 520, fx: hit.x, fy: hit.y, r: hit.r, S };
-    zoomedR = hit.r * S;
+    const tan = Math.tan(46 * Math.PI / 360);
+    const rA = (200 / 23 * 0.9) * H / (2 * Math.max(distTarget || dist, 1) * tan);
+    const S = Math.max(1.15, Math.min(9, rA / Math.max(hit.r, 3)));
+    dive = { phase: 'in', t0: performance.now(), dur: 700, fx: hit.x, fy: hit.y, r: hit.r, S };
+    zoomedR = 1;
   }
   try {
     const j = await fetchSystem(mint);
@@ -1463,10 +1488,7 @@ async function enterOrbit(mint, hit) {
     const ps = layoutPlanets((j.tokens || []).filter(t => t.mint !== mint).map(t => bodyFrom(t, null)).sort((x, y) => y.mc - x.mc), null);
     if (!trail.length || trail[trail.length - 1].mint !== mint) trail.push({ mint, symbol: a.symbol, image: LOCAL.has(mint) ? (CLEAN[mint] || 'art/m/' + mint + '.jpg') : a.remote });
     setSystem(a, ps, true);
-    if (zoomedR) {
-      const rA = screenRadius([0, 0, 0], studioRadius(anchor.vmc || anchor.mc, 0.9));
-      startArrive(Math.max(1.5, Math.min(24, zoomedR / Math.max(rA, 3))));
-    } else startArrive(2.2);
+    startArrive();
     if (!ps.length) document.getElementById('orbitCount').textContent = 'No pairs yet for this coin.';
   } catch (e) {
     if (token !== entering) return;
