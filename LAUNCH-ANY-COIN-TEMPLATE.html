@@ -94,21 +94,21 @@ layout: null
 <h2>The 6 steps</h2>
 <ol><li><strong>Launch the coin on pump.fun, paired with USDC. That is the main pool.</strong> USDC is a dollar on Solana. Name [NAME], ticker [TICKER].</li><li><strong>Buy about 20% of the coins yourself.</strong> That leaves most of the rest for other people.</li><li><strong>Lock 10% in a pool with BTC on Meteora.</strong> BTC is the main coin of this group. Lock means the money cannot be pulled back out. <a href="https://meteora.ag/create/dammv2/standard">https://meteora.ag/create/dammv2/standard</a> (Create → DAMM V2 → Standard Pool). <em>(DAMM V2 is Meteora's permanent pool. Tick the permanent-lock box.)</em> Base = [TICKER] mint, Quote = BTC mint. Initial Price = [TICKER] $ ÷ BTC $. Equal $ value on both sides. Tick <strong>Permanently lock my liquidity</strong>.</li><li><strong>Lock 10% in a pool with SOL on Meteora.</strong> Same pool as step 3, with SOL as the Quote. Equal $ value on both sides. Tick <strong>Permanently lock my liquidity</strong>. <em>Optional extra boost, not part of the protocol: a Tether-themed token paired to USDT, Bulma and Big Titty Coin (BTC). Its USDT pool is the thinner side, about 35% of USDC on Solana. The protocol works without it. Bulma itself is paired to USDC, SOL and Big Titty Coin (BTC).</em></li><li><strong>Leave the rest in the USDC pool.</strong> That stays the main pool, during the launch and after. <em>(After the first pool sells about 79%, the coin moves to PumpSwap by itself.)</em></li><li><strong>Then other coins lock a piece of their supply against your new coin.</strong> Your coin becomes the hub they all connect through. The example hub is Bulma Dollar. Yours can be any coin. Same Meteora pool, permanently locked.</li></ol>
 <p><strong>Support the protocol (strongly encouraged).</strong> Add GitHub <code>d4trhban3</code> as a pump.fun creator-fee recipient. Optional. See below.</p>
-<h2 id="calculator">Protocol calculator</h2>
-<p>The same maths as the <a href="galaxy/">galaxy</a> panel, so you can check one against the other. The launch is fixed. Only the other coins' pools move with the sliders. Estimates from a standard pump.fun-style curve, not a quote. Check the live curve first.</p>
+<h2 id="calculator">Launch calculator</h2>
+<p>Your token, paired with USDC as the main pool, then a supply slider for the SOL pair, then a supply slider for a second pair of your choice. It follows the six steps exactly: dev buy about 20%, lock a slice against SOL, lock a slice against your second pair, and leave the rest in the USDC pool. Estimates from a standard pump.fun-style curve, not a quote. Check the live curve first.</p>
 <div class="calc" id="calc">
-  <label>Market cap of the coins that will pair with you ($)<input id="cMc" type="number" min="0" value="8250880"></label>
-  <label>Liquidity of the whole group today ($)<input id="cLiq" type="number" min="0" value="2439406"></label>
-  <label>Market cap increase <b id="cBoostL">+0%</b><input id="cBoost" type="range" min="0" max="10000" step="1" value="0"></label>
-  <label>Supply paired to your coin <b id="cShareL">0%</b><input id="cShare" type="range" min="0" max="50" step="1" value="0"></label>
-  <p class="calc-note">Defaults are the Big Titty group snapshot (the orbiting coins' market cap, and liquidity including BTC). In the galaxy, with the same master sliders, the main protocol figure equals the "Other coins' pools" cost below.</p>
+  <label>Your token <input id="cName" type="text" value="[TICKER]" maxlength="12"></label>
+  <label>Second pair of your choice <input id="cSecond" type="text" value="BTC" maxlength="12"></label>
+  <label>Supply locked in the SOL pair <b id="cSolL">10%</b><input id="cSol" type="range" min="0" max="30" step="1" value="10"></label>
+  <label>Supply locked in the second pair <b id="cSecL">10%</b><input id="cSec" type="range" min="0" max="30" step="1" value="10"></label>
+  <p class="calc-note">The main pool is always USDC. The protocol's own numbers are 10% and 10%, bought from the 20% dev buy. If the two slices add up to more than 20%, the buy grows to cover them.</p>
   <div id="cOut"></div>
 </div>
 <style>
   .calc { margin: 12px 0 24px; padding: 14px 16px; border: 1px solid rgba(255,255,255,0.12); border-radius: 12px; background: rgba(16,22,34,0.6); }
   .calc label { display: block; margin: 0 0 12px; font-size: 12px; color: #aab3c5; }
   .calc label b { float: right; color: #8fd3e6; font-size: 12px; }
-  .calc input[type=number] { display: block; width: 100%; margin-top: 4px; padding: 8px 10px; background: #0b1020; color: #e7ebf3; border: 1px solid rgba(255,255,255,0.18); border-radius: 8px; font: inherit; }
+  .calc input[type=text] { display: block; width: 100%; margin-top: 4px; padding: 8px 10px; background: #0b1020; color: #e7ebf3; border: 1px solid rgba(255,255,255,0.18); border-radius: 8px; font: inherit; }
   .calc input[type=range] { display: block; width: 100%; margin-top: 4px; accent-color: #8fd3e6; }
   .calc table { width: 100%; border-collapse: collapse; margin: 6px 0 12px; font-size: 13px; }
   .calc th { text-align: left; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: #8b93a3; padding: 4px 0; }
@@ -117,53 +117,51 @@ layout: null
   .calc tr.on td { color: #8fd3e6; font-weight: 700; }
   .calc h4 { margin: 12px 0 2px; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: #8fd3e6; }
   .calc small, .calc-note { display: block; color: #8b93a3; font-size: 12px; line-height: 1.5; }
+  .calc .warn { color: #f5d78a; }
 </style>
 <script>
 (function () {
-  var SUP = 1e9, VT = 1.073e9, SOLD = 793.1e6, DEVBUY = 0.2 * SUP, LOCKED = 0.1 * SUP, DEV_COST = 1000;
-  var VQ = DEV_COST * (VT - DEVBUY) / DEVBUY;
-  var USDC = 6.828e9, USDT = 2.403e9, W = USDT / USDC;
+  // pump.fun-style constant-product curve: 1B supply, 1.073B virtual tokens, 793.1M sold before it
+  // graduates. The virtual USDC reserve is set so a 20% buy costs about $1,000 (the how-to's figure).
+  var SUP = 1e9, VT = 1.073e9, SOLD = 793.1e6, BASE_BUY = 0.2 * SUP, BASE_COST = 1000;
+  var VQ = BASE_COST * (VT - BASE_BUY) / BASE_BUY;
   function money(n) {
     n = Number(n) || 0;
-    if (n >= 1e12) return '$' + (n / 1e12).toFixed(2) + 'T';
     if (n >= 1e9) return '$' + (n / 1e9).toFixed(2) + 'B';
     if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
-    if (n >= 1e3) return '$' + (n / 1e3).toFixed(n >= 1e5 ? 0 : 1) + 'K';
+    if (n >= 1e3) return '$' + (n / 1e3).toFixed(1) + 'K';
     if (n >= 1) return '$' + n.toFixed(2);
     return n > 0 ? '$' + n.toFixed(4) : '$0';
   }
-  function pct(n) { return n.toLocaleString('en-US', { maximumFractionDigits: n >= 100 ? 0 : 1 }); }
+  function tok(n) { return n >= 1e9 ? (n / 1e9).toFixed(2) + 'B' : (n / 1e6).toFixed(0) + 'M'; }
   var $ = function (id) { return document.getElementById(id); };
+  function esc(t) { return String(t).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
   function paint() {
-    var mc = Math.max(0, Number($('cMc').value) || 0), liq = Math.max(1, Number($('cLiq').value) || 0);
-    var boost = Number($('cBoost').value), share = Number($('cShare').value) / 100;
-    $('cBoostL').textContent = '+' + boost.toLocaleString('en-US') + '%';
-    $('cShareL').textContent = Math.round(share * 100) + '%';
-    var level = mc * (1 + boost / 100), A = share * level;
-    var price = (VQ + DEV_COST) / (VT - DEVBUY), side = LOCKED * price;
-    var launch = DEV_COST + 2 * side, gradMc = VQ * VT / Math.pow(VT - SOLD, 2) * SUP;
-    var k = 101, top = mc * k, u = 0.5 * top, d = 0.5 * top * W;
-    var caps = [['$' + (gradMc / 1e3).toFixed(1) + 'K (graduation)', gradMc], ['$1M', 1e6], ['$10M', 1e7], ['$100M', 1e8]];
-    var h = '<h4>Launch (fixed)</h4><table><tr><th>Step</th><th>Coin</th><th>Cost</th></tr>'
-      + '<tr><td>Dev buy, 20%</td><td>200M</td><td>≈' + money(DEV_COST) + '</td></tr>'
-      + '<tr><td>Lock 10% with BTC</td><td>100M</td><td>≈' + money(side) + ' of BTC</td></tr>'
-      + '<tr><td>Lock 10% with SOL</td><td>100M</td><td>≈' + money(side) + ' of SOL</td></tr>'
-      + '<tr class="on"><td>Launch total</td><td>200M</td><td>≈' + money(launch) + '</td></tr></table>'
-      + '<small>Opens near ' + money(price * SUP) + ' of market cap after the dev buy and graduates near ' + money(gradMc) + '. The sliders do not change this.</small>'
-      + '<h4>Other coins’ pools (moves with the sliders)</h4>'
-      + '<small>Market cap ' + money(mc) + ' → ' + money(level) + ' · pairing ' + Math.round(share * 100) + '% · money to match: ' + money(A) + '</small>';
-    if (A > 0) {
-      h += '<table><tr><th>If your coin is worth</th><th>Needed</th><th>Cost</th></tr>'
-        + caps.map(function (c) { return '<tr><td>' + c[0] + '</td><td>' + pct(A / c[1] * 100) + '% of supply</td><td>≈' + money(A) + '</td></tr>'; }).join('')
-        + '</table><small>To fit inside 10% of supply your coin needs about ' + money(A * 10) + ' of market cap. Group liquidity would rise ' + pct(A / liq * 100) + '%.</small>';
-    }
-    h += '<h4>Ceiling · +10,000% and 50% paired</h4><table><tr><th>Setup</th><th>Added money</th><th>Group liquidity</th></tr>'
-      + [['No hub', 0], ['Main hub (USDC)', u], ['USDT boost only', d], ['Main hub + USDT boost', u + d]].map(function (r) {
-          return '<tr><td>' + r[0] + '</td><td>+' + money(r[1]) + '</td><td>+' + (r[1] / liq * 100).toLocaleString('en-US', { maximumFractionDigits: 0 }) + '%</td></tr>'; }).join('')
-      + '</table><small>USDT is an optional extra boost, not part of the protocol, and counts at about ' + Math.round(W * 100) + '% of USDC. On Solana USDC is ' + money(USDC) + ' and USDT is ' + money(USDT) + ', so USDC is ' + money(USDC - USDT) + ' deeper.</small>';
+    var name = esc($('cName').value.trim() || '[TICKER]'), second = esc($('cSecond').value.trim() || 'second pair');
+    var sol = Number($('cSol').value) / 100, sec = Number($('cSec').value) / 100;
+    $('cSolL').textContent = Math.round(sol * 100) + '%';
+    $('cSecL').textContent = Math.round(sec * 100) + '%';
+    var locked = (sol + sec) * SUP;
+    var buy = Math.max(BASE_BUY, locked);
+    var cost = VQ * buy / (VT - buy);
+    var price = (VQ + cost) / (VT - buy);
+    var solSide = sol * SUP * price, secSide = sec * SUP * price;
+    var total = cost + solSide + secSide;
+    var gradMc = VQ * VT / Math.pow(VT - SOLD, 2) * SUP;
+    var left = SUP - buy;
+    var h = '<table><tr><th>Step</th><th>' + name + '</th><th>Cost</th></tr>'
+      + '<tr><td>1. Launch on pump.fun, paired with USDC (main pool)</td><td>—</td><td>fee only</td></tr>'
+      + '<tr><td>2. Buy ' + Math.round(buy / SUP * 100) + '%</td><td>' + tok(buy) + '</td><td>≈' + money(cost) + '</td></tr>'
+      + '<tr><td>3. Lock ' + Math.round(sol * 100) + '% in the SOL pair</td><td>' + tok(sol * SUP) + '</td><td>≈' + money(solSide) + ' of SOL</td></tr>'
+      + '<tr><td>4. Lock ' + Math.round(sec * 100) + '% in the ' + second + ' pair</td><td>' + tok(sec * SUP) + '</td><td>≈' + money(secSide) + ' of ' + second + '</td></tr>'
+      + '<tr><td>5. Rest stays in the USDC pool</td><td>' + tok(left) + '</td><td>$0</td></tr>'
+      + '<tr class="on"><td>Total to launch</td><td>' + tok(buy) + ' bought</td><td>≈' + money(total) + '</td></tr></table>'
+      + '<small>After the buy, ' + name + ' sits near ' + money(price * SUP) + ' of market cap, and each pair needs its other side worth the same as the ' + name + ' locked in it. The curve graduates near ' + money(gradMc) + '.</small>';
+    if (buy > SOLD) h += '<small class="warn">That buy is more than the curve sells before it graduates (' + tok(SOLD) + '). Lower the slices.</small>';
+    else if (buy > BASE_BUY) h += '<small class="warn">The two slices add up to more than 20%, so the buy grows to ' + Math.round(buy / SUP * 100) + '% to cover them.</small>';
     $('cOut').innerHTML = h;
   }
-  ['cMc', 'cLiq', 'cBoost', 'cShare'].forEach(function (id) { $(id).addEventListener('input', paint); });
+  ['cName', 'cSecond', 'cSol', 'cSec'].forEach(function (id) { $(id).addEventListener('input', paint); });
   paint();
 })();
 </script>
