@@ -1274,16 +1274,21 @@ if (window.visualViewport) visualViewport.addEventListener('resize', resize);
 
 // Sorted the way Titty Kitty suggested: by what each coin is. Only the big stars draw the shape;
 // the smaller members of a group sit inside it as plain stars.
+// Big Titty Cat Wif Sword (@BTCWScoin) came up with the constellation concept, so they get a space of their
+// own. It is a credit, not a coin: no mint, no orbit. Clicking the avatar opens their X account.
+const SWORDCAT = { credit: true, url: 'https://x.com/BTCWScoin', mint: 'credit:btcwscoin', symbol: 'BTCWScoin', name: 'Big Titty Cat Wif Sword', mc: 0, loaded: false, img: new Image() };
+SWORDCAT.img.onload = () => { SWORDCAT.loaded = true; imgVersion++; };
+SWORDCAT.img.src = 'art/btcws-avatar.jpg';
 const GROUPS = [
-  { name: 'THE MAJORS', color: '#7eb6ff', symbols: ['SOL','ETH','BNB','XRP','LTC'], about: 'Blue chips' },
-  { name: 'COMMUNITY', color: '#6fd6a8', symbols: ['DOGE','BONK','SWORDCAT','BTCWS'], about: 'Meme and fandom coins' },
+  { name: 'THE MAJORS', color: '#7eb6ff', symbols: ['SOL','ETH','BNB','XRP','LTC'], about: 'Blue chips and their lookalikes' },
+  { name: 'COMMUNITY', color: '#6fd6a8', symbols: ['DOGE','BONK','CCC','CAT','BALDCOIN','ZEUS','NRN','ATH','FUCK','TOPLESS'], about: 'Meme and fandom coins' },
   { name: 'UTILITY & DEFI', color: '#4fd0e0', symbols: ['HYPE','JUP','SUI','TAO'], about: 'Platform, exchange and AI tokens' },
   { name: 'THE STABLES', color: '#9fb8c8', symbols: ['USDT','USDC'], about: 'Coins that hold their value' },
   { name: 'THE SHADOW COINS', color: '#c4a6ff', symbols: ['XMR','ZEC'], about: 'Privacy coins' },
   { name: 'WALL STREET', color: '#e6c15a', symbols: ['NVDA','SP500','TSLA','RSI','GLD','ETF'], about: 'Stocks, indexes and gold' },
   { name: "SLINGOOR'S BELT", color: '#ff7ad9', symbols: ['PUMP','SLING','SENDOOR','TITTY','OF'], about: 'Pump.fun and Slingoor' },
-  { name: 'LITTLE SIBLINGS', color: '#f0a060', symbols: ['XBT','STC','xxxBTC','BTB'], about: 'Spinoffs and parodies of BTC' },
-  { name: 'THE FIELD', color: '#f4f1ea', symbols: null, about: 'Distant specks' }
+  { name: 'LITTLE SIBLINGS', color: '#f0a060', symbols: ['XBT','STC','XXXBTC','BTB','BTC','PTC','SPLASH','SI'], about: 'Spinoffs and parodies of BTC', fallback: true },
+  { name: 'BIG TITTY CAT WIF SWORD', color: '#ffb86b', symbols: ['BTCWS'], extra: SWORDCAT, about: 'Came up with the concept · @BTCWScoin' }
 ];
 // pts are slots in drawing order. The shape joins the big stars that fill them.
 const FIGURES = {
@@ -1297,19 +1302,26 @@ const FIGURES = {
     slots: { NVDA: [0.5, 0], SP500: [0.5, 1], TSLA: [0.88, 0.24], RSI: [0.08, 0.24], GLD: [0.08, 0.62], ETF: [0.92, 0.78] },
     centre: [0.5, 0.5], s: [['TSLA', 'RSI'], ['RSI', 'GLD'], ['GLD', 'C'], ['C', 'ETF'], ['ETF', 'SP500']], bar: ['NVDA', 'SP500'] },
   "SLINGOOR'S BELT": { box: [0.38, 0.06, 0.34, 0.16], pts: [[0.05, 0.45], [0.3, 0.1], [0.55, 0.5], [0.8, 0.1], [0.95, 0.5]] },
-  'LITTLE SIBLINGS': { box: [0.38, 0.72, 0.24, 0.20], pts: [[0.5, 0.05], [0.95, 0.5], [0.5, 0.95], [0.05, 0.5]] }
+  'LITTLE SIBLINGS': { box: [0.37, 0.68, 0.26, 0.24], pts: [[0.5, 0.05], [0.95, 0.5], [0.5, 0.95], [0.05, 0.5]] },
+  // A sword: blade and grip in straight lines, a crossguard, and the cat holding it.
+  'BIG TITTY CAT WIF SWORD': { box: [0.355, 0.26, 0.10, 0.30], sword: true }
 };
 // Stars the viewer holds light up. There is no wallet connection yet, so none are lit.
 const LIT = new Set();
 function assignGroups() {
   const used = new Set();
-  return GROUPS.map(g => {
-    const members = g.symbols
-      ? g.symbols.map(sym => planets.find(p => p.symbol === sym && !used.has(p))).filter(Boolean)
-      : planets.filter(p => !used.has(p));
+  const out = GROUPS.map(g => {
+    const want = new Set((g.symbols || []).map(x => x.toUpperCase()));
+    const members = planets.filter(p => !used.has(p) && want.has(String(p.symbol || '').toUpperCase()));
     members.forEach(p => used.add(p));
-    return { name: g.name, color: g.color, members };
-  }).filter(g => g.members.length);
+    if (g.extra && !members.some(m => m.mint === g.extra.mint)) members.unshift(g.extra);
+    return { name: g.name, color: g.color, members, fallback: g.fallback };
+  });
+  // every coin gets a constellation: whatever no narrative claimed joins the spinoffs and parodies
+  const rest = planets.filter(p => !used.has(p));
+  const fb = out.find(g => g.fallback);
+  if (fb) fb.members.push(...rest);
+  return out.filter(g => g.members.length);
 }
 function starShare(t) {
   return Math.sqrt(Math.max(t.mc || 0, 1) / (SNAP.maxMc || 1));
@@ -1377,6 +1389,22 @@ function drawConstellations() {
   groups.forEach(g => {
     const fig = FIGURES[g.name];
     if (!fig) return;
+    if (fig.sword) {
+      const P = (nx, ny) => mapPt(fig.box, nx, ny);
+      ctx.save(); ctx.lineCap = 'round'; ctx.strokeStyle = g.color;
+      const seg = (a, b, al, lw) => { ctx.globalAlpha = al; ctx.lineWidth = lw; ctx.shadowColor = g.color; ctx.shadowBlur = 10; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); };
+      seg(P(0.5, 0), P(0.5, 0.64), 0.95, 1.6);        // blade
+      seg(P(0.5, 0.64), P(0.5, 0.92), 0.7, 1.4);      // grip
+      seg(P(0.04, 0.64), P(0.96, 0.64), 0.7, 1.4);    // crossguard
+      ctx.restore();
+      const pom = P(0.5, 1); ctx.beginPath(); ctx.arc(pom.x, pom.y - 2, 5, 0, Math.PI * 2); ctx.strokeStyle = g.color; ctx.lineWidth = 1.4; ctx.stroke();
+      const cat = g.members[0], c0 = P(0.5, 0.64);
+      dot(cat, c0.x, c0.y, 22, true);
+      g.members.slice(1).forEach((t, i) => dot(t, c0.x + (i % 2 ? 36 : -36), c0.y + 26 + i * 8, 7, false));
+      if (showLabels) { ctx.font = '500 11px "DM Sans", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillStyle = 'rgba(244,241,234,0.7)'; ctx.fillText('@BTCWScoin · the concept', fig.box[0] * W + fig.box[2] * W * 0.5, P(0.5, 1).y + 10); }
+      if (showLabels) { ctx.font = '600 12px "DM Sans", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillStyle = g.color; ctx.fillText(g.name, fig.box[0] * W + fig.box[2] * W * 0.5, P(0.5, 0).y - 8); }
+      return;
+    }
     if (fig.dollar) {
       const P = k => k === 'C' ? mapPt(fig.box, ...fig.centre) : mapPt(fig.box, ...fig.slots[k]);
       ctx.save();
@@ -1609,6 +1637,7 @@ canvas.addEventListener('click', e => {
     if (d < s.r + 8 && d < bestD) { best = s; bestD = d; }
   });
   if (!best) return;
+  if (best.t.credit) { window.open(best.t.url, '_blank', 'noopener'); return; }
   if (best.t === anchor) { selected = anchor; renderInspector(); return; }
   if (dive) return;
   selected = best.t;
