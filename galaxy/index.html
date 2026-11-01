@@ -485,9 +485,27 @@ function buildStars() {
 let lastSig = '', imgVersion = 0;
 let dive = null;
 const ease = { io: p => -(Math.cos(Math.PI * p) - 1) / 2, out: p => Math.sin(p * Math.PI / 2) };
-let theta = 0, phi = Math.acos(0.72), dTheta = 0, dPhi = 0;
+let dTheta = 0, dPhi = 0;
+// The camera is a free frame (right, up, back), so the galaxy can be turned about any axis.
+let camX = [1, 0, 0], camY = [0, 1, 0], camZ = [0, 0, 1];
+function frameFromAngles(th, ph) {
+  const sp = Math.sin(ph);
+  const z = norm([sp * Math.sin(th), Math.cos(ph), sp * Math.cos(th)]);
+  const x = norm(cross([0, 1, 0], z));
+  camX = x; camZ = z; camY = cross(z, x);
+}
+frameFromAngles(0, Math.acos(0.72));
+function rotVec(v, k, a) {
+  const c = Math.cos(a), sn = Math.sin(a), d = dot(k, v) * (1 - c), kv = cross(k, v);
+  return [v[0] * c + kv[0] * sn + k[0] * d, v[1] * c + kv[1] * sn + k[1] * d, v[2] * c + kv[2] * sn + k[2] * d];
+}
+function turnFrame(k, a) {
+  const n = norm(k);
+  camX = rotVec(camX, n, a); camY = rotVec(camY, n, a); camZ = rotVec(camZ, n, a);
+  camZ = norm(camZ); camX = norm(cross(camY, camZ)); camY = cross(camZ, camX);
+}
 // Throwing: release a fast drag and the galaxy keeps spinning, then slows. Grab it to stop it.
-let spinV = 0, spinP = 0, dragTrail = [];
+let spinW = [0, 0, 0], dragTrail = [];
 const SPIN_DECAY = 0.991, SPIN_GAIN = 1.5, SPIN_MAX = 0.3, SPIN_MIN = 0.015;
 let dist = 90, distTarget = null;
 const ROT_STEPS = [25, 50, 75, 100, 150, 200, 300, 500, 750, 1000, 1500, 2000];
@@ -637,14 +655,18 @@ function zoomFactor() {
   return home / (dist || home || 1);
 }
 function stepCamera() {
-  theta += dTheta * CAM_DAMP + spinV;
-  spinV *= SPIN_DECAY;
-  if (Math.abs(spinV) < 0.0002) spinV = 0;
-  const phiNext = phi + dPhi * CAM_DAMP + spinP;
-  phi = Math.max(MIN_PHI, Math.min(MAX_PHI, phiNext));
-  if (phi !== phiNext) spinP = 0;
-  spinP *= SPIN_DECAY;
-  if (Math.abs(spinP) < 0.0002) spinP = 0;
+  if (dTheta) turnFrame([0, 1, 0], dTheta * CAM_DAMP);
+  if (dPhi) {
+    const before = Math.abs(camZ[1]), lim = Math.cos(MIN_PHI), keep = [camX, camY, camZ];
+    turnFrame(camX, dPhi * CAM_DAMP);
+    if (Math.abs(camZ[1]) > lim && Math.abs(camZ[1]) > before) { [camX, camY, camZ] = keep; dPhi = 0; }
+  }
+  const sm = Math.hypot(spinW[0], spinW[1], spinW[2]);
+  if (sm > 0.0002) {
+    turnFrame(spinW, sm);
+    const f = SPIN_DECAY;
+    spinW = [spinW[0] * f, spinW[1] * f, spinW[2] * f];
+  } else spinW = [0, 0, 0];
   dTheta *= 1 - CAM_DAMP;
   dPhi *= 1 - CAM_DAMP;
   if (autoRotate && !dragging && view !== 'constellations') dTheta -= 0.0008 * rotSpeed;
@@ -683,9 +705,8 @@ function centerCluster() {
 }
 function resetCamera() {
   userZoomed = false;
-  spinV = 0; spinP = 0;
-  theta = 0;
-  phi = Math.acos(0.72);
+  spinW = [0, 0, 0];
+  frameFromAngles(0, Math.acos(0.72));
   dTheta = 0;
   dPhi = 0;
   distTarget = fittedDistance() * camSpread();
@@ -723,15 +744,12 @@ function cross(a, b) {
 }
 function dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
 function cameraPos() {
-  const sp = Math.sin(phi), cp = Math.cos(phi);
-  return [dist * sp * Math.sin(theta), dist * cp, dist * sp * Math.cos(theta)];
+  return [dist * camZ[0], dist * camZ[1], dist * camZ[2]];
 }
 function project(world) {
   const cam = cameraPos();
   const rel = [world[0] - cam[0], world[1] - cam[1], world[2] - cam[2]];
-  const zaxis = norm(cam);
-  const xaxis = norm(cross([0, 1, 0], zaxis));
-  const yaxis = cross(zaxis, xaxis);
+  const zaxis = camZ, xaxis = camX, yaxis = camY;
   const x = dot(rel, xaxis), y = dot(rel, yaxis), z = dot(rel, zaxis);
   const box = stageBox();
   const aspect = Math.max(0.4, box.w / box.h);
@@ -1129,7 +1147,7 @@ document.getElementById('zOut').onclick = () => zoomBy(1 / 1.18);
 document.getElementById('zReset').onclick = () => resetCamera();
 canvas.style.cursor = 'grab';
 canvas.addEventListener('pointerdown', e => {
-  spinV = 0; spinP = 0; dragTrail = [];
+  spinW = [0, 0, 0]; dragTrail = [];
   pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
   lastX = e.clientX; lastY = e.clientY;
   canvas._moved = false; canvas._sx = e.clientX; canvas._sy = e.clientY;
@@ -1152,10 +1170,21 @@ function endPointer(e) {
       const frames = Math.max(1, (b.t - a.t) / 16.7);
       const h = canvas.clientHeight || H || 1;
       const k = (2 * Math.PI) / h * ROT_SPEED * SPIN_GAIN / frames;
-      const vx = -(b.x - a.x) * k, vy = -(b.y - a.y) * k;
-      if (Math.hypot(vx, vy) > SPIN_MIN) {
-        const m = Math.hypot(vx, vy), cap = Math.min(1, SPIN_MAX / m);
-        spinV = vx * cap; spinP = vy * cap;
+      const vx = (b.x - a.x) * k, vy = (b.y - a.y) * k;
+      // Near the middle a throw turns the galaxy about the screen axis across its path. Near the
+      // rim the same throw rolls it about the view axis, like a trackball.
+      const rect = canvas.getBoundingClientRect();
+      const px = a.x - (rect.left + rect.width / 2), py = a.y - (rect.top + rect.height / 2);
+      const rho = Math.hypot(px, py) / (0.5 * Math.min(rect.width, rect.height));
+      const w = Math.max(0, Math.min(1, (rho - 0.7) / 0.3));
+      const L2 = Math.max(1, px * px + py * py);
+      const roll = ((px * (b.y - a.y) - py * (b.x - a.x)) / L2) * (2 * Math.PI) / (2 * Math.PI) * SPIN_GAIN / frames;
+      const wv = [0, 0, 0];
+      for (let i = 0; i < 3; i++) wv[i] = (1 - w) * -(vx * camY[i] + vy * camX[i]) + w * (roll * camZ[i]);
+      const m = Math.hypot(wv[0], wv[1], wv[2]);
+      if (m > SPIN_MIN) {
+        const cap = Math.min(1, SPIN_MAX / m);
+        spinW = wv.map(c => c * cap);
         dTheta = 0; dPhi = 0;
       }
     }
@@ -1367,7 +1396,7 @@ function loop() {
   stepCamera();
   let mix = 0;
   for (const t of bodies) mix += t.boost + t.share + t.shareUsdt + (t.loaded ? 1 : 0);
-  const sig = [theta, phi, dist, usdcT, usdtT, W, H, view, showLabels, showOrbits, showPairs, selected && selected.mint, anchor.mint, imgVersion, dive ? performance.now() : 0, mix, bulmaImg.complete, usdtImg.complete, hubTab].join('|');
+  const sig = [camX.join(), camY.join(), camZ.join(), dist, usdcT, usdtT, W, H, view, showLabels, showOrbits, showPairs, selected && selected.mint, anchor.mint, imgVersion, dive ? performance.now() : 0, mix, bulmaImg.complete, usdtImg.complete, hubTab].join('|');
   if (sig === lastSig) { requestAnimationFrame(loop); return; }
   lastSig = sig;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
