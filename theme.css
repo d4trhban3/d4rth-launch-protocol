@@ -71,7 +71,8 @@ h3 { color: var(--muted); }
 .portrait, .sample img { border-color: rgba(184,160,255,.5) !important; box-shadow: 0 0 40px rgba(184,160,255,.18); }
 
 /* One column width on every page, so nav and headings never jump sideways */
-.wrap { max-width: 880px !important; margin-left: auto !important; margin-right: auto !important; }
+.wrap { padding: 28px 22px 72px !important; max-width: 880px !important; margin-left: auto !important; margin-right: auto !important; }
+nav { margin-bottom: 22px !important; }
 .doc > * { max-width: 760px; }
 .doc > .gallery, .doc > .banner { max-width: none; }
 
