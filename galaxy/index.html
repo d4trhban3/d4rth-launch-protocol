@@ -406,9 +406,7 @@
       <button type="button" id="bondChip" class="bond-chip" hidden></button>
       <aside id="mapKey" class="map-key" hidden>
         <b>Key</b>
-        <div><i></i> USDC line · main protocol, through Bulma (example only)</div>
-        <div><i class="green"></i> Tether token line · optional extra boost</div>
-        <div><i class="spoke"></i> Each coin's link to the center</div>
+        <div><i class="green"></i> Green light and Tether badge: the USDT boost</div>
         <div><i class="ghost"></i> Where that coin sat before the pull</div>
         <p>Closer to BTC = stronger liquidity pool.</p>
       </aside>
@@ -455,7 +453,7 @@
         <div class="ends"><span>0%</span><span>10,000%</span></div>
         <div class="hubtabs">
           <button type="button" id="tabUsdc" class="on">USDC · Bulma (example)</button>
-          <button type="button" id="tabUsdt">Tether token (extra boost)</button>
+          <button type="button" id="tabUsdt">USDT boost</button>
         </div>
         <div class="sl pair"><span id="pairName">Supply paired to Bulma (main)</span> <b id="allShareLabel">0%</b></div>
         <input id="allShare" type="range" min="0" max="50" step="1" value="0">
@@ -703,20 +701,31 @@ function stepCamera() {
   const el = document.getElementById('zPct');
   if (el && el.textContent !== pct + '%') el.textContent = pct + '%';
 }
+// The USDT boost on the fused picture: Tether-green light on both characters and a small Tether badge.
+function tetherBoost(cx, cy, r, k) {
+  ctx.save();
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.clip();
+  ctx.globalCompositeOperation = 'screen';
+  [[0.22, 0.33], [0.85, 0.31]].forEach(([fx, fy]) => {
+    const x = cx + (fx - 0.5) * 2 * r, y = cy + (fy - 0.5) * 2 * r;
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r * 0.55);
+    g.addColorStop(0, 'rgba(90,255,150,' + 0.3 * k + ')'); g.addColorStop(0.55, 'rgba(80,235,130,' + 0.14 * k + ')'); g.addColorStop(1, 'rgba(80,235,130,0)');
+    ctx.fillStyle = g; ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+  });
+  const rim = ctx.createRadialGradient(cx, cy, r * 0.7, cx, cy, r);
+  rim.addColorStop(0, 'rgba(168,235,110,0)'); rim.addColorStop(1, 'rgba(168,235,110,' + 0.55 * k + ')');
+  ctx.fillStyle = rim; ctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+  ctx.restore();
+  ctx.save(); ctx.globalAlpha = k;
+  const br = Math.max(7, r * 0.27);
+  disc(cx + r * 0.7, cy + r * 0.7, br, usdtImg.complete && usdtImg.naturalWidth ? usdtImg : null);
+  ctx.restore();
+}
 function centerCluster() {
-  // Bulma is not a separate disc: it fuses with BTC in the centre. Its lines run to that centre disc.
-  // Tether sits beside it: on the left when it is alone, on the right once Bulma joins.
-  const btcR = studioRadius(anchor.vmc || anchor.mc, 0.9);
-  const usdtR = btcR * 0.58;
-  const line = 4.2;
-  const u = Math.min(1, usdcT);
-  const gap = (btcR + usdtR + line) * usdtT;
-  const btc = [gap * 0.45 * (1 - u), 0, 0];
-  return {
-    btc,
-    usdc: usdcT > 0.02 ? btc : null,
-    usdt: usdtT > 0.02 ? [gap * (-0.55 * (1 - u) + u), 0, 0] : null
-  };
+  // Bulma fuses with BTC in the centre disc. The USDT boost is not a disc of its own: it adds a
+  // small Tether badge and green highlights to that same picture. Their lines all run to the centre.
+  const btc = [0, 0, 0];
+  return { btc, usdc: usdcT > 0.02 ? btc : null, usdt: usdtT > 0.02 ? btc : null };
 }
 function resetCamera() {
   userZoomed = false;
@@ -1091,9 +1100,12 @@ function paintHubButtons() {
   pc.textContent = usdcOn ? 'USDC · Bulma (example) on' : 'Add USDC · Bulma (example)';
   pt.textContent = usdtOn ? 'USDT boost on' : 'Add USDT boost';
   pc.classList.toggle('on', usdcOn); pt.classList.toggle('on', usdtOn);
+  ut.hidden = !usdcOn; pt.hidden = !usdcOn; document.getElementById('tabUsdt').hidden = !usdcOn;
   pc.setAttribute('aria-pressed', String(usdcOn)); pt.setAttribute('aria-pressed', String(usdtOn));
 }
 function toggleHub(which) {
+  if (which === 'usdt' && !usdcOn) return;                 // the USDT boost only exists on top of Bulma
+  if (which === 'usdc' && usdcOn && usdtOn) toggleHub('usdt');   // so it goes off with Bulma
   const turningOn = which === 'usdt' ? !usdtOn : !usdcOn;
   if (which === 'usdt') usdtOn = turningOn; else usdcOn = turningOn;
   const other = which === 'usdt' ? usdcOn : usdtOn;
@@ -1510,7 +1522,7 @@ function loop() {
   const hubB = centers.usdc ? project(centers.usdc) : null;
   const hubU = centers.usdt ? project(centers.usdt) : null;
   const rB = hubB ? btcR : 0;
-  const rU = hubU ? screenRadius(centers.usdt, studioRadius(anchor.vmc || anchor.mc, 0.9) * 0.58) : 0;
+  const rU = hubU ? btcR : 0;
   const drawn = planets.map(t => {
     const world = worldOf(t);
     const p = project(world);
@@ -1543,17 +1555,12 @@ function loop() {
     ctx.lineWidth = 1;
     ctx.stroke();
   });
-  const spokes = showPairs || usdcT > 0.04 || usdtT > 0.04;
+  const spokes = showPairs;                              // hub lines are gone: the pull and the ghost markers show it
   if (spokes) {
     drawn.forEach(p => {
       ctx.lineWidth = 1;
-      if (p.pull >= 0.02 && (hubB || hubU)) {
-        if (hubB && addedUsdc(p.t) > 0) { ctx.strokeStyle = 'rgba(184,160,255,0.9)'; strokeBetween(hubB, p, rB + 2, p.r + 2); }
-        if (hubU && addedUsdt(p.t) > 0) { ctx.strokeStyle = 'rgba(168,235,110,0.9)'; strokeBetween(hubU, p, rU + 2, p.r + 2); }
-      } else {
-        ctx.strokeStyle = 'rgba(244,241,234,0.45)';
-        strokeBetween(btcP, p, btcR + 2, p.r + 2);
-      }
+      ctx.strokeStyle = 'rgba(244,241,234,0.45)';
+      strokeBetween(btcP, p, btcR + 2, p.r + 2);
     });
   }
   document.getElementById('mapKey').hidden = !(usdcT > 0.02 || usdtT > 0.02);
@@ -1562,22 +1569,13 @@ function loop() {
     disc(p.x, p.y, p.r, p.t.loaded ? p.t.img : null);
     hits.push({ t: p.t, x: p.x, y: p.y, r: p.r });
   });
-  if (hubU) {
-    ctx.strokeStyle = 'rgba(168,235,110,0.95)';
-    ctx.lineWidth = 1.15;
-    strokeBetween(btcP, hubU, btcR + 2, rU + 2);
-  }
-  if (hubU) {
-    disc(hubU.x, hubU.y, rU, usdtImg.complete && usdtImg.naturalWidth ? usdtImg : null);
-    ctx.fillStyle = '#f4f1ea'; ctx.font = '600 11px "DM Sans", sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('TETHER', hubU.x, hubU.y + rU + 13);
-  }
   ctx.globalAlpha = 1;
   disc(btcP.x, btcP.y, btcR, anchor.loaded ? anchor.img : null);
   if (usdcT > 0.01 && anchor.mint === home.anchor.mint && toastImg.complete && toastImg.naturalWidth) {
     ctx.globalAlpha = ease.io(Math.min(1, usdcT));
     disc(btcP.x, btcP.y, btcR, toastImg);
     ctx.globalAlpha = 1;
+    if (usdtT > 0.01) tetherBoost(btcP.x, btcP.y, btcR, ease.io(Math.min(1, usdtT)) * ease.io(Math.min(1, usdcT)));
   }
   if (morphQ > 0.002 && dive.target && dive.target.loaded) {
     ctx.globalAlpha = morphQ;
