@@ -616,6 +616,10 @@ function loadImg(t) {
   })();
 }
 bodies.forEach(loadImg);
+// When Bulma joins, the centre BTC disc morphs into the two of them toasting.
+const toastImg = new Image();
+toastImg.onload = () => { imgVersion++; };
+toastImg.src = 'art/btc-bulma.jpg';
 const usdtImg = new Image();
 usdtImg.src = 'art/usdt.svg';
 const bulmaImg = new Image();
@@ -1471,7 +1475,7 @@ function loop() {
   stepCamera();
   let mix = 0;
   for (const t of bodies) mix += t.boost + t.share + t.shareUsdt + (t.loaded ? 1 : 0);
-  const sig = [camX.join(), camY.join(), camZ.join(), dist, usdcT, usdtT, W, H, view, showLabels, showOrbits, showPairs, selected && selected.mint, anchor.mint, imgVersion, dive ? performance.now() : 0, mix, bulmaImg.complete, usdtImg.complete, hubTab].join('|');
+  const sig = [camX.join(), camY.join(), camZ.join(), dist, usdcT, usdtT, W, H, view, showLabels, showOrbits, showPairs, selected && selected.mint, anchor.mint, imgVersion, dive ? performance.now() : 0, mix, bulmaImg.complete, toastImg.complete, usdtImg.complete, hubTab].join('|');
   if (sig === lastSig) { requestAnimationFrame(loop); return; }
   lastSig = sig;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -1595,6 +1599,11 @@ function loop() {
   }
   ctx.globalAlpha = 1;
   disc(btcP.x, btcP.y, btcR, anchor.loaded ? anchor.img : null);
+  if (usdcT > 0.01 && anchor.mint === home.anchor.mint && toastImg.complete && toastImg.naturalWidth) {
+    ctx.globalAlpha = ease.io(Math.min(1, usdcT));
+    disc(btcP.x, btcP.y, btcR, toastImg);
+    ctx.globalAlpha = 1;
+  }
   if (morphQ > 0.002 && dive.target && dive.target.loaded) {
     ctx.globalAlpha = morphQ;
     disc(btcP.x, btcP.y, btcR, dive.target.img);
