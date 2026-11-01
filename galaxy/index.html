@@ -1280,7 +1280,7 @@ const GROUPS = [
   { name: 'UTILITY & DEFI', color: '#4fd0e0', symbols: ['HYPE','JUP','SUI','TAO'], about: 'Platform, exchange and AI tokens' },
   { name: 'THE STABLES', color: '#9fb8c8', symbols: ['USDT','USDC'], about: 'Coins that hold their value' },
   { name: 'THE SHADOW COINS', color: '#c4a6ff', symbols: ['XMR','ZEC'], about: 'Privacy coins' },
-  { name: 'WALL STREET', color: '#e6c15a', symbols: ['NVDA','SP500','GLD','ETF'], about: 'Stocks, indexes and gold' },
+  { name: 'WALL STREET', color: '#e6c15a', symbols: ['NVDA','SP500','TSLA','RSI','GLD','ETF'], about: 'Stocks, indexes and gold' },
   { name: "SLINGOOR'S BELT", color: '#ff7ad9', symbols: ['PUMP','SLING','SENDOOR','TITTY','OF'], about: 'Pump.fun and Slingoor' },
   { name: 'LITTLE SIBLINGS', color: '#f0a060', symbols: ['XBT','STC','xxxBTC','BTB'], about: 'Spinoffs and parodies of BTC' },
   { name: 'THE FIELD', color: '#f4f1ea', symbols: null, about: 'Distant specks' }
@@ -1291,11 +1291,16 @@ const FIGURES = {
   'COMMUNITY': { box: [0.06, 0.70, 0.24, 0.22], pts: [[0.1, 0.5], [0.5, 0.1], [0.9, 0.55], [0.5, 0.95]] },
   'UTILITY & DEFI': { box: [0.72, 0.10, 0.22, 0.26], pts: [[0.1, 0.1], [0.9, 0.2], [0.8, 0.9], [0.15, 0.75]] },
   'THE STABLES': { box: [0.06, 0.50, 0.20, 0.14], pts: [[0.05, 0.6], [0.95, 0.4]] },
-  'THE SHADOW COINS': { box: [0.76, 0.42, 0.20, 0.18], pts: [[0.1, 0.8], [0.5, 0.1], [0.9, 0.8]] },
-  'WALL STREET': { box: [0.68, 0.66, 0.26, 0.26], pts: [[0.5, 0.05], [0.95, 0.9], [0.05, 0.9], [0.5, 0.55]] },
+  'THE SHADOW COINS': { box: [0.76, 0.34, 0.20, 0.16], pts: [[0.1, 0.8], [0.5, 0.1], [0.9, 0.8]] },
+  // Wall Street is a dollar sign: a straight bar from NVDA to SP500 with an S of straight lines through it.
+  'WALL STREET': { box: [0.70, 0.56, 0.22, 0.38], dollar: true,
+    slots: { NVDA: [0.5, 0], SP500: [0.5, 1], TSLA: [0.88, 0.24], RSI: [0.08, 0.24], GLD: [0.08, 0.62], ETF: [0.92, 0.78] },
+    centre: [0.5, 0.5], s: [['TSLA', 'RSI'], ['RSI', 'GLD'], ['GLD', 'C'], ['C', 'ETF'], ['ETF', 'SP500']], bar: ['NVDA', 'SP500'] },
   "SLINGOOR'S BELT": { box: [0.38, 0.06, 0.34, 0.16], pts: [[0.05, 0.45], [0.3, 0.1], [0.55, 0.5], [0.8, 0.1], [0.95, 0.5]] },
   'LITTLE SIBLINGS': { box: [0.38, 0.72, 0.24, 0.20], pts: [[0.5, 0.05], [0.95, 0.5], [0.5, 0.95], [0.05, 0.5]] }
 };
+// Stars the viewer holds light up. There is no wallet connection yet, so none are lit.
+const LIT = new Set();
 function assignGroups() {
   const used = new Set();
   return GROUPS.map(g => {
@@ -1372,6 +1377,26 @@ function drawConstellations() {
   groups.forEach(g => {
     const fig = FIGURES[g.name];
     if (!fig) return;
+    if (fig.dollar) {
+      const P = k => k === 'C' ? mapPt(fig.box, ...fig.centre) : mapPt(fig.box, ...fig.slots[k]);
+      ctx.save();
+      ctx.lineCap = 'round'; ctx.strokeStyle = g.color;
+      fig.s.forEach(([a, b]) => { const pa = P(a), pb = P(b); ctx.globalAlpha = 0.5; ctx.lineWidth = 1.4; ctx.shadowColor = g.color; ctx.shadowBlur = 8; ctx.beginPath(); ctx.moveTo(pa.x, pa.y); ctx.lineTo(pb.x, pb.y); ctx.stroke(); });
+      glow([P(fig.bar[0]), P(fig.bar[1])], g.color);
+      ctx.restore();
+      Object.keys(fig.slots).forEach(sym => {
+        const q = P(sym), t = g.members.find(m => m.symbol === sym);
+        if (t) {
+          dot(t, q.x, q.y, Math.max(10, Math.min(20, 8 + starShare(t) * 24)), true);
+          if (LIT.has(t.mint)) { ctx.beginPath(); ctx.arc(q.x, q.y, 24, 0, Math.PI * 2); ctx.strokeStyle = g.color; ctx.lineWidth = 2; ctx.stroke(); }
+        } else {
+          ctx.beginPath(); ctx.arc(q.x, q.y, 8, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(244,241,234,0.35)'; ctx.lineWidth = 1.2; ctx.stroke();
+          if (showLabels) { ctx.fillStyle = 'rgba(244,241,234,0.45)'; ctx.font = '600 10px "DM Sans", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(sym, q.x, q.y + 13); }
+        }
+      });
+      if (showLabels) { ctx.font = '600 12px "DM Sans", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillStyle = g.color; ctx.fillText(g.name, fig.box[0] * W + fig.box[2] * W * 0.5, P('NVDA').y - 30); }
+      return;
+    }
     const slots = fig.pts.map(([nx, ny]) => mapPt(fig.box, nx, ny));
     const ranked = [...g.members].sort((a, b) => b.mc - a.mc);
     const big = ranked.slice(0, slots.length), small = ranked.slice(slots.length);
