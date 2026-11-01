@@ -2,22 +2,23 @@
 
 # Launch any coin
 
-**This is the template.** Copy it, fill in the blanks, launch. Bulma Dollar is the example coin. Yours can be any coin.
+**This is the template.** Copy it, fill in the blanks, launch. It works for any coin.
 
-Part of the d4rth Launch Protocol. The main coin of this group is BTC. The new coin is whatever you name it. Use Bulma Dollar if you want the example.
+Part of the d4rth Launch Protocol. The main pool is USDC. Next to it you lock a slice against SOL, and, if you want one, a slice against a second pair of your choice.
 
 **Blanks**
-- Token: [NAME] / [TICKER]. USBD if you use the example.
-- Anchor coin: BTC `C5xph2yL6gMdxmuLGxJBkGpmuDFfyi5fqkBNhvL6pump`
+- Token: [NAME] / [TICKER].
 - USDC (a dollar on Solana): `EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v`
 - Wrapped SOL: `So11111111111111111111111111111111111111112`
+- Second pair (optional): [PAIR] mint. A narrative coin, a stock token, or any coin your holders know.
 
 ## What these words mean
 - **pump.fun** — the site you launch the coin on. Price goes up as people buy.
 - **USDC** — a dollar on Solana. The main pool is priced in dollars.
 - **Lock** — put coins in a pool and freeze them so they cannot be removed.
 - **Meteora** — the site where those locked pools are made.
-- **Hub** — the new coin that other coins connect to. Bulma Dollar is the example. Yours can be any coin.
+- **Second pair** — optional. Another coin you lock a slice against, chosen to fit your story: a narrative coin, a stock token, a coin from your scene.
+- **Hub** — your coin, once other coins lock a piece of their supply against it.
 - **Creator fee** — optional. A slice of the launch fees. Holders can still get the rest.
 - **pump.fun curve** — the first trading pool. It only sells about 79% of the coins. Then the coin moves on by itself.
 - **PumpSwap** — the regular pool it moves to after that. You do not set this up.
@@ -25,10 +26,10 @@ Part of the d4rth Launch Protocol. The main coin of this group is BTC. The new c
 ## The 6 steps
 1. **Launch the coin on pump.fun, paired with USDC. That is the main pool.** USDC is a dollar on Solana. Name [NAME], ticker [TICKER].
 2. **Buy about 20% of the coins yourself.** That leaves most of the rest for other people.
-3. **Lock 10% in a pool with BTC on Meteora.** BTC is the main coin of this group. Lock means the money cannot be pulled back out. https://meteora.ag/create/dammv2/standard (Create → DAMM V2 → Standard Pool). *(DAMM V2 is Meteora's permanent pool. Tick the permanent-lock box.)* Base = [TICKER] mint, Quote = BTC mint. Initial Price = [TICKER] $ ÷ BTC $. Equal $ value on both sides. Tick **Permanently lock my liquidity**.
-4. **Lock 10% in a pool with SOL on Meteora.** Same pool as step 3, with SOL as the Quote. Equal $ value on both sides. Tick **Permanently lock my liquidity**. Optional extra boost, not part of the protocol: a Tether-themed token paired to USDT, Bulma and Big Titty Coin (BTC). Its USDT pool is the thinner side, about 35% of USDC on Solana. The protocol works without it. Bulma itself is paired to USDC, SOL and Big Titty Coin (BTC).
+3. **Lock 10% in a pool with SOL on Meteora.** Lock means the money cannot be pulled back out. https://meteora.ag/create/dammv2/standard (Create → DAMM V2 → Standard Pool). *(DAMM V2 is Meteora's permanent pool. Tick the permanent-lock box.)* Base = [TICKER] mint, Quote = wrapped SOL. Initial Price = [TICKER] $ ÷ SOL $. Equal $ value on both sides. Tick **Permanently lock my liquidity**.
+4. **Optional: lock up to 10% in a second pair of your choice.** Pick a narrative coin, a stock token, or any coin your holders know. Same pool as step 3, with that coin's mint as the Quote. Equal $ value on both sides. Skip it and the protocol still works.
 5. **Leave the rest in the USDC pool.** That stays the main pool, during the launch and after. *(After the first pool sells about 79%, the coin moves to PumpSwap by itself.)*
-6. **Then other coins lock a piece of their supply against your new coin.** Your coin becomes the hub they all connect through. The example hub is Bulma Dollar. Yours can be any coin. Same Meteora pool, permanently locked.
+6. **Then other coins can lock a piece of their supply against your coin.** Your coin becomes the hub they connect through. Same Meteora pool, permanently locked.
 
 **Support the protocol (strongly encouraged).** Add GitHub `d4trhban3` as a pump.fun creator-fee recipient. Optional. See below.
 
