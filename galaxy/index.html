@@ -448,6 +448,8 @@ function buildStars() {
   }
 }
 let lastSig = '';
+let dive = null;
+const ease = { smooth: p => p * p * (3 - 2 * p), out: p => 1 - Math.pow(1 - p, 3) };
 let theta = 0, phi = Math.acos(0.72), dTheta = 0, dPhi = 0;
 let dist = 90, distTarget = null;
 let dragging = false, lastX = 0, lastY = 0, userZoomed = false, autoRotate = false;
@@ -1151,13 +1153,34 @@ function loop() {
   stepCamera();
   let mix = 0;
   for (const t of bodies) mix += t.boost + t.share + t.shareUsdt + (t.loaded ? 1 : 0);
-  const sig = [theta, phi, dist, usdcT, usdtT, W, H, view, showLabels, showOrbits, showPairs, selected && selected.mint, anchor.mint, mix, bulmaImg.complete, usdtImg.complete, hubTab].join('|');
+  const sig = [theta, phi, dist, usdcT, usdtT, W, H, view, showLabels, showOrbits, showPairs, selected && selected.mint, anchor.mint, dive ? performance.now() : 0, mix, bulmaImg.complete, usdtImg.complete, hubTab].join('|');
   if (sig === lastSig) { requestAnimationFrame(loop); return; }
   lastSig = sig;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   ctx.fillStyle = '#10100e';
   ctx.fillRect(0, 0, W, H);
   if (starLayer) ctx.drawImage(starLayer, 0, 0, W, H);
+  let dFade = 0, dHole = null;
+  if (dive) {
+    const cx = W / 2, cy = H / 2, e = Math.min(1, (performance.now() - dive.t0) / dive.dur);
+    if (dive.phase === 'in') {
+      const k = Math.pow(e, 1.8);
+      const sc = 1 + (dive.S - 1) * k;
+      ctx.save();
+      ctx.translate(dive.fx + (cx - dive.fx) * k, dive.fy + (cy - dive.fy) * k);
+      ctx.scale(sc, sc);
+      ctx.translate(-dive.fx, -dive.fy);
+      dFade = Math.max(0, Math.min(1, (k - 0.5) / 0.5));
+      dHole = { x: dive.fx, y: dive.fy, r: dive.r };
+    } else {
+      const k = ease.out(e), sc = 1 + (dive.s0 - 1) * (1 - k);
+      ctx.save();
+      ctx.translate(cx, cy); ctx.scale(sc, sc); ctx.translate(-cx, -cy);
+      dFade = Math.max(0, 1 - k * 1.7);
+      dHole = { anchor: true };
+      if (e >= 1) dive.done = true;
+    }
+  }
   if (W < 8 || H < 8) { requestAnimationFrame(loop); return; }
   if (view === 'constellations') { drawConstellations(); requestAnimationFrame(loop); return; }
   const hits = [];
@@ -1278,6 +1301,18 @@ function loop() {
       }
     });
   }
+  if (dive) {
+    if (dFade > 0.01) {
+      const hole = dHole.anchor ? { x: btcP.x, y: btcP.y, r: btcR } : dHole, big = (W + H) * 12;
+      ctx.beginPath();
+      ctx.rect(-big, -big, big * 2, big * 2);
+      ctx.arc(hole.x, hole.y, hole.r, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(16,16,14,' + dFade.toFixed(3) + ')';
+      ctx.fill('evenodd');
+    }
+    ctx.restore();
+    if (dive.done) { dive = null; lastSig = ''; }
+  }
   window.__hit = hits.filter(h => h.t && h.t.mint !== 'bulma');
   const tick = (usdcT * 20 | 0) + ':' + (usdtT * 20 | 0);
   if (tick !== loop._tick) { loop._tick = tick; paintDeltas(); }
@@ -1294,9 +1329,10 @@ canvas.addEventListener('click', e => {
   });
   if (!best) return;
   if (best.t === anchor) { selected = anchor; renderInspector(); return; }
+  if (dive) return;
   selected = best.t;
   renderInspector();
-  enterOrbit(best.t.mint);
+  enterOrbit(best.t.mint, best);
 });
 
 if (!REDUCED) {
@@ -1382,7 +1418,7 @@ function renderCrumbs() {
   try { history.replaceState(null, '', trail.length ? hash : location.pathname + location.search); } catch (e) {}
 }
 function goTrail(i) {
-  if (i <= 0) { trail = []; setSystem(home.anchor, home.planets, false); return; }
+  if (i <= 0) { trail = []; setSystem(home.anchor, home.planets, false); startArrive(0.6); return; }
   const target = trail[i - 1].mint;
   trail = trail.slice(0, i - 1);
   enterOrbit(target);
@@ -1401,22 +1437,40 @@ async function fetchSystem(mint) {
   } finally { clearTimeout(timer); }
 }
 let entering = 0;
-async function enterOrbit(mint) {
-  if (mint === home.anchor.mint) { trail = []; setSystem(home.anchor, home.planets, false); return; }
+function startArrive(s0) {
+  if (REDUCED) { dive = null; return; }
+  dive = { phase: 'out', t0: performance.now(), dur: 720, s0 };
+}
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+async function enterOrbit(mint, hit) {
+  if (mint === home.anchor.mint) { trail = []; setSystem(home.anchor, home.planets, false); startArrive(0.6); return; }
   const token = ++entering;
   const count = document.getElementById('orbitCount');
   count.textContent = 'Opening orbit…';
+  let zoomedR = 0;
+  if (hit && !REDUCED) {
+    const S = Math.max(2, Math.min(18, Math.min(W, H) * 0.3 / Math.max(hit.r, 3)));
+    dive = { phase: 'in', t0: performance.now(), dur: 520, fx: hit.x, fy: hit.y, r: hit.r, S };
+    zoomedR = hit.r * S;
+  }
   try {
     const j = await fetchSystem(mint);
+    if (token !== entering) return;
+    if (dive && dive.phase === 'in') await sleep(Math.max(0, dive.t0 + dive.dur - performance.now()));
     if (token !== entering) return;
     const known = allTokens.get(mint) || j.anchor;
     const a = bodyFrom({ ...j.anchor, ...known, image: j.anchor.image }, null);
     const ps = layoutPlanets((j.tokens || []).filter(t => t.mint !== mint).map(t => bodyFrom(t, null)).sort((x, y) => y.mc - x.mc), null);
     if (!trail.length || trail[trail.length - 1].mint !== mint) trail.push({ mint, symbol: a.symbol, image: LOCAL.has(mint) ? (CLEAN[mint] || 'art/m/' + mint + '.jpg') : a.remote });
     setSystem(a, ps, true);
+    if (zoomedR) {
+      const rA = screenRadius([0, 0, 0], studioRadius(anchor.vmc || anchor.mc, 0.9));
+      startArrive(Math.max(1.5, Math.min(24, zoomedR / Math.max(rA, 3))));
+    } else startArrive(2.2);
     if (!ps.length) document.getElementById('orbitCount').textContent = 'No pairs yet for this coin.';
   } catch (e) {
     if (token !== entering) return;
+    dive = null;
     renderCaption();
     count.textContent = 'Could not open that orbit. Check your connection and try again.';
   }
