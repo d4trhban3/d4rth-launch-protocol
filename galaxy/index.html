@@ -6,6 +6,8 @@
 <meta name="color-scheme" content="dark">
 <meta name="theme-color" content="#10100e">
 <title>d4rth Launch Protocol · Galaxy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Manrope:wght@500;600;700;800&display=swap">
 <style>
   :root {
@@ -272,7 +274,13 @@
     .tv-home-title { font-size: clamp(72px, 12vw, 160px); }
   }
   @media (max-width: 760px) {
-    :root { --tv-header-h: 64px; --tv-footer-h: 32px; }
+    :root { --tv-header-h: 100px; --tv-footer-h: 32px; }
+    .tv-header { flex-wrap: wrap; align-content: center; row-gap: 6px; padding: 6px 14px; }
+    .tv-brand { min-height: 36px; }
+    .tv-header-tools { margin-left: auto; }
+    .site-nav { order: 3; flex: 1 0 100%; margin: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+    .site-nav::-webkit-scrollbar { display: none; }
+    .site-nav a { flex: none; }
     .tv-brand b { font-size: 16px; }
     .site-nav a { height: 28px; padding: 0 8px; font-size: 11px; }
     .tv-brand small { display: none; }
@@ -408,7 +416,23 @@ const RINGS = [15, 24, 33, 42].map(r => r * 1.48);
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const app = document.getElementById('app');
-let W = 2, H = 2;
+let W = 2, H = 2, DPR = 1, starLayer = null;
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function buildStars() {
+  starLayer = document.createElement('canvas');
+  starLayer.width = Math.round(W * DPR); starLayer.height = Math.round(H * DPR);
+  const g = starLayer.getContext('2d');
+  g.scale(DPR, DPR);
+  let seed = 7;
+  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+  const n = Math.round(W * H / 5200);
+  for (let i = 0; i < n; i++) {
+    const a = 0.12 + rnd() * 0.4, r = rnd() < 0.08 ? 1.2 : 0.7;
+    g.fillStyle = 'rgba(238,233,221,' + a.toFixed(2) + ')';
+    g.beginPath(); g.arc(rnd() * W, rnd() * H, r, 0, 6.2832); g.fill();
+  }
+}
+let lastSig = '';
 let theta = 0, phi = Math.acos(0.72), dTheta = 0, dPhi = 0;
 let dist = 90, distTarget = null;
 let dragging = false, lastX = 0, lastY = 0, userZoomed = false, autoRotate = false;
@@ -452,19 +476,18 @@ const CLEAN = {
   "9AfSCLTcHTwgKdy78ibYdJFn3TGbkQRcaxd2RUyHpump": "art/si.webp"
 };
 if (CLEAN[anchor.mint]) anchor.image = CLEAN[anchor.mint];
-planets.forEach(t => { if (CLEAN[t.mint]) t.image = CLEAN[t.mint]; });
+planets.forEach(t => { t.image = CLEAN[t.mint] || 'art/m/' + t.mint + '.jpg'; });
 const bodies = [anchor, ...planets];
 function loadImg(t) {
   if (!t.image) return;
   const im = new Image();
-  im.crossOrigin = 'anonymous';
   im.onload = () => { t.loaded = true; if (!selected || selected === t) renderInspector(); };
   im.src = t.image;
   t.img = im;
 }
 bodies.forEach(loadImg);
 const bulmaImg = new Image();
-bulmaImg.src = 'art/usbd.png';
+bulmaImg.src = 'art/usbd.jpg';
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": '&#39;' }[c])); }
 function money(n) {
   n = Number(n) || 0;
@@ -508,7 +531,7 @@ function stepCamera() {
   phi = Math.max(MIN_PHI, Math.min(MAX_PHI, phi + dPhi * CAM_DAMP));
   dTheta *= 1 - CAM_DAMP;
   dPhi *= 1 - CAM_DAMP;
-  if (autoRotate && !dragging && view !== 'constellations') dTheta -= 0.012;
+  if (autoRotate && !dragging && view !== 'constellations') dTheta -= 0.004;
   if (!userZoomed) distTarget = fittedDistance() * camSpread();
   if (distTarget != null) {
     dist += (distTarget - dist) * 0.16;
@@ -919,8 +942,11 @@ function resize() {
   const w = Math.max(2, Math.round(r.width));
   const h = Math.max(2, Math.round(r.height));
   if (w === W && h === H) return;
-  W = canvas.width = w;
-  H = canvas.height = h;
+  W = w; H = h;
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  canvas.width = Math.round(w * DPR);
+  canvas.height = Math.round(h * DPR);
+  buildStars();
   if (!userZoomed) dist = distTarget = fittedDistance() * camSpread();
 }
 addEventListener('resize', resize);
@@ -1068,8 +1094,15 @@ function loop() {
   usdcT = usdcOn ? Math.min(1, usdcT + 0.03) : Math.max(0, usdcT - 0.03);
   usdtT = usdtOn ? Math.min(1, usdtT + 0.03) : Math.max(0, usdtT - 0.03);
   stepCamera();
+  let mix = 0;
+  for (const t of bodies) mix += t.boost + t.share + t.shareUsdt + (t.loaded ? 1 : 0);
+  const sig = [theta, phi, dist, usdcT, usdtT, W, H, view, showLabels, showOrbits, showPairs, selected && selected.mint, mix, bulmaImg.complete, hubTab].join('|');
+  if (sig === lastSig) { requestAnimationFrame(loop); return; }
+  lastSig = sig;
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   ctx.fillStyle = '#10100e';
   ctx.fillRect(0, 0, W, H);
+  if (starLayer) ctx.drawImage(starLayer, 0, 0, W, H);
   if (W < 8 || H < 8) { requestAnimationFrame(loop); return; }
   if (view === 'constellations') { drawConstellations(); requestAnimationFrame(loop); return; }
   const hits = [];
@@ -1213,6 +1246,12 @@ canvas.addEventListener('click', e => {
   renderInspector();
 });
 
+if (!REDUCED) {
+  autoRotate = true;
+  document.getElementById('optMotion').checked = true;
+  const mb = document.getElementById('tvMotion');
+  mb.textContent = 'Pause'; mb.setAttribute('aria-pressed', 'true');
+}
 document.getElementById('orbitCount').textContent = SNAP.orbitCount.toLocaleString() + ' in this orbit / ' + planets.length + ' in view';
 renderCatalog('');
 selected = anchor;
