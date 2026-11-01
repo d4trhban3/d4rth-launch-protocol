@@ -359,7 +359,7 @@
       <a class="here" href="https://d4trhban3.github.io/d4rth-launch-protocol/galaxy/">Galaxy</a>
     </nav>
     <div class="tv-header-tools">
-      <button type="button" id="btn" class="hub-btn" aria-pressed="false">Add USDC</button>
+      <button type="button" id="btn" class="hub-btn" aria-pressed="false" title="USDC pairs with Bulma, the example coin">Add USDC · Bulma (example)</button>
       <button type="button" id="btnUsdt" class="hub-btn" aria-pressed="false">Add USDT boost</button>
       <button type="button" id="openProtocol" class="tv-icon-button" aria-label="Protocol sliders" style="width:auto;padding:0 10px;font-size:11px;font-weight:700">Sliders</button>
       <button type="button" id="openStars" class="tv-icon-button" aria-label="Constellations" style="width:auto;padding:0 10px;font-size:11px">Stars</button>
@@ -385,7 +385,7 @@
       <button type="button" id="bondChip" class="bond-chip" hidden></button>
       <aside id="mapKey" class="map-key" hidden>
         <b>Key</b>
-        <div><i></i> USDC line · main protocol, through Bulma</div>
+        <div><i></i> USDC line · main protocol, through Bulma (example only)</div>
         <div><i class="green"></i> Tether token line · optional extra boost</div>
         <div><i class="spoke"></i> Each coin's link to the center</div>
         <div><i class="ghost"></i> Where that coin sat before the pull</div>
@@ -420,7 +420,7 @@
         <div id="tvDirectory"></div>
       </div>
       <div id="paneProtocol" hidden>
-        <p class="proto-lead"><b>The main protocol is USDC · Bulma.</b> Bulma is paired to USDC, SOL and Big Titty Coin (BTC): the main pool is USDC, 10% locks to BTC, and 10% locks to SOL. The other coins lock a chunk of their supply to Bulma.</p>
+        <p class="proto-lead"><b>The main protocol is USDC · Bulma.</b> <i>Bulma is an example coin only. Any coin can take its place.</i> Bulma is paired to USDC, SOL and Big Titty Coin (BTC): the main pool is USDC, 10% locks to BTC, and 10% locks to SOL. The other coins lock a chunk of their supply to Bulma.</p>
         <p class="proto-lead proto-extra"><b>USDT is not part of that protocol.</b> It is an optional extra boost: add a Tether-themed token paired to USDT, Bulma and Big Titty Coin (BTC) and the same coins pull a little closer. Its USDT pool is the thinner one, so the same chunk adds less.</p>
         <div class="hubtoggles">
           <button type="button" id="pUsdc" class="hub-btn" aria-pressed="false">Add USDC · Bulma</button>
@@ -430,7 +430,7 @@
         <input id="allBoost" type="range" min="0" max="10000" step="1" value="0">
         <div class="ends"><span>0%</span><span>10,000%</span></div>
         <div class="hubtabs">
-          <button type="button" id="tabUsdc" class="on">USDC · Bulma (main)</button>
+          <button type="button" id="tabUsdc" class="on">USDC · Bulma (example)</button>
           <button type="button" id="tabUsdt">Tether token (extra boost)</button>
         </div>
         <div class="sl pair"><span id="pairName">Supply paired to Bulma (main)</span> <b id="allShareLabel">0%</b></div>
@@ -872,7 +872,7 @@ function paintDeltas() {
     chip.hidden = true;
     return;
   }
-  if (usdcOn) lines.push('Main protocol (USDC · Bulma): +' + money(bu));
+  if (usdcOn) lines.push('Main protocol (USDC · Bulma, example): +' + money(bu));
   if (usdtOn) lines.push('USDT extra boost (optional): +' + money(bd) + (usdcOn && bu > 0 ? ' · ' + (bd / bu * 100).toFixed(0) + '% on top of the main' : ''));
   lines.push('Group liquidity +' + (bond / base * 100).toFixed(1) + '%');
   if (usdtOn && !usdcOn) lines.push('USDT is only a boost. The main protocol is Bulma on USDC, so turn USDC on for the full picture.');
@@ -1026,14 +1026,14 @@ function renderCatalog(q) {
 }
 function paintHubButtons() {
   const uc = document.getElementById('btn'), ut = document.getElementById('btnUsdt');
-  uc.textContent = usdcOn ? 'USDC on' : 'Add USDC';
+  uc.textContent = usdcOn ? 'USDC · Bulma (example) on' : 'Add USDC · Bulma (example)';
   ut.textContent = usdtOn ? 'USDT boost on' : 'Add USDT boost';
   uc.classList.toggle('on', usdcOn);
   ut.classList.toggle('on', usdtOn);
   uc.setAttribute('aria-pressed', String(usdcOn));
   ut.setAttribute('aria-pressed', String(usdtOn));
   const pc = document.getElementById('pUsdc'), pt = document.getElementById('pUsdt');
-  pc.textContent = usdcOn ? 'USDC · Bulma on' : 'Add USDC · Bulma';
+  pc.textContent = usdcOn ? 'USDC · Bulma (example) on' : 'Add USDC · Bulma (example)';
   pt.textContent = usdtOn ? 'USDT boost on' : 'Add USDT boost';
   pc.classList.toggle('on', usdcOn); pt.classList.toggle('on', usdtOn);
   pc.setAttribute('aria-pressed', String(usdcOn)); pt.setAttribute('aria-pressed', String(usdtOn));
@@ -1429,7 +1429,7 @@ function loop() {
   if (hubB) {
     disc(hubB.x, hubB.y, rB, bulmaImg.complete ? bulmaImg : null);
     ctx.fillStyle = '#f4f1ea'; ctx.font = '600 11px "DM Sans", sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('BULMA', hubB.x, hubB.y + rB + 13);
+    ctx.fillText('BULMA (example)', hubB.x, hubB.y + rB + 13);
     hits.push({ t: { mint: 'bulma', symbol: 'BULMA' }, x: hubB.x, y: hubB.y, r: rB });
   }
   if (hubU) {
