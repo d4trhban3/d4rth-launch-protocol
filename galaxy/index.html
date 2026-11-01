@@ -255,6 +255,13 @@
   .tv-row-name small { display: block; color: var(--tv-muted); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tv-row-metric { flex: none; font-size: 12px; }
   .proto-lead { margin: 0 0 14px; color: var(--tv-muted); font-size: 13px; line-height: 1.55; }
+  .orbs-h b { color: var(--tv-muted); font-weight: 500; text-transform: none; letter-spacing: 0; }
+  .orb { margin: 0 0 12px; padding: 8px 10px 4px; border: 1px solid var(--tv-rule); }
+  .orb .nm { display: flex; justify-content: space-between; font-size: 12px; }
+  .orb .nm span { color: var(--tv-muted); font-size: 10px; }
+  .tokdet { margin: 14px 0 0; }
+  .tokdet > summary { cursor: pointer; padding: 10px 0; font-size: 11px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--tv-acid); }
+  .tokdet[open] > summary { margin-bottom: 8px; }
   .hubtoggles { display: flex; gap: 6px; margin: 0 0 6px; }
   .hubtoggles button { flex: 1; height: 36px; font-size: 12px; font-weight: 650; }
   #pUsdt { border-color: #a8eb6e; background: #a8eb6e; }
@@ -433,7 +440,9 @@
         <div class="ceil" id="ceilBox"></div>
         <div class="ceil" id="launchBox"></div>
         <p class="weightline">How the numbers work: added money = supply share × market cap (after the increase). USDT counts at about 35% of that, because Solana holds $2.40B of USDT against $6.83B of USDC. Closer = new money ÷ (current liquidity + new money), up to 42% nearer BTC.</p>
-        <div id="rows"></div>
+        <div class="sl orbs-h">Orbit sliders <b>each ring on its own</b></div>
+        <div id="orbits"></div>
+        <details id="tokenDetails" class="tokdet"><summary>Individual tokens (optional)</summary><div id="rows"></div></details>
       </div>
       <div id="paneSettings" hidden>
         <p class="proto-lead">The orbit is the BTC system. The protocol is the layer on top of it.</p>
@@ -518,6 +527,7 @@ const LOCAL = new Set([anchor.mint, ...planets.map(t => t.mint)]);
 [anchor, ...planets].forEach(t => { t.remote = t.image; });
 if (CLEAN[anchor.mint]) anchor.image = CLEAN[anchor.mint];
 planets.forEach(t => { t.image = CLEAN[t.mint] || 'art/m/' + t.mint + '.jpg'; });
+let trail = [];
 let bodies = [anchor, ...planets];
 function loadImgOld(t) {
   if (!t.image) return;
@@ -746,6 +756,8 @@ function disc(x, y, r, img) {
 }
 
 const rows = document.getElementById('rows');
+const orbitsEl = document.getElementById('orbits');
+let orbitGroups = new Map();
 function shareKey() { return hubTab === 'usdt' ? 'shareUsdt' : 'share'; }
 function buildRows() {
   rows.innerHTML = '';
@@ -760,16 +772,17 @@ function buildRows() {
   rows.appendChild(row);
   row.querySelector('[data-kind="vol"]').addEventListener('input', e => {
     t.boost = Number(e.target.value);
-    row.querySelector('[data-v]').textContent = '+' + t.boost.toLocaleString('en-US') + '% · ' + money(levelOf(t));
+    syncControls();
     paintDeltas();
     renderInspector();
   });
   row.querySelector('[data-kind="share"]').addEventListener('input', e => {
     t[shareKey()] = Number(e.target.value) / 100;
-    row.querySelector('[data-s]').textContent = e.target.value + '%';
+    syncControls();
     paintDeltas();
   });
 });
+  buildOrbits();
 }
 buildRows();
 function bondText() {
@@ -867,41 +880,70 @@ function paintDeltas() {
   chip.hidden = false;
   chip.textContent = (usdcOn ? 'Main ' + money(bu) : '') + (usdcOn && usdtOn ? ' · ' : '') + (usdtOn ? 'USDT boost +' + money(bd) : '') + ' · +' + (bond / base * 100).toFixed(0) + '%';
 }
-function syncShareInputs() {
+function fmtBoost(v) { return '+' + v.toLocaleString('en-US') + '%'; }
+function groupKey(t) { return t.moon ? 'moon' : String(t.ring || 0); }
+function buildOrbits() {
+  orbitGroups = new Map();
+  planets.forEach(t => { const k = groupKey(t); if (!orbitGroups.has(k)) orbitGroups.set(k, []); orbitGroups.get(k).push(t); });
+  const keys = [...orbitGroups.keys()].sort((a, b) => (a === 'moon' ? -1 : b === 'moon' ? 1 : Number(a) - Number(b)));
+  orbitsEl.innerHTML = keys.map(k => {
+    const n = orbitGroups.get(k).length;
+    const title = k === 'moon' ? 'Moon' : 'Orbit ' + (Number(k) + 1);
+    return '<div class="orb" data-g="' + k + '"><div class="nm"><b>' + title + '</b><span>' + n + (n === 1 ? ' coin' : ' coins') + '</span></div>'
+      + '<div class="sl">Market cap increase <b data-ob>+0%</b></div>'
+      + '<input type="range" data-o="vol" min="0" max="10000" step="1" value="0">'
+      + '<div class="sl pair"><span class="pair-name"></span> <b data-os>0%</b></div>'
+      + '<input type="range" data-o="share" min="0" max="50" step="1" value="0"></div>';
+  }).join('');
+  syncControls();
+}
+orbitsEl.addEventListener('input', e => {
+  const box = e.target.closest('.orb'); if (!box) return;
+  const list = orbitGroups.get(box.dataset.g) || [], v = Number(e.target.value);
+  if (e.target.dataset.o === 'vol') list.forEach(t => { t.boost = v; });
+  else list.forEach(t => { t[shareKey()] = v / 100; });
+  syncControls(); paintDeltas(); renderInspector();
+});
+function common(list, f) { if (!list.length) return 0; const v = f(list[0]); return list.every(t => f(t) === v) ? v : null; }
+// One place that repaints every slider (master, each orbit, each token) from the token values.
+function syncControls() {
   const key = shareKey();
   const name = hubTab === 'usdt' ? 'Supply paired to Tether token (extra boost)' : 'Supply paired to Bulma (main)';
   document.querySelectorAll('.pair-name').forEach(el => { el.textContent = name; });
   document.getElementById('pairName').textContent = name;
-  const vals = planets.map(t => Math.round((t[key] || 0) * 100));
+  const pct = t => Math.round((t[key] || 0) * 100);
   planets.forEach(t => {
-    const pct = Math.round((t[key] || 0) * 100);
     const row = rows.querySelector('[data-d="' + t.mint + '"]')?.closest('.row');
     if (!row) return;
-    row.querySelector('[data-kind="share"]').value = pct;
-    row.querySelector('[data-s]').textContent = pct + '%';
+    row.querySelector('[data-kind="vol"]').value = t.boost || 0;
+    row.querySelector('[data-v]').textContent = fmtBoost(t.boost || 0) + ' · ' + money(levelOf(t));
+    row.querySelector('[data-kind="share"]').value = pct(t);
+    row.querySelector('[data-s]').textContent = pct(t) + '%';
   });
-  if (vals.every(v => v === vals[0])) {
-    document.getElementById('allShare').value = vals[0];
-    document.getElementById('allShareLabel').textContent = vals[0] + '%';
-  }
+  const put = (vol, volLabel, share, shareLabel, list) => {
+    const b = common(list, t => t.boost || 0), sh = common(list, pct);
+    const mean = f => list.length ? list.reduce((s, t) => s + f(t), 0) / list.length : 0;
+    vol.value = b == null ? Math.round(mean(t => t.boost || 0)) : b;
+    volLabel.textContent = b == null ? 'mixed' : fmtBoost(b);
+    share.value = sh == null ? Math.round(mean(pct)) : sh;
+    shareLabel.textContent = sh == null ? 'mixed' : sh + '%';
+  };
+  put(document.getElementById('allBoost'), document.getElementById('allBoostLabel'), document.getElementById('allShare'), document.getElementById('allShareLabel'), planets);
+  orbitsEl.querySelectorAll('.orb').forEach(box => {
+    put(box.querySelector('[data-o="vol"]'), box.querySelector('[data-ob]'), box.querySelector('[data-o="share"]'), box.querySelector('[data-os]'), orbitGroups.get(box.dataset.g) || []);
+  });
 }
+function syncShareInputs() { syncControls(); }
 function applyAllBoost(v) {
   anchor.boost = v;
-  planets.forEach(t => {
-    t.boost = v;
-    const row = rows.querySelector('[data-d="' + t.mint + '"]')?.closest('.row');
-    if (!row) return;
-    row.querySelector('[data-kind="vol"]').value = v;
-    row.querySelector('[data-v]').textContent = '+' + v.toLocaleString('en-US') + '% · ' + money(levelOf(t));
-  });
-  document.getElementById('allBoostLabel').textContent = '+' + v.toLocaleString('en-US') + '%';
+  planets.forEach(t => { t.boost = v; });
+  syncControls();
   paintDeltas();
   renderInspector();
 }
 function applyAllShare(v) {
   planets.forEach(t => { t[shareKey()] = v / 100; });
-  document.getElementById('allShareLabel').textContent = v + '%';
-  syncShareInputs();
+  syncControls();
   paintDeltas();
 }
 document.getElementById('allBoost').addEventListener('input', e => applyAllBoost(Number(e.target.value)));
@@ -1456,7 +1498,6 @@ const CAPS = [9, 12, 12, 15];
 const LTC_MINT = 'DffdPtAKvnP91k9Ct6QvZ8TwVvWbJ6CxRtGNGNh9pump';
 const allTokens = new Map();
 const sysCache = new Map();
-let trail = [];
 let liveAt = null;
 const home = { anchor, planets };
 function absImg(p) { return p && p[0] === '/' ? API_ORIGIN + p : p; }
