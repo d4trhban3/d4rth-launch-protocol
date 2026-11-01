@@ -143,6 +143,9 @@
   .crumb { border: 0; background: none; padding: 4px 0; color: var(--tv-muted); font-size: 11px; display: inline-flex; align-items: center; gap: 6px; }
   .crumb:hover { color: var(--tv-acid); }
   .crumb img { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; }
+  .tv-navback { height: 30px; padding: 0 12px; border: 1px solid var(--tv-rule); background: transparent; color: var(--tv-paper); font-size: 11px; font-weight: 650; letter-spacing: .04em; white-space: nowrap; flex: none; }
+  .tv-navback:hover:not(:disabled) { border-color: var(--tv-acid); color: var(--tv-acid); }
+  .tv-navback:disabled { opacity: .35; cursor: default; }
   .tv-back { position: absolute; right: 18px; top: 52px; z-index: 4; height: 30px; padding: 0 12px; border: 1px solid var(--tv-rule); background: rgba(16,16,14,.8); color: var(--tv-paper); font-size: 11px; }
   .tv-back:hover { border-color: var(--tv-acid); color: var(--tv-acid); }
   .tv-socials { display: flex; flex-wrap: wrap; gap: 14px; margin: 0 0 16px; }
@@ -385,6 +388,7 @@
 
   <section id="tvUniverse" class="tv-universe">
     <div class="tv-chapter">
+      <button type="button" class="tv-navback" id="navBack" disabled aria-label="Back one step">← Back</button>
       <nav class="tv-breadcrumb" id="crumbs" aria-label="System path"><span>d4rth protocol</span><b>BTC orbit</b></nav>
       <button type="button" class="tv-link-button" id="copyOrbit">Copy orbit link</button>
       <a class="tv-link-button" href="https://d4trhban3.github.io/d4rth-launch-protocol/LAUNCH-ANY-COIN-TEMPLATE.html">Template</a>
@@ -1112,6 +1116,7 @@ function toggleHub(which) {
 }
 function setStars(on) {
   view = on ? 'constellations' : 'orbit';
+  try { updateBack(); } catch (e) {}
   document.getElementById('optStars').checked = on;
   setCaption();
   renderInspector();
@@ -1247,6 +1252,7 @@ addEventListener('keydown', e => {
   if (e.key === 'Escape') setPanel('none');
   if (e.target.closest && e.target.closest('input,textarea')) return;
   if (e.key === '/' ) { e.preventDefault(); setPanel('catalog'); return; }
+  if (e.key === 'Backspace' && !document.getElementById('navBack').disabled) { e.preventDefault(); goBack(); return; }
   if (e.key === '+' || e.key === '=') { e.preventDefault(); zoomBy(1.18); }
   else if (e.key === '-') { e.preventDefault(); zoomBy(1 / 1.18); }
   else if (e.key.toLowerCase() === 'r') { e.preventDefault(); resetCamera(); }
@@ -1663,9 +1669,41 @@ function renderCrumbs() {
     return '<span aria-hidden="true">→</span>' + (last ? '<b>' + esc(it.symbol) + ' orbit</b>' : '<button type="button" class="crumb" data-i="' + i + '">' + img + esc(it.symbol) + '</button>');
   }).join('');
   nav.querySelectorAll('.crumb').forEach(b => { b.onclick = () => goTrail(Number(b.dataset.i)); });
-  const hash = trail.length ? '#orbit=' + trail[trail.length - 1].mint : location.pathname + location.search;
-  try { history.replaceState(null, '', trail.length ? hash : location.pathname + location.search); } catch (e) {}
+  pushPath();
 }
+// The user's path is real browser history: every orbit opened is one entry, so Back (this button, the
+// browser's back button, or a swipe) steps back one orbit at a time.
+let navStarted = false, navPopping = false, navDepth = 0;
+function pathUrl() { return trail.length ? '#orbit=' + trail[trail.length - 1].mint : location.pathname + location.search; }
+function pushPath() {
+  const state = { d4: true, trail: trail.map(t => ({ mint: t.mint, symbol: t.symbol, image: t.image })), depth: navDepth };
+  try {
+    if (!navStarted || navPopping) { if (navPopping) navDepth = (history.state && history.state.depth) || 0; state.depth = navDepth; history.replaceState(state, '', pathUrl()); }
+    else if (history.state && JSON.stringify(history.state.trail) === JSON.stringify(state.trail)) history.replaceState(state, '', pathUrl());
+    else { state.depth = ++navDepth; history.pushState(state, '', pathUrl()); }
+  } catch (e) {}
+  navStarted = true; navPopping = false;
+  updateBack();
+}
+function updateBack() {
+  const b = document.getElementById('navBack');
+  b.disabled = !(trail.length > 0 || view === 'constellations');
+}
+function goBack() {
+  if (view === 'constellations') { setStars(false); updateBack(); return; }
+  if (!trail.length) return;
+  if (navDepth > 0 && history.state && history.state.d4) history.back();
+  else goTrail(trail.length - 1);
+}
+addEventListener('popstate', e => {
+  if (view === 'constellations') setStars(false);
+  const st = e.state;
+  const want = st && st.d4 ? st.trail : (() => { const m = /#orbit=([1-9A-HJ-NP-Za-km-z]{32,44})/.exec(location.hash); return m ? [{ mint: m[1] }] : []; })();
+  navPopping = true;
+  if (!want.length) { trail = []; setSystem(home.anchor, home.planets, false); startArrive(); return; }
+  trail = want.slice(0, -1).map(t => ({ ...t }));
+  enterOrbit(want[want.length - 1].mint);
+});
 function goTrail(i) {
   if (i <= 0) { trail = []; setSystem(home.anchor, home.planets, false); startArrive(); return; }
   const target = trail[i - 1].mint;
@@ -1716,12 +1754,14 @@ async function enterOrbit(mint, hit) {
     if (!ps.length) document.getElementById('orbitCount').textContent = 'No pairs yet for this coin.';
   } catch (e) {
     if (token !== entering) return;
+    navPopping = false;
     if (pulled) startArrive(); else dive = null;
     renderCaption();
     count.textContent = 'Could not open that orbit. Check your connection and try again.';
   }
 }
 document.getElementById('backHome').onclick = () => goTrail(0);
+document.getElementById('navBack').onclick = goBack;
 document.getElementById('copyOrbit').onclick = async e => {
   const url = location.origin + location.pathname + (trail.length ? '#orbit=' + trail[trail.length - 1].mint : '');
   try { await navigator.clipboard.writeText(url); e.target.textContent = 'Copied'; } catch (err) { e.target.textContent = 'Copy failed'; }
