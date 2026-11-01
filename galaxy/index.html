@@ -1189,19 +1189,44 @@ function loop() {
     const k = dive.inDur ? ease.io(clamp01((now - dive.t0) / dive.inDur)) : 1;
     dive.k = k;
     if (dive.swapT) {
-      const es = clamp01((now - dive.emergeT) / dive.emDur);
-      const late = clamp01((now - dive.swapT) / 600);
-      emergeK = 0.08 + 0.92 * ease.out(es);
-      emergeA = ease.io(clamp01((es - 0.1) / 0.75));
-      anchorA = dive.snap ? Math.max(k, late) : 1;
-      oldA = dive.snap ? Math.max(1 - k, 1 - late) : 0;
-      if (now > dive.t0 + dive.inDur && es >= 1) dive.done = true;
+      const late = clamp01((now - dive.swapT) / 700);
+      if (dive.snap) {
+        emergeK = 1;
+        emergeA = ease.io(Math.min(clamp01((k - 0.12) / 0.65), late));
+        anchorA = 1;
+        oldA = Math.max(1 - k, 1 - late);
+        if (now > dive.t0 + dive.inDur + 60 && late >= 1) dive.done = true;
+      } else {
+        const es = clamp01((now - dive.emergeT) / dive.emDur);
+        emergeK = 0.08 + 0.92 * ease.out(es);
+        emergeA = ease.io(clamp01((es - 0.1) / 0.75));
+        if (now > dive.t0 + dive.inDur && es >= 1) dive.done = true;
+      }
     } else if (dive.snap) { oldA = 1; }
   }
+  function drawSnap(a) {
+      const cx = W / 2, cy = H / 2, k = dive.k, sc = 1 + (dive.S - 1) * k;
+      ctx.save();
+      ctx.globalAlpha = a;
+      ctx.translate(dive.fx + (cx - dive.fx) * k, dive.fy + (cy - dive.fy) * k);
+      ctx.scale(sc, sc);
+      ctx.translate(-dive.fx, -dive.fy);
+      ctx.drawImage(dive.snap, 0, 0, W, H);
+      ctx.restore();
+  }
+  if (dive && dive.snap && dive.swapT && oldA > 0.005) drawSnap(oldA);
   ctx.globalAlpha = emergeA;
   if (W < 8 || H < 8) { requestAnimationFrame(loop); return; }
   if (view === 'constellations') { drawConstellations(); requestAnimationFrame(loop); return; }
   const hits = [];
+  let sceneSaved = false;
+  if (dive && dive.snap && dive.swapT) {
+    const cx = W / 2, cy = H / 2, k = dive.k, sc = 1 + (dive.S - 1) * k, m = (dive.r / dive.rA) * sc;
+    ctx.save(); sceneSaved = true;
+    ctx.translate(dive.fx + (cx - dive.fx) * k, dive.fy + (cy - dive.fy) * k);
+    ctx.scale(m, m);
+    ctx.translate(-cx, -cy);
+  }
   const spread = orbitSpread();
   if (showOrbits) {
     RINGS.forEach((radius, ring) => {
@@ -1322,16 +1347,10 @@ function loop() {
     });
   }
   ctx.globalAlpha = 1;
+  if (sceneSaved) ctx.restore();
   if (dive) {
-    if (dive.snap && oldA > 0.005) {
-      const cx = W / 2, cy = H / 2, k = dive.k, sc = 1 + (dive.S - 1) * k;
-      ctx.save();
-      ctx.globalAlpha = oldA;
-      ctx.translate(dive.fx + (cx - dive.fx) * k, dive.fy + (cy - dive.fy) * k);
-      ctx.scale(sc, sc);
-      ctx.translate(-dive.fx, -dive.fy);
-      ctx.drawImage(dive.snap, 0, 0, W, H);
-      ctx.restore();
+    if (dive.snap && !dive.swapT && oldA > 0.005) {
+      drawSnap(oldA);
     }
     if (dive.done) { dive = null; lastSig = ''; }
   }
@@ -1479,7 +1498,7 @@ async function enterOrbit(mint, hit) {
     snap = document.createElement('canvas');
     snap.width = canvas.width; snap.height = canvas.height;
     snap.getContext('2d').drawImage(canvas, 0, 0);
-    dive = { phase: 'in', t0: performance.now(), inDur: 1500, emDur: 1800, fx: hit.x, fy: hit.y, r: hit.r, S, snap };
+    dive = { phase: 'in', t0: performance.now(), inDur: 1500, emDur: 1800, fx: hit.x, fy: hit.y, r: hit.r, S, rA, snap };
   }
   try {
     const j = await fetchSystem(mint);
