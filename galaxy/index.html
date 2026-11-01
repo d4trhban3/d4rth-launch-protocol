@@ -173,8 +173,8 @@
   }
   .map-key b { display: block; margin-bottom: 6px; color: #e8ff58; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }
   .map-key div { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
-  .map-key i { width: 22px; height: 0; border-top: 2px solid #e8ff58; flex: none; }
-  .map-key i.green { border-top-color: #26a17b; }
+  .map-key i { width: 22px; height: 0; border-top: 2px solid #b8a0ff; flex: none; }
+  .map-key i.green { border-top-color: #a8eb6e; }
   .map-key i.spoke { border-top-color: rgba(244,241,234,.75); }
   .map-key i.ghost { border-top-style: dashed; border-top-color: #f4f1ea; }
   .map-key p { margin: 8px 0 0; color: #e8ff58; }
@@ -531,7 +531,7 @@ function stepCamera() {
   phi = Math.max(MIN_PHI, Math.min(MAX_PHI, phi + dPhi * CAM_DAMP));
   dTheta *= 1 - CAM_DAMP;
   dPhi *= 1 - CAM_DAMP;
-  if (autoRotate && !dragging && view !== 'constellations') dTheta -= 0.004;
+  if (autoRotate && !dragging && view !== 'constellations') dTheta -= 0.002;
   if (!userZoomed) distTarget = fittedDistance() * camSpread();
   if (distTarget != null) {
     dist += (distTarget - dist) * 0.16;
@@ -1166,9 +1166,9 @@ function loop() {
       const usdc = addedUsdc(p.t), usdt = addedUsdt(p.t);
       let target = btcP, tr = btcR, color = 'rgba(244,241,234,0.45)';
       if (p.pull >= 0.02 && usdt > usdc && hubU) {
-        target = hubU; tr = rU; color = 'rgba(38,161,123,0.9)';
+        target = hubU; tr = rU; color = 'rgba(168,235,110,0.9)';
       } else if (p.pull >= 0.02 && hubB) {
-        target = hubB; tr = rB; color = 'rgba(232,255,88,0.9)';
+        target = hubB; tr = rB; color = 'rgba(184,160,255,0.9)';
       }
       ctx.strokeStyle = color;
       ctx.lineWidth = 1;
@@ -1182,17 +1182,17 @@ function loop() {
     hits.push({ t: p.t, x: p.x, y: p.y, r: p.r });
   });
   if (hubB) {
-    ctx.strokeStyle = 'rgba(232,255,88,0.9)';
+    ctx.strokeStyle = 'rgba(184,160,255,0.9)';
     ctx.lineWidth = 1.15;
     strokeBetween(btcP, hubB, btcR + 2, rB + 2);
   }
   if (hubU) {
-    ctx.strokeStyle = 'rgba(38,161,123,0.95)';
+    ctx.strokeStyle = 'rgba(168,235,110,0.95)';
     ctx.lineWidth = 1.15;
     strokeBetween(btcP, hubU, btcR + 2, rU + 2);
   }
   if (hubB && hubU) {
-    ctx.strokeStyle = 'rgba(232,255,88,0.8)';
+    ctx.strokeStyle = 'rgba(184,160,255,0.8)';
     ctx.lineWidth = 1;
     strokeBetween(hubB, hubU, rB + 2, rU + 2);
   }
@@ -1203,7 +1203,7 @@ function loop() {
     hits.push({ t: { mint: 'bulma', symbol: 'BULMA' }, x: hubB.x, y: hubB.y, r: rB });
   }
   if (hubU) {
-    ctx.fillStyle = '#26a17b'; ctx.beginPath(); ctx.arc(hubU.x, hubU.y, rU, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#a8eb6e'; ctx.beginPath(); ctx.arc(hubU.x, hubU.y, rU, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1.2; ctx.stroke();
     ctx.fillStyle = '#f4f1ea'; ctx.font = '600 11px "DM Sans", sans-serif'; ctx.textAlign = 'center';
     ctx.fillText('USDT', hubU.x, hubU.y + rU + 13);
