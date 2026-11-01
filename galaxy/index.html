@@ -140,6 +140,15 @@
   .tv-breadcrumb b { color: var(--tv-paper); font-weight: 500; }
   .tv-link-button { border: 0; border-bottom: 1px solid var(--tv-rule); background: none; color: var(--tv-muted); font-size: 10px; padding: 4px 0; }
   .tv-link-button:hover, .tv-link-button.on { color: var(--tv-acid); border-color: var(--tv-acid); }
+  .crumb { border: 0; background: none; padding: 4px 0; color: var(--tv-muted); font-size: 11px; display: inline-flex; align-items: center; gap: 6px; }
+  .crumb:hover { color: var(--tv-acid); }
+  .crumb img { width: 18px; height: 18px; border-radius: 50%; object-fit: cover; }
+  .tv-back { position: absolute; right: 18px; top: 52px; z-index: 4; height: 30px; padding: 0 12px; border: 1px solid var(--tv-rule); background: rgba(16,16,14,.8); color: var(--tv-paper); font-size: 11px; }
+  .tv-back:hover { border-color: var(--tv-acid); color: var(--tv-acid); }
+  .tv-socials { display: flex; flex-wrap: wrap; gap: 14px; margin: 0 0 16px; }
+  .tv-socials a { color: var(--tv-muted); font-size: 11px; border-bottom: 1px solid var(--tv-rule); padding-bottom: 2px; }
+  .tv-socials a:hover { color: var(--tv-acid); border-color: var(--tv-acid); }
+  .chg-up { color: #a8eb6e; } .chg-down { color: #ff8f8f; }
   .tv-stage { position: relative; min-width: 0; min-height: 0; background: var(--tv-ink); }
   #canvas { width: 100%; height: 100%; touch-action: none; cursor: grab; }
   .tv-system-caption { position: absolute; left: 26px; top: 20px; z-index: 3; pointer-events: none; max-width: calc(100% - 180px); }
@@ -337,12 +346,14 @@
 
   <section id="tvUniverse" class="tv-universe">
     <div class="tv-chapter">
-      <nav class="tv-breadcrumb" aria-label="System path"><span>d4rth protocol</span><b>BTC orbit</b></nav>
+      <nav class="tv-breadcrumb" id="crumbs" aria-label="System path"><span>d4rth protocol</span><b>BTC orbit</b></nav>
+      <button type="button" class="tv-link-button" id="copyOrbit">Copy orbit link</button>
       <a class="tv-link-button" href="https://d4trhban3.github.io/d4rth-launch-protocol/LAUNCH-ANY-COIN-TEMPLATE.html">Template</a>
       <a class="tv-link-button" href="https://d4trhban3.github.io/d4rth-launch-protocol/BULMA-USBD-READY-TO-LAUNCH/README.html">Bulma Dollar</a>
     </div>
     <div class="tv-stage">
       <canvas id="canvas"></canvas>
+      <button type="button" class="tv-back" id="backHome" hidden>← Main galaxy</button>
       <div class="tv-system-caption">
         <span id="kicker">01 / Home orbit</span>
         <strong id="title">BTC system</strong>
@@ -445,10 +456,10 @@ let pinchDist = 0;
 const CAM_DAMP = 0.075, ROT_SPEED = 0.6, MIN_PHI = 0.06, MAX_PHI = Math.PI - 0.06;
 let view = 'orbit', hubTab = 'usdc', usdcOn = false, usdtOn = false, usdcT = 0, usdtT = 0;
 let selected = null, showLabels = true, showOrbits = true, showPairs = false;
-const anchor = SNAP.anchor;
+let anchor = SNAP.anchor;
 anchor.center = true;
 anchor.boost = 0; anchor.share = 0; anchor.shareUsdt = 0;
-const planets = SNAP.planets;
+let planets = SNAP.planets;
 planets.forEach(t => { t.boost = 0; t.share = 0; t.shareUsdt = 0; t.baseR = t.moon ? RINGS[0] * 0.72 : RINGS[t.ring]; });
 const CLEAN = {
   "C5xph2yL6gMdxmuLGxJBkGpmuDFfyi5fqkBNhvL6pump": "art/btc.webp",
@@ -479,15 +490,30 @@ const CLEAN = {
   "147g9KHLLPBok3b3kRmkgcXP1Q3o7zwZbR8tQYmUpump": "art/sling.webp",
   "9AfSCLTcHTwgKdy78ibYdJFn3TGbkQRcaxd2RUyHpump": "art/si.webp"
 };
+const LOCAL = new Set([anchor.mint, ...planets.map(t => t.mint)]);
+[anchor, ...planets].forEach(t => { t.remote = t.image; });
 if (CLEAN[anchor.mint]) anchor.image = CLEAN[anchor.mint];
 planets.forEach(t => { t.image = CLEAN[t.mint] || 'art/m/' + t.mint + '.jpg'; });
-const bodies = [anchor, ...planets];
-function loadImg(t) {
+let bodies = [anchor, ...planets];
+function loadImgOld(t) {
   if (!t.image) return;
   const im = new Image();
   im.onload = () => { t.loaded = true; if (!selected || selected === t) renderInspector(); };
   im.src = t.image;
   t.img = im;
+}
+function loadImg(t) {
+  const srcs = [];
+  if (LOCAL.has(t.mint)) srcs.push(CLEAN[t.mint] || 'art/m/' + t.mint + '.jpg');
+  if (t.remote) srcs.push(t.remote);
+  t.image = srcs[0] || '';
+  (function next(i) {
+    if (i >= srcs.length) return;
+    const im = new Image();
+    im.onload = () => { t.img = im; t.loaded = true; t.image = srcs[i]; if (!selected || selected === t) renderInspector(); };
+    im.onerror = () => next(i + 1);
+    im.src = srcs[i];
+  })(0);
 }
 bodies.forEach(loadImg);
 const usdtImg = new Image();
@@ -495,6 +521,12 @@ usdtImg.src = 'art/usdt.svg';
 const bulmaImg = new Image();
 bulmaImg.src = 'art/usbd.jpg';
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": '&#39;' }[c])); }
+function price(n) {
+  n = Number(n) || 0;
+  if (n >= 1) return '$' + n.toFixed(2);
+  if (n <= 0) return '$0';
+  return '$' + n.toPrecision(4).replace(/0+$/, '').replace(/\.$/, '');
+}
 function money(n) {
   n = Number(n) || 0;
   if (n >= 1e6) return '$' + (n / 1e6).toFixed(2) + 'M';
@@ -520,7 +552,7 @@ function orbitSpread() { return 1; }
 function camSpread() { return 1; }
 function studioRadius(mc, shrink) {
   const maxMc = SNAP.maxMc || anchor.mc || 1;
-  const share = Math.sqrt(Math.max(0, mc) / maxMc);
+  const share = Math.min(1, Math.sqrt(Math.max(0, mc) / maxMc));
   return Math.max(24, 200 * share) / 23 * (shrink || 1);
 }
 function fittedDistance() {
@@ -548,7 +580,7 @@ function stepCamera() {
   if (el && el.textContent !== pct + '%') el.textContent = pct + '%';
 }
 function centerCluster() {
-  const btcR = studioRadius(anchor.mc, 0.9);
+  const btcR = studioRadius(anchor.vmc || anchor.mc, 0.9);
   const bulmaR = btcR * 0.72;
   const usdtR = btcR * 0.58;
   const line = 4.2;
@@ -662,7 +694,9 @@ function disc(x, y, r, img) {
 
 const rows = document.getElementById('rows');
 function shareKey() { return hubTab === 'usdt' ? 'shareUsdt' : 'share'; }
-planets.forEach(t => {
+function buildRows() {
+  rows.innerHTML = '';
+  planets.forEach(t => {
   const row = document.createElement('div');
   row.className = 'row';
   row.innerHTML = '<img alt="" src="' + esc(t.image || '') + '"><div><div class="nm"><b>' + esc(t.symbol) + '</b><span class="delta" data-d="' + esc(t.mint) + '">0%</span></div>'
@@ -683,6 +717,8 @@ planets.forEach(t => {
     paintDeltas();
   });
 });
+}
+buildRows();
 function bondText() {
   const bu = planets.reduce((s, t) => s + addedUsdc(t), 0);
   const bd = planets.reduce((s, t) => s + addedUsdt(t), 0);
@@ -758,14 +794,18 @@ document.getElementById('allShare').addEventListener('input', e => applyAllShare
 function renderInspector() {
   const t = selected || anchor;
   const open = app.dataset.details === 'open';
-  const role = t.center ? 'Earth / home' : t.moon ? 'The Moon' : 'BTC pair';
+  const nested = trail.length > 0;
+  const role = t.center ? (nested ? 'Nested orbit' : 'Earth / home') : t.moon ? 'The Moon' : anchor.symbol + ' pair';
   const stage = (t.stage || 'Bonded');
   const desc = t.center
-    ? 'The home planet. Every orbit begins here.'
+    ? (nested ? 'Follow ' + t.symbol + ' into its own corner of the universe.' : 'The home planet. Every orbit begins here.')
     : t.moon
       ? 'Little Titty Coin. Always close to Earth.'
-      : 'Paired with BTC. Add USDC or USDT and this planet pulls closer.';
-  const stats = [['Market cap', money(levelOf(t))], ['Price', t.price ? money(t.price) : '—'], ['24h volume', money(t.vol)], ['Liquidity', money(t.liq)]];
+      : 'Paired with ' + anchor.symbol + '. Click the disc to open its own orbit. Add USDC or USDT and it pulls closer.';
+  const stats = [['Market cap', money(levelOf(t))], ['Price', t.price ? price(t.price) : '—'], ['24h volume', money(t.vol)], ['Liquidity', money(t.liq)]];
+  if (t.change != null) stats.push(['24h change', '<span class="' + (t.change >= 0 ? 'chg-up' : 'chg-down') + '">' + (t.change >= 0 ? '+' : '') + Number(t.change).toFixed(1) + '%</span>']);
+  const socials = (t.socials || []).filter(x => x.url && /^https:\/\//.test(x.url) && !/pump\.fun/.test(x.url));
+  const soc = socials.length ? '<div class="tv-socials">' + socials.map(x => '<a href="' + esc(x.url) + '" target="_blank" rel="noopener noreferrer">' + esc(x.label || x.type) + ' ↗</a>').join('') + '</div>' : '';
   const stars = view === 'constellations' ? '<div class="star-key"><div><i style="background:#7eb6ff"></i>The Majors</div><div><i style="background:#ff7ad9"></i>Slingoor\'s Belt</div><div><i style="background:#c4a6ff"></i>The Shadow Coins</div><div><i style="background:#e6c15a"></i>Wall Street</div><div><i style="background:#f0a060"></i>Little Siblings</div><div><i style="background:#f4f1ea"></i>The Field, distant specks</div><p class="star-credit-note">Outlines, not spokes. Search to find a small coin.</p><p class="star-credit-note">Concept · <a href="https://x.com/BTCWScoin" target="_blank" rel="noopener">Big Titty Cat Wif Sword · @BTCWScoin</a></p></div>' : '';
   document.getElementById('inspector').innerHTML =
     '<button type="button" id="tvDetailsToggle" class="tv-details-toggle">Token details <span>' + (open ? '−' : '+') + '</span></button>'
@@ -774,8 +814,10 @@ function renderInspector() {
     + '<p class="tv-token-description">' + esc(desc) + '</p>'
     + '<dl class="tv-metrics">' + stats.map((s, i) => '<div><dt><span>' + String(i + 1).padStart(2, '0') + '</span>' + s[0] + '</dt><dd>' + s[1] + '</dd></div>').join('') + '</dl>'
     + stars
+    + soc
     + '<div class="tv-token-actions"><a href="https://pump.fun/coin/' + encodeURIComponent(t.mint) + '" target="_blank" rel="noopener">Open on Pump ↗</a></div>'
-    + '<p class="tv-observed">Snapshot ' + esc((SNAP.capturedAt || '').slice(0, 16).replace('T', ' ')) + ' UTC. Not a live quote. Not tittyverse.fun.</p>'
+    + '<p class="tv-observed">' + esc(liveStamp()) + ' Not financial advice.</p>'
+    + '<p class="tv-observed">Independent d4rth build. It mirrors the look and public data of <a href="https://tittyverse.fun" target="_blank" rel="noopener">tittyverse.fun</a> to help advance the build and the community. Not the official site, not affiliated.</p>'
     + '<details class="tv-address"><summary>Token address</summary><code>' + esc(t.mint) + '</code></details>';
   document.getElementById('tvDetailsToggle').onclick = () => {
     app.dataset.details = open ? 'closed' : 'open';
@@ -785,8 +827,8 @@ function renderInspector() {
 
 function setCaption() {
   const stars = view === 'constellations';
-  document.getElementById('kicker').textContent = stars ? 'Constellations' : 'd4rth · example map';
-  document.getElementById('title').textContent = stars ? 'The chart' : 'BTC system';
+  document.getElementById('kicker').textContent = stars ? 'Constellations' : (trail.length ? '02 / Nested orbit' : 'd4rth · example map');
+  document.getElementById('title').textContent = stars ? 'The chart' : anchor.symbol + ' system';
   document.getElementById('starCredit').hidden = !stars;
   document.getElementById('orbitCount').hidden = stars;
   document.getElementById('openStars').classList.toggle('on', stars);
@@ -815,12 +857,13 @@ function selectMint(mint) {
 }
 function renderCatalog(q) {
   const query = (q || '').trim().toLowerCase();
-  const list = bodies.filter(t => !query || (t.symbol + ' ' + t.name + ' ' + t.mint).toLowerCase().includes(query));
+  const pool = allTokens.size ? [...allTokens.values()].map(t => ({ mint: t.mint, symbol: t.symbol, name: t.name, mc: t.marketCap || 0, image: LOCAL.has(t.mint) ? (CLEAN[t.mint] || 'art/m/' + t.mint + '.jpg') : absImg(t.image) })) : bodies;
+  const list = pool.filter(t => !query || (t.symbol + ' ' + t.name + ' ' + t.mint).toLowerCase().includes(query)).sort((x, y) => (y.mc || 0) - (x.mc || 0)).slice(0, 80);
   document.getElementById('tvDirectory').innerHTML = list.map((t, i) =>
-    '<button type="button" class="tv-directory-row" data-mint="' + esc(t.mint) + '"><span class="tv-row-index">' + String(i + 1).padStart(2, '0') + '</span><img alt="" src="' + esc(t.image || '') + '"><span class="tv-row-name"><strong>' + esc(t.symbol) + '</strong><small>' + esc(t.name || '') + '</small></span><span class="tv-row-metric">' + money(t.mc) + '</span></button>'
+    '<button type="button" class="tv-directory-row" data-mint="' + esc(t.mint) + '"><span class="tv-row-index">' + String(i + 1).padStart(2, '0') + '</span><img alt="" loading="lazy" src="' + esc(t.image || '') + '"><span class="tv-row-name"><strong>' + esc(t.symbol) + '</strong><small>' + esc(t.name || '') + '</small></span><span class="tv-row-mc">' + money(t.mc) + '</span></button>'
   ).join('') || '<p class="proto-lead">No planet matches that.</p>';
   document.querySelectorAll('#tvDirectory button').forEach(b => {
-    b.onclick = () => { selectMint(b.dataset.mint); setPanel('none'); };
+    b.onclick = () => { setPanel('none'); enterOrbit(b.dataset.mint); };
   });
 }
 function paintHubButtons() {
@@ -1108,7 +1151,7 @@ function loop() {
   stepCamera();
   let mix = 0;
   for (const t of bodies) mix += t.boost + t.share + t.shareUsdt + (t.loaded ? 1 : 0);
-  const sig = [theta, phi, dist, usdcT, usdtT, W, H, view, showLabels, showOrbits, showPairs, selected && selected.mint, mix, bulmaImg.complete, usdtImg.complete, hubTab].join('|');
+  const sig = [theta, phi, dist, usdcT, usdtT, W, H, view, showLabels, showOrbits, showPairs, selected && selected.mint, anchor.mint, mix, bulmaImg.complete, usdtImg.complete, hubTab].join('|');
   if (sig === lastSig) { requestAnimationFrame(loop); return; }
   lastSig = sig;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -1133,11 +1176,11 @@ function loop() {
   }
   const centers = centerCluster();
   const btcP = project(centers.btc);
-  const btcR = screenRadius(centers.btc, studioRadius(anchor.mc, 0.9));
+  const btcR = screenRadius(centers.btc, studioRadius(anchor.vmc || anchor.mc, 0.9));
   const hubB = centers.usdc ? project(centers.usdc) : null;
   const hubU = centers.usdt ? project(centers.usdt) : null;
-  const rB = hubB ? screenRadius(centers.usdc, studioRadius(anchor.mc, 0.9) * 0.72) : 0;
-  const rU = hubU ? screenRadius(centers.usdt, studioRadius(anchor.mc, 0.9) * 0.58) : 0;
+  const rB = hubB ? screenRadius(centers.usdc, studioRadius(anchor.vmc || anchor.mc, 0.9) * 0.72) : 0;
+  const rU = hubU ? screenRadius(centers.usdt, studioRadius(anchor.vmc || anchor.mc, 0.9) * 0.58) : 0;
   const drawn = planets.map(t => {
     const world = worldOf(t);
     const p = project(world);
@@ -1250,9 +1293,10 @@ canvas.addEventListener('click', e => {
     if (d < s.r + 8 && d < bestD) { best = s; bestD = d; }
   });
   if (!best) return;
+  if (best.t === anchor) { selected = anchor; renderInspector(); return; }
   selected = best.t;
-  if (window.matchMedia('(max-width: 760px)').matches) app.dataset.details = 'open';
   renderInspector();
+  enterOrbit(best.t.mint);
 });
 
 if (!REDUCED) {
@@ -1261,7 +1305,161 @@ if (!REDUCED) {
   const mb = document.getElementById('tvMotion');
   mb.textContent = 'Pause'; mb.setAttribute('aria-pressed', 'true');
 }
-document.getElementById('orbitCount').textContent = SNAP.orbitCount.toLocaleString() + ' in this orbit / ' + planets.length + ' in view';
+const API = 'https://sling-rewards-backend.onrender.com/public/galaxy/';
+const API_ORIGIN = 'https://sling-rewards-backend.onrender.com';
+const CAPS = [9, 12, 12, 15];
+const LTC_MINT = 'DffdPtAKvnP91k9Ct6QvZ8TwVvWbJ6CxRtGNGNh9pump';
+const allTokens = new Map();
+const sysCache = new Map();
+let trail = [];
+let liveAt = null;
+const home = { anchor, planets };
+function absImg(p) { return p && p[0] === '/' ? API_ORIGIN + p : p; }
+function liveStamp() {
+  if (liveAt) return 'Live data, checked ' + liveAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + '. Prices refresh about every 5 minutes.';
+  return 'Saved snapshot ' + (SNAP.capturedAt || '').slice(0, 16).replace('T', ' ') + ' UTC while live data loads.';
+}
+function bodyFrom(tok, old) {
+  const t = old || { boost: 0, share: 0, shareUsdt: 0 };
+  Object.assign(t, {
+    mint: tok.mint, symbol: tok.symbol, name: tok.name, stage: tok.stage,
+    mc: tok.marketCap || 0, liq: tok.liquidityUsd ?? tok.curveBackingUsd ?? 0, vol: tok.volume24h || 0,
+    price: tok.priceUsd, change: tok.change24h ?? null, socials: tok.socials || [],
+  });
+  if (!old) { t.remote = absImg(tok.image); t.moon = false; t.center = false; }
+  return t;
+}
+function layoutPlanets(list, moonMint) {
+  list = list.slice(0, 48);
+  let i = 0;
+  CAPS.forEach((cap, ring) => {
+    const row = list.slice(i, i + cap); i += cap;
+    row.forEach((t, k) => { t.ring = ring; t.angle = k * 2 * Math.PI / row.length + ring * 0.55; });
+  });
+  list.forEach(t => { if (moonMint && t.mint === moonMint) { t.moon = true; t.ring = 0; t.angle = 2.5; } });
+  return list;
+}
+function setSystem(a, ps, nestedFlag) {
+  anchor = a; planets = ps; bodies = [anchor, ...planets];
+  anchor.center = true; anchor.boost = 0; anchor.share = 0; anchor.shareUsdt = 0;
+  planets.forEach(t => { t.boost = 0; t.share = 0; t.shareUsdt = 0; t.baseR = t.moon ? RINGS[0] * 0.72 : RINGS[t.ring]; if (!t.img && !t._req) { t._req = true; loadImg(t); } });
+  if (!anchor.img && !anchor._req) { anchor._req = true; loadImg(anchor); }
+  if (nestedFlag) {
+    SNAP.maxMc = Math.max(1, ...planets.map(t => t.mc)) * 2.2;
+    anchor.vmc = SNAP.maxMc;
+  } else {
+    SNAP.maxMc = Math.max(1, anchor.mc);
+    anchor.vmc = null;
+  }
+  usdcOn = usdtOn = false; usdcT = usdtT = 0; hubTab = 'usdc';
+  if (view === 'constellations') setStars(false);
+  buildRows(); paintHubButtons(); applyAllBoost(0); syncShareInputs();
+  selected = anchor;
+  resetCamera();
+  renderCrumbs(); renderCaption(); renderCatalog(document.getElementById('tvSearch').value);
+  renderInspector(); paintDeltas();
+}
+function renderCaption() {
+  const nested = trail.length > 0;
+  document.getElementById('kicker').textContent = nested ? '02 / Nested orbit' : 'd4rth · example map';
+  document.getElementById('title').textContent = anchor.symbol + ' system';
+  document.getElementById('orbitCount').textContent = nested
+    ? planets.length + ' in this orbit / ' + planets.length + ' in view'
+    : (allTokens.size ? allTokens.size - 1 : SNAP.orbitCount).toLocaleString() + ' in this orbit / ' + planets.length + ' in view';
+  document.getElementById('backHome').hidden = !nested;
+  document.getElementById('openStars').hidden = nested;
+}
+function renderCrumbs() {
+  const nav = document.getElementById('crumbs');
+  const items = [{ mint: null, symbol: home.anchor.symbol, image: home.anchor.image }, ...trail];
+  nav.innerHTML = '<span>d4rth protocol</span>' + items.map((it, i) => {
+    const last = i === items.length - 1;
+    const img = it.image ? '<img alt="" src="' + esc(it.image) + '">' : '';
+    return '<span aria-hidden="true">→</span>' + (last ? '<b>' + esc(it.symbol) + ' orbit</b>' : '<button type="button" class="crumb" data-i="' + i + '">' + img + esc(it.symbol) + '</button>');
+  }).join('');
+  nav.querySelectorAll('.crumb').forEach(b => { b.onclick = () => goTrail(Number(b.dataset.i)); });
+  const hash = trail.length ? '#orbit=' + trail[trail.length - 1].mint : location.pathname + location.search;
+  try { history.replaceState(null, '', trail.length ? hash : location.pathname + location.search); } catch (e) {}
+}
+function goTrail(i) {
+  if (i <= 0) { trail = []; setSystem(home.anchor, home.planets, false); return; }
+  const target = trail[i - 1].mint;
+  trail = trail.slice(0, i - 1);
+  enterOrbit(target);
+}
+async function fetchSystem(mint) {
+  if (sysCache.has(mint)) return sysCache.get(mint);
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 9000);
+  try {
+    const r = await fetch(API + 'system?mint=' + encodeURIComponent(mint), { signal: ctl.signal });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    sysCache.set(mint, j);
+    setTimeout(() => sysCache.delete(mint), 60000);
+    return j;
+  } finally { clearTimeout(timer); }
+}
+let entering = 0;
+async function enterOrbit(mint) {
+  if (mint === home.anchor.mint) { trail = []; setSystem(home.anchor, home.planets, false); return; }
+  const token = ++entering;
+  const count = document.getElementById('orbitCount');
+  count.textContent = 'Opening orbit…';
+  try {
+    const j = await fetchSystem(mint);
+    if (token !== entering) return;
+    const known = allTokens.get(mint) || j.anchor;
+    const a = bodyFrom({ ...j.anchor, ...known, image: j.anchor.image }, null);
+    const ps = layoutPlanets((j.tokens || []).filter(t => t.mint !== mint).map(t => bodyFrom(t, null)).sort((x, y) => y.mc - x.mc), null);
+    if (!trail.length || trail[trail.length - 1].mint !== mint) trail.push({ mint, symbol: a.symbol, image: LOCAL.has(mint) ? (CLEAN[mint] || 'art/m/' + mint + '.jpg') : a.remote });
+    setSystem(a, ps, true);
+    if (!ps.length) document.getElementById('orbitCount').textContent = 'No pairs yet for this coin.';
+  } catch (e) {
+    if (token !== entering) return;
+    renderCaption();
+    count.textContent = 'Could not open that orbit. Check your connection and try again.';
+  }
+}
+document.getElementById('backHome').onclick = () => goTrail(0);
+document.getElementById('copyOrbit').onclick = async e => {
+  const url = location.origin + location.pathname + (trail.length ? '#orbit=' + trail[trail.length - 1].mint : '');
+  try { await navigator.clipboard.writeText(url); e.target.textContent = 'Copied'; } catch (err) { e.target.textContent = 'Copy failed'; }
+  setTimeout(() => { e.target.textContent = 'Copy orbit link'; }, 1600);
+};
+function applyLive(j) {
+  allTokens.clear();
+  [j.anchor, ...j.tokens].forEach(t => allTokens.set(t.mint, t));
+  [home.anchor, ...home.planets, ...bodies].forEach(b => { const t = allTokens.get(b.mint); if (t) bodyFrom(t, b); });
+  liveAt = new Date(j.capturedAt || Date.now());
+}
+let liveBusy = false;
+async function refreshLive(first) {
+  if (liveBusy) return;
+  liveBusy = true;
+  try {
+    const r = await fetch(API + 'bootstrap');
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const j = await r.json();
+    applyLive(j);
+    const calm = !trail.length && !usdcOn && !usdtOn && selected === anchor;
+    if (first && calm) {
+      const fresh = j.tokens.filter(t => t.mint !== home.anchor.mint).map(t => bodyFrom(t, home.planets.find(p => p.mint === t.mint) || null)).sort((x, y) => y.mc - x.mc);
+      home.planets = layoutPlanets(fresh, LTC_MINT);
+      setSystem(home.anchor, home.planets, false);
+    } else { renderCaption(); renderInspector(); }
+    renderCatalog(document.getElementById('tvSearch').value);
+  } catch (e) { /* keep the saved snapshot */ }
+  liveBusy = false;
+}
+if (!REDUCED) {
+  autoRotate = true;
+  document.getElementById('optMotion').checked = true;
+  const mb = document.getElementById('tvMotion');
+  mb.textContent = 'Pause'; mb.setAttribute('aria-pressed', 'true');
+}
+renderCaption();
+renderCrumbs();
 renderCatalog('');
 selected = anchor;
 renderInspector();
@@ -1270,6 +1468,13 @@ paintHubButtons();
 setScreen();
 resize();
 requestAnimationFrame(loop);
+if (!(navigator.connection && navigator.connection.saveData)) {
+  setTimeout(() => refreshLive(true).then(() => {
+    const m = /#orbit=([1-9A-HJ-NP-Za-km-z]{32,44})/.exec(location.hash);
+    if (m) enterOrbit(m[1]);
+  }), 600);
+  setInterval(() => { if (document.visibilityState === 'visible') refreshLive(false); }, 300000);
+}
 </script>
 </body>
 </html>
