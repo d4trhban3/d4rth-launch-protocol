@@ -255,6 +255,10 @@
   .tv-row-name small { display: block; color: var(--tv-muted); font-size: 10px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tv-row-metric { flex: none; font-size: 12px; }
   .proto-lead { margin: 0 0 14px; color: var(--tv-muted); font-size: 13px; line-height: 1.55; }
+  .hubtoggles { display: flex; gap: 6px; margin: 0 0 6px; }
+  .hubtoggles button { flex: 1; height: 36px; font-size: 12px; font-weight: 650; }
+  #pUsdt { border-color: #a8eb6e; background: #a8eb6e; }
+  #pUsdt.on { background: transparent; color: #a8eb6e; }
   .hubtabs { display: flex; gap: 6px; margin: 8px 0 4px; }
   .hubtabs button { flex: 1; height: 36px; border: 1px solid var(--tv-rule); background: transparent; font-size: 12px; font-weight: 650; }
   .hubtabs button.on { background: var(--tv-acid); color: var(--tv-ink); border-color: var(--tv-acid); }
@@ -411,6 +415,10 @@
       <div id="paneProtocol" hidden>
         <p class="proto-lead"><b>The main protocol is USDC · Bulma.</b> Bulma is paired to USDC, SOL and Big Titty Coin (BTC): the main pool is USDC, 10% locks to BTC, and 10% locks to SOL. The other coins lock a chunk of their supply to Bulma.</p>
         <p class="proto-lead proto-extra"><b>USDT is not part of that protocol.</b> It is an optional extra boost: add a Tether-themed token paired to USDT, Bulma and Big Titty Coin (BTC) and the same coins pull a little closer. Its USDT pool is the thinner one, so the same chunk adds less.</p>
+        <div class="hubtoggles">
+          <button type="button" id="pUsdc" class="hub-btn" aria-pressed="false">Add USDC · Bulma</button>
+          <button type="button" id="pUsdt" class="hub-btn" aria-pressed="false">Add USDT boost</button>
+        </div>
         <div class="sl">Market cap increase <b id="allBoostLabel">+0%</b></div>
         <input id="allBoost" type="range" min="0" max="10000" step="1" value="0">
         <div class="ends"><span>0%</span><span>10,000%</span></div>
@@ -949,6 +957,11 @@ function paintHubButtons() {
   ut.classList.toggle('on', usdtOn);
   uc.setAttribute('aria-pressed', String(usdcOn));
   ut.setAttribute('aria-pressed', String(usdtOn));
+  const pc = document.getElementById('pUsdc'), pt = document.getElementById('pUsdt');
+  pc.textContent = usdcOn ? 'USDC · Bulma on' : 'Add USDC · Bulma';
+  pt.textContent = usdtOn ? 'USDT boost on' : 'Add USDT boost';
+  pc.classList.toggle('on', usdcOn); pt.classList.toggle('on', usdtOn);
+  pc.setAttribute('aria-pressed', String(usdcOn)); pt.setAttribute('aria-pressed', String(usdtOn));
 }
 function toggleHub(which) {
   const turningOn = which === 'usdt' ? !usdtOn : !usdcOn;
@@ -965,7 +978,6 @@ function toggleHub(which) {
   syncShareInputs();
   paintHubButtons();
   if (turningOn) setPanel('protocol');
-  else if (!usdcOn && !usdtOn && app.dataset.panel === 'protocol') setPanel('none');
 }
 function setStars(on) {
   view = on ? 'constellations' : 'orbit';
@@ -975,6 +987,8 @@ function setStars(on) {
 }
 document.getElementById('btn').onclick = () => toggleHub('usdc');
 document.getElementById('btnUsdt').onclick = () => toggleHub('usdt');
+document.getElementById('pUsdc').onclick = () => toggleHub('usdc');
+document.getElementById('pUsdt').onclick = () => toggleHub('usdt');
 document.getElementById('tabUsdc').onclick = () => { hubTab = 'usdc'; document.getElementById('tabUsdc').classList.add('on'); document.getElementById('tabUsdt').classList.remove('on'); syncShareInputs(); };
 document.getElementById('tabUsdt').onclick = () => { hubTab = 'usdt'; document.getElementById('tabUsdt').classList.add('on'); document.getElementById('tabUsdc').classList.remove('on'); syncShareInputs(); };
 document.getElementById('openProtocol').onclick = () => setPanel(app.dataset.panel === 'protocol' ? 'none' : 'protocol');
