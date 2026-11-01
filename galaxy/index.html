@@ -490,6 +490,8 @@ function loadImg(t) {
   t.img = im;
 }
 bodies.forEach(loadImg);
+const usdtImg = new Image();
+usdtImg.src = 'art/usdt.svg';
 const bulmaImg = new Image();
 bulmaImg.src = 'art/usbd.jpg';
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&', '<': '<', '>': '>', '"': '"', "'": '&#39;' }[c])); }
@@ -1106,7 +1108,7 @@ function loop() {
   stepCamera();
   let mix = 0;
   for (const t of bodies) mix += t.boost + t.share + t.shareUsdt + (t.loaded ? 1 : 0);
-  const sig = [theta, phi, dist, usdcT, usdtT, W, H, view, showLabels, showOrbits, showPairs, selected && selected.mint, mix, bulmaImg.complete, hubTab].join('|');
+  const sig = [theta, phi, dist, usdcT, usdtT, W, H, view, showLabels, showOrbits, showPairs, selected && selected.mint, mix, bulmaImg.complete, usdtImg.complete, hubTab].join('|');
   if (sig === lastSig) { requestAnimationFrame(loop); return; }
   lastSig = sig;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -1209,8 +1211,7 @@ function loop() {
     hits.push({ t: { mint: 'bulma', symbol: 'BULMA' }, x: hubB.x, y: hubB.y, r: rB });
   }
   if (hubU) {
-    ctx.fillStyle = '#a8eb6e'; ctx.beginPath(); ctx.arc(hubU.x, hubU.y, rU, 0, Math.PI * 2); ctx.fill();
-    ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1.2; ctx.stroke();
+    disc(hubU.x, hubU.y, rU, usdtImg.complete && usdtImg.naturalWidth ? usdtImg : null);
     ctx.fillStyle = '#f4f1ea'; ctx.font = '600 11px "DM Sans", sans-serif'; ctx.textAlign = 'center';
     ctx.fillText('USDT', hubU.x, hubU.y + rU + 13);
   }
