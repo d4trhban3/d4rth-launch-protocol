@@ -546,7 +546,7 @@ function centerCluster() {
   const bulmaR = btcR * 0.72;
   const usdtR = btcR * 0.58;
   const line = 4.2;
-  const showBulma = usdcT > 0.02 || usdtT > 0.02;
+  const showBulma = usdcT > 0.02;
   const showUsdt = usdtT > 0.02;
   if (showBulma && showUsdt) {
     return {
@@ -555,8 +555,12 @@ function centerCluster() {
       usdt: [btcR + usdtR + line, 0, 0]
     };
   }
+  if (showUsdt) {
+    const gap = (btcR + usdtR + line) * usdtT;
+    return { btc: [gap * 0.45, 0, 0], usdc: null, usdt: [-gap * 0.55, 0, 0] };
+  }
   if (showBulma) {
-    const gap = (btcR + bulmaR + line) * Math.max(usdcT, usdtT);
+    const gap = (btcR + bulmaR + line) * usdcT;
     return { btc: [gap * 0.45, 0, 0], usdc: [-gap * 0.55, 0, 0], usdt: null };
   }
   return { btc: [0, 0, 0], usdc: null, usdt: null };
@@ -1165,8 +1169,8 @@ function loop() {
     drawn.forEach(p => {
       ctx.lineWidth = 1;
       if (p.pull >= 0.02 && (hubB || hubU)) {
-        if (hubB) { ctx.strokeStyle = 'rgba(184,160,255,0.9)'; strokeBetween(hubB, p, rB + 2, p.r + 2); }
-        if (hubU) { ctx.strokeStyle = 'rgba(168,235,110,0.9)'; strokeBetween(hubU, p, rU + 2, p.r + 2); }
+        if (hubB && addedUsdc(p.t) > 0) { ctx.strokeStyle = 'rgba(184,160,255,0.9)'; strokeBetween(hubB, p, rB + 2, p.r + 2); }
+        if (hubU && addedUsdt(p.t) > 0) { ctx.strokeStyle = 'rgba(168,235,110,0.9)'; strokeBetween(hubU, p, rU + 2, p.r + 2); }
       } else {
         ctx.strokeStyle = 'rgba(244,241,234,0.45)';
         strokeBetween(btcP, p, btcR + 2, p.r + 2);
