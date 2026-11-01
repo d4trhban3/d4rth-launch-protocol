@@ -704,28 +704,19 @@ function stepCamera() {
   if (el && el.textContent !== pct + '%') el.textContent = pct + '%';
 }
 function centerCluster() {
+  // Bulma is not a separate disc: it fuses with BTC in the centre. Its lines run to that centre disc.
+  // Tether sits beside it: on the left when it is alone, on the right once Bulma joins.
   const btcR = studioRadius(anchor.vmc || anchor.mc, 0.9);
-  const bulmaR = btcR * 0.72;
   const usdtR = btcR * 0.58;
   const line = 4.2;
-  const showBulma = usdcT > 0.02;
-  const showUsdt = usdtT > 0.02;
-  if (showBulma && showUsdt) {
-    return {
-      btc: [0, 0, 0],
-      usdc: [-(btcR + bulmaR + line), 0, 0],
-      usdt: [btcR + usdtR + line, 0, 0]
-    };
-  }
-  if (showUsdt) {
-    const gap = (btcR + usdtR + line) * usdtT;
-    return { btc: [gap * 0.45, 0, 0], usdc: null, usdt: [-gap * 0.55, 0, 0] };
-  }
-  if (showBulma) {
-    const gap = (btcR + bulmaR + line) * usdcT;
-    return { btc: [gap * 0.45, 0, 0], usdc: [-gap * 0.55, 0, 0], usdt: null };
-  }
-  return { btc: [0, 0, 0], usdc: null, usdt: null };
+  const u = Math.min(1, usdcT);
+  const gap = (btcR + usdtR + line) * usdtT;
+  const btc = [gap * 0.45 * (1 - u), 0, 0];
+  return {
+    btc,
+    usdc: usdcT > 0.02 ? btc : null,
+    usdt: usdtT > 0.02 ? [gap * (-0.55 * (1 - u) + u), 0, 0] : null
+  };
 }
 function resetCamera() {
   userZoomed = false;
@@ -1518,7 +1509,7 @@ function loop() {
   const btcR = screenRadius(centers.btc, studioRadius(anchor.vmc || anchor.mc, 0.9));
   const hubB = centers.usdc ? project(centers.usdc) : null;
   const hubU = centers.usdt ? project(centers.usdt) : null;
-  const rB = hubB ? screenRadius(centers.usdc, studioRadius(anchor.vmc || anchor.mc, 0.9) * 0.72) : 0;
+  const rB = hubB ? btcR : 0;
   const rU = hubU ? screenRadius(centers.usdt, studioRadius(anchor.vmc || anchor.mc, 0.9) * 0.58) : 0;
   const drawn = planets.map(t => {
     const world = worldOf(t);
@@ -1571,26 +1562,10 @@ function loop() {
     disc(p.x, p.y, p.r, p.t.loaded ? p.t.img : null);
     hits.push({ t: p.t, x: p.x, y: p.y, r: p.r });
   });
-  if (hubB) {
-    ctx.strokeStyle = 'rgba(184,160,255,0.9)';
-    ctx.lineWidth = 1.15;
-    strokeBetween(btcP, hubB, btcR + 2, rB + 2);
-  }
   if (hubU) {
     ctx.strokeStyle = 'rgba(168,235,110,0.95)';
     ctx.lineWidth = 1.15;
     strokeBetween(btcP, hubU, btcR + 2, rU + 2);
-  }
-  if (hubB && hubU) {
-    ctx.strokeStyle = 'rgba(184,160,255,0.8)';
-    ctx.lineWidth = 1;
-    strokeBetween(hubB, hubU, rB + 2, rU + 2);
-  }
-  if (hubB) {
-    disc(hubB.x, hubB.y, rB, bulmaImg.complete ? bulmaImg : null);
-    ctx.fillStyle = '#f4f1ea'; ctx.font = '600 11px "DM Sans", sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('BULMA (example)', hubB.x, hubB.y + rB + 13);
-    hits.push({ t: { mint: 'bulma', symbol: 'BULMA' }, x: hubB.x, y: hubB.y, r: rB });
   }
   if (hubU) {
     disc(hubU.x, hubU.y, rU, usdtImg.complete && usdtImg.naturalWidth ? usdtImg : null);
@@ -1622,7 +1597,7 @@ function loop() {
       if (h.t !== anchor && h.r < 8) return;
       ctx.fillStyle = '#f4f1ea';
       ctx.font = '600 12px "DM Sans", sans-serif';
-      ctx.fillText(h.t.symbol, h.x, h.y + h.r + 4);
+      ctx.fillText(h.t === anchor && usdcT > 0.5 && anchor.mint === home.anchor.mint ? 'BTC × BULMA (example)' : h.t.symbol, h.x, h.y + h.r + 4);
       if ((selected && selected.mint === h.t.mint) || (!selected && h.t === anchor) || (selected === anchor && h.t === anchor)) {
         ctx.fillStyle = '#8fd3e6';
         ctx.fillRect(h.x - 12, h.y + h.r + 18, 24, 2);
