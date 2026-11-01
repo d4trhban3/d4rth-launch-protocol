@@ -1181,7 +1181,13 @@ function loop() {
   ctx.fillRect(0, 0, W, H);
   if (starLayer) ctx.drawImage(starLayer, 0, 0, W, H);
   emergeK = 1; emergeA = 1;
-  if (dive) {
+  let morphQ = 0;
+  if (dive && dive.pull) {
+    const p = Math.max(0, Math.min(1, (performance.now() - dive.t0) / dive.dur)), k = ease.io(p);
+    emergeK = 1 - 0.92 * k;
+    emergeA = 1 - ease.io(Math.min(1, k / 0.8));
+    morphQ = ease.io(Math.max(0, Math.min(1, (p - 0.1) / 0.75)));
+  } else if (dive) {
     const now = performance.now();
     const es = Math.max(0, Math.min(1, (now - dive.t0) / dive.emDur));
     emergeK = 0.08 + 0.92 * ease.out(es);
@@ -1291,6 +1297,11 @@ function loop() {
   }
   ctx.globalAlpha = 1;
   disc(btcP.x, btcP.y, btcR, anchor.loaded ? anchor.img : null);
+  if (morphQ > 0.002 && dive.target && dive.target.loaded) {
+    ctx.globalAlpha = morphQ;
+    disc(btcP.x, btcP.y, btcR, dive.target.img);
+    ctx.globalAlpha = 1;
+  }
   ctx.globalAlpha = emergeA;
   hits.push({ t: anchor, x: btcP.x, y: btcP.y, r: btcR });
   if (showLabels) {
@@ -1448,6 +1459,8 @@ async function enterOrbit(mint, hit) {
   const token = ++entering;
   const count = document.getElementById('orbitCount');
   count.textContent = 'Opening orbit…';
+  const pulled = hit && hit.t && !REDUCED;
+  if (pulled) dive = { pull: true, t0: performance.now(), dur: 900, emDur: 1800, target: hit.t };
   try {
     const j = await fetchSystem(mint);
     if (token !== entering) return;
@@ -1458,12 +1471,14 @@ async function enterOrbit(mint, hit) {
     const pend = [a, ...ps].map(t => { t._req = true; return loadImg(t); });
     await Promise.race([Promise.all(pend), sleep(2500)]);
     if (token !== entering) return;
+    if (pulled) await sleep(Math.max(0, dive.t0 + dive.dur - performance.now()));
+    if (token !== entering) return;
     setSystem(a, ps, true);
     startArrive();
     if (!ps.length) document.getElementById('orbitCount').textContent = 'No pairs yet for this coin.';
   } catch (e) {
     if (token !== entering) return;
-    dive = null;
+    if (pulled) startArrive(); else dive = null;
     renderCaption();
     count.textContent = 'Could not open that orbit. Check your connection and try again.';
   }
