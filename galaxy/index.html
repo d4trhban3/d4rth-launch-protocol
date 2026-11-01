@@ -1180,26 +1180,22 @@ function loop() {
   ctx.fillStyle = '#10100e';
   ctx.fillRect(0, 0, W, H);
   if (starLayer) ctx.drawImage(starLayer, 0, 0, W, H);
-  let dFade = 0, dHole = null;
+  let oldA = 0, anchorA = 1;
   emergeK = 1; emergeA = 1;
   if (dive) {
-    const cx = W / 2, cy = H / 2, e = Math.min(1, (performance.now() - dive.t0) / dive.dur);
-    if (dive.phase === 'in') {
-      const k = ease.io(e);
-      const sc = 1 + (dive.S - 1) * k;
-      ctx.save();
-      ctx.translate(dive.fx + (cx - dive.fx) * k, dive.fy + (cy - dive.fy) * k);
-      ctx.scale(sc, sc);
-      ctx.translate(-dive.fx, -dive.fy);
-      dFade = Math.min(1, k / 0.75);
-      dHole = { x: dive.fx, y: dive.fy, r: dive.r };
-    } else {
-      const k = ease.out(e);
-      ctx.save();
-      emergeK = 0.08 + 0.92 * k;
-      emergeA = ease.io(Math.min(1, Math.max(0, (e - 0.1) / 0.75)));
-      if (e >= 1) dive.done = true;
-    }
+    const now = performance.now();
+    const clamp01 = v => Math.max(0, Math.min(1, v));
+    const k = dive.inDur ? ease.io(clamp01((now - dive.t0) / dive.inDur)) : 1;
+    dive.k = k;
+    if (dive.swapT) {
+      const es = clamp01((now - dive.emergeT) / dive.emDur);
+      const late = clamp01((now - dive.swapT) / 600);
+      emergeK = 0.08 + 0.92 * ease.out(es);
+      emergeA = ease.io(clamp01((es - 0.1) / 0.75));
+      anchorA = dive.snap ? Math.max(k, late) : 1;
+      oldA = dive.snap ? Math.max(1 - k, 1 - late) : 0;
+      if (now > dive.t0 + dive.inDur && es >= 1) dive.done = true;
+    } else if (dive.snap) { oldA = 1; }
   }
   ctx.globalAlpha = emergeA;
   if (W < 8 || H < 8) { requestAnimationFrame(loop); return; }
@@ -1302,7 +1298,7 @@ function loop() {
     ctx.fillStyle = '#f4f1ea'; ctx.font = '600 11px "DM Sans", sans-serif'; ctx.textAlign = 'center';
     ctx.fillText('USDT', hubU.x, hubU.y + rU + 13);
   }
-  ctx.globalAlpha = 1;
+  ctx.globalAlpha = anchorA;
   disc(btcP.x, btcP.y, btcR, anchor.loaded ? anchor.img : null);
   ctx.globalAlpha = emergeA;
   hits.push({ t: anchor, x: btcP.x, y: btcP.y, r: btcR });
@@ -1326,15 +1322,16 @@ function loop() {
   }
   ctx.globalAlpha = 1;
   if (dive) {
-    if (dFade > 0.01) {
-      const hole = dHole, big = (W + H) * 12;
-      ctx.beginPath();
-      ctx.rect(-big, -big, big * 2, big * 2);
-      ctx.arc(hole.x, hole.y, hole.r, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(16,16,14,' + dFade.toFixed(3) + ')';
-      ctx.fill('evenodd');
+    if (dive.snap && oldA > 0.005) {
+      const cx = W / 2, cy = H / 2, k = dive.k, sc = 1 + (dive.S - 1) * k;
+      ctx.save();
+      ctx.globalAlpha = oldA;
+      ctx.translate(dive.fx + (cx - dive.fx) * k, dive.fy + (cy - dive.fy) * k);
+      ctx.scale(sc, sc);
+      ctx.translate(-dive.fx, -dive.fy);
+      ctx.drawImage(dive.snap, 0, 0, W, H);
+      ctx.restore();
     }
-    ctx.restore();
     if (dive.done) { dive = null; lastSig = ''; }
   }
   window.__hit = hits.filter(h => h.t && h.t.mint !== 'bulma');
@@ -1463,7 +1460,8 @@ async function fetchSystem(mint) {
 let entering = 0;
 function startArrive() {
   if (REDUCED) { dive = null; return; }
-  dive = { phase: 'emerge', t0: performance.now(), dur: 1800 };
+  const now = performance.now();
+  dive = { phase: 'emerge', t0: now, inDur: 0, swapT: now, emergeT: now, emDur: 1800 };
 }
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 async function enterOrbit(mint, hit) {
@@ -1471,26 +1469,27 @@ async function enterOrbit(mint, hit) {
   const token = ++entering;
   const count = document.getElementById('orbitCount');
   count.textContent = 'Opening orbit…';
-  let zoomedR = 0;
+  let snap = null;
   if (hit && !REDUCED) {
     const tan = Math.tan(46 * Math.PI / 360);
     const rA = (200 / 23 * 0.9) * H / (2 * Math.max(distTarget || dist, 1) * tan);
     const S = Math.max(1.15, Math.min(9, rA / Math.max(hit.r, 3)));
     dTheta = 0; dPhi = 0;
-    dive = { phase: 'in', t0: performance.now(), dur: 1500, fx: hit.x, fy: hit.y, r: hit.r, S };
-    zoomedR = 1;
+    snap = document.createElement('canvas');
+    snap.width = canvas.width; snap.height = canvas.height;
+    snap.getContext('2d').drawImage(canvas, 0, 0);
+    dive = { phase: 'in', t0: performance.now(), inDur: 1500, emDur: 1800, fx: hit.x, fy: hit.y, r: hit.r, S, snap };
   }
   try {
     const j = await fetchSystem(mint);
-    if (token !== entering) return;
-    if (dive && dive.phase === 'in') await sleep(Math.max(0, dive.t0 + dive.dur - performance.now()));
     if (token !== entering) return;
     const known = allTokens.get(mint) || j.anchor;
     const a = bodyFrom({ ...j.anchor, ...known, image: j.anchor.image }, null);
     const ps = layoutPlanets((j.tokens || []).filter(t => t.mint !== mint).map(t => bodyFrom(t, null)).sort((x, y) => y.mc - x.mc), null);
     if (!trail.length || trail[trail.length - 1].mint !== mint) trail.push({ mint, symbol: a.symbol, image: LOCAL.has(mint) ? (CLEAN[mint] || 'art/m/' + mint + '.jpg') : a.remote });
     setSystem(a, ps, true);
-    startArrive();
+    if (dive && dive.snap) { const now = performance.now(); dive.swapT = now; dive.emergeT = Math.max(now, dive.t0 + 250); }
+    else startArrive();
     if (!ps.length) document.getElementById('orbitCount').textContent = 'No pairs yet for this coin.';
   } catch (e) {
     if (token !== entering) return;
