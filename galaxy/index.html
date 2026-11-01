@@ -964,7 +964,7 @@ function renderInspector() {
   if (t.change != null) stats.push(['24h change', '<span class="' + (t.change >= 0 ? 'chg-up' : 'chg-down') + '">' + (t.change >= 0 ? '+' : '') + Number(t.change).toFixed(1) + '%</span>']);
   const socials = (t.socials || []).filter(x => x.url && /^https:\/\//.test(x.url) && !/pump\.fun/.test(x.url));
   const soc = socials.length ? '<div class="tv-socials">' + socials.map(x => '<a href="' + esc(x.url) + '" target="_blank" rel="noopener noreferrer">' + esc(x.label || x.type) + ' ↗</a>').join('') + '</div>' : '';
-  const stars = view === 'constellations' ? '<div class="star-key"><div><i style="background:#7eb6ff"></i>The Majors</div><div><i style="background:#ff7ad9"></i>Slingoor\'s Belt</div><div><i style="background:#c4a6ff"></i>The Shadow Coins</div><div><i style="background:#e6c15a"></i>Wall Street</div><div><i style="background:#f0a060"></i>Little Siblings</div><div><i style="background:#f4f1ea"></i>The Field, distant specks</div><p class="star-credit-note">Outlines, not spokes. Search to find a small coin.</p><p class="star-credit-note">Concept · <a href="https://x.com/BTCWScoin" target="_blank" rel="noopener">Big Titty Cat Wif Sword · @BTCWScoin</a></p></div>' : '';
+  const stars = view === 'constellations' ? '<div class="star-key">' + GROUPS.map(g => '<div><i style="background:' + g.color + '"></i>' + esc(g.name.replace(/\b(\w)(\w*)/g, (m, c, r) => c + r.toLowerCase()).replace('Defi', 'DeFi')) + ' <small>' + esc(g.about) + '</small></div>').join('') + '<p class="star-credit-note">Only the big stars draw each shape. Smaller coins sit inside it. Search to find one.</p><p class="star-credit-note">Concept · <a href="https://x.com/BTCWScoin" target="_blank" rel="noopener">Big Titty Cat Wif Sword · @BTCWScoin</a></p></div>' : '';
   document.getElementById('inspector').innerHTML =
     '<button type="button" id="tvDetailsToggle" class="tv-details-toggle">Token details <span>' + (open ? '−' : '+') + '</span></button>'
     + '<div class="tv-token-role"><span>' + esc(role) + '</span><span>' + esc(stage) + '</span></div>'
@@ -1169,20 +1169,29 @@ function resize() {
 addEventListener('resize', resize);
 if (window.visualViewport) visualViewport.addEventListener('resize', resize);
 
+// Sorted the way Titty Kitty suggested: by what each coin is. Only the big stars draw the shape;
+// the smaller members of a group sit inside it as plain stars.
 const GROUPS = [
-  { name: 'THE MAJORS', color: '#7eb6ff', symbols: ['ETH','XRP','BNB','SOL','TAO','DOGE'] },
-  { name: "SLINGOOR'S BELT", color: '#ff7ad9', symbols: ['SLING','SENDOOR','OF','PUMP'] },
-  { name: 'THE SHADOW COINS', color: '#c4a6ff', symbols: ['XMR','ZEC'] },
-  { name: 'WALL STREET', color: '#e6c15a', symbols: ['NVDA','GLD','ETF'] },
-  { name: 'LITTLE SIBLINGS', color: '#f0a060', symbols: ['LTC','XBT','STC','BTB'] },
-  { name: 'THE FIELD', color: '#f4f1ea', symbols: null }
+  { name: 'THE MAJORS', color: '#7eb6ff', symbols: ['SOL','ETH','BNB','XRP','LTC'], about: 'Blue chips' },
+  { name: 'COMMUNITY', color: '#6fd6a8', symbols: ['DOGE','BONK','SWORDCAT','BTCWS'], about: 'Meme and fandom coins' },
+  { name: 'UTILITY & DEFI', color: '#4fd0e0', symbols: ['HYPE','JUP','SUI','TAO'], about: 'Platform, exchange and AI tokens' },
+  { name: 'THE STABLES', color: '#9fb8c8', symbols: ['USDT','USDC'], about: 'Coins that hold their value' },
+  { name: 'THE SHADOW COINS', color: '#c4a6ff', symbols: ['XMR','ZEC'], about: 'Privacy coins' },
+  { name: 'WALL STREET', color: '#e6c15a', symbols: ['NVDA','SP500','GLD','ETF'], about: 'Stocks, indexes and gold' },
+  { name: "SLINGOOR'S BELT", color: '#ff7ad9', symbols: ['PUMP','SLING','SENDOOR','TITTY','OF'], about: 'Pump.fun and Slingoor' },
+  { name: 'LITTLE SIBLINGS', color: '#f0a060', symbols: ['XBT','STC','xxxBTC','BTB'], about: 'Spinoffs and parodies of BTC' },
+  { name: 'THE FIELD', color: '#f4f1ea', symbols: null, about: 'Distant specks' }
 ];
+// pts are slots in drawing order. The shape joins the big stars that fill them.
 const FIGURES = {
-  'THE MAJORS': { box: [0.08, 0.18, 0.34, 0.38], pts: [[0.5, 0], [0.93, 0.25], [0.93, 0.75], [0.5, 1], [0.07, 0.75], [0.07, 0.25]] },
-  "SLINGOOR'S BELT": { box: [0.46, 0.14, 0.46, 0.16], pts: [[0, 0.5], [0.22, 0.08], [0.5, 0.32], [0.78, 0.08], [1, 0.5], [0.5, 0.95]] },
-  'THE SHADOW COINS': { box: [0.56, 0.38, 0.34, 0.22], pts: [[0, 0.5], [0.5, 0.05], [1, 0.5], [0.5, 0.95]] },
-  'WALL STREET': { box: [0.08, 0.62, 0.28, 0.28], pts: [[0.5, 0], [1, 1], [0, 1]] },
-  'LITTLE SIBLINGS': { box: [0.40, 0.64, 0.20, 0.24], pts: [[0.5, 0], [1, 0.5], [0.5, 1], [0, 0.5]] }
+  'THE MAJORS': { box: [0.05, 0.14, 0.30, 0.32], pts: [[0.1, 0.05], [0.5, 0.4], [0.9, 0.05], [0.75, 0.95], [0.25, 0.95]] },
+  'COMMUNITY': { box: [0.06, 0.70, 0.24, 0.22], pts: [[0.1, 0.5], [0.5, 0.1], [0.9, 0.55], [0.5, 0.95]] },
+  'UTILITY & DEFI': { box: [0.72, 0.10, 0.22, 0.26], pts: [[0.1, 0.1], [0.9, 0.2], [0.8, 0.9], [0.15, 0.75]] },
+  'THE STABLES': { box: [0.06, 0.50, 0.20, 0.14], pts: [[0.05, 0.6], [0.95, 0.4]] },
+  'THE SHADOW COINS': { box: [0.76, 0.42, 0.20, 0.18], pts: [[0.1, 0.8], [0.5, 0.1], [0.9, 0.8]] },
+  'WALL STREET': { box: [0.68, 0.66, 0.26, 0.26], pts: [[0.5, 0.05], [0.95, 0.9], [0.05, 0.9], [0.5, 0.55]] },
+  "SLINGOOR'S BELT": { box: [0.38, 0.06, 0.34, 0.16], pts: [[0.05, 0.45], [0.3, 0.1], [0.55, 0.5], [0.8, 0.1], [0.95, 0.5]] },
+  'LITTLE SIBLINGS': { box: [0.38, 0.72, 0.24, 0.20], pts: [[0.5, 0.05], [0.95, 0.5], [0.5, 0.95], [0.05, 0.5]] }
 };
 function assignGroups() {
   const used = new Set();
@@ -1215,7 +1224,7 @@ function drawConstellations() {
     ctx.lineWidth = 6;
     ctx.beginPath();
     pts.forEach((p, i) => i ? ctx.lineTo(p.x, p.y) : ctx.moveTo(p.x, p.y));
-    ctx.closePath();
+    if (pts.length > 3) ctx.closePath();
     ctx.stroke();
     ctx.shadowBlur = 0;
     ctx.globalAlpha = 0.95;
@@ -1260,26 +1269,19 @@ function drawConstellations() {
   groups.forEach(g => {
     const fig = FIGURES[g.name];
     if (!fig) return;
-    const outline = fig.pts.map(([nx, ny]) => mapPt(fig.box, nx, ny));
-    glow(outline, g.color);
+    const slots = fig.pts.map(([nx, ny]) => mapPt(fig.box, nx, ny));
     const ranked = [...g.members].sort((a, b) => b.mc - a.mc);
-    const count = Math.min(ranked.length, outline.length);
-    const used = new Set();
-    let placed = 0;
-    for (let i = 0; i < count; i++) {
-      let pi = Math.round(i * outline.length / count) % outline.length;
-      if (used.has(pi)) pi = outline.findIndex((_, k) => !used.has(k));
-      if (pi < 0) break;
-      used.add(pi);
-      const p = outline[pi];
-      dot(ranked[placed], p.x, p.y, Math.max(9, Math.min(20, 8 + starShare(ranked[placed]) * 24)), true);
-      ranked[placed]._placed = true;
-      placed++;
-    }
-    ranked.filter(t => !t._placed).forEach((t, i) => {
-      const edge = i % outline.length;
-      const a = outline[edge], b = outline[(edge + 1) % outline.length];
-      dot(t, a.x + (b.x - a.x) * 0.5, a.y + (b.y - a.y) * 0.5, Math.max(4, starShare(t) * 12), false);
+    const big = ranked.slice(0, slots.length), small = ranked.slice(slots.length);
+    const outline = slots.slice(0, big.length);
+    if (outline.length > 1) glow(outline, g.color);
+    big.forEach((t, i) => { dot(t, outline[i].x, outline[i].y, Math.max(9, Math.min(20, 8 + starShare(t) * 24)), true); });
+    const cxg = outline.reduce((s2, q) => s2 + q.x, 0) / outline.length, cyg = outline.reduce((s2, q) => s2 + q.y, 0) / outline.length;
+    small.forEach((t, i) => {
+      let h = 0;
+      for (let k = 0; k < t.mint.length; k++) h = (h * 31 + t.mint.charCodeAt(k)) >>> 0;
+      const a2 = (h % 628) / 100, rr = 0.25 + ((h >>> 9) % 50) / 100;
+      const q = outline[(h >>> 4) % outline.length];
+      dot(t, cxg + (q.x - cxg) * rr + Math.cos(a2) * 10, cyg + (q.y - cyg) * rr + Math.sin(a2) * 10, Math.max(3, starShare(t) * 9), false);
     });
     if (showLabels) {
       const top = outline.reduce((p, q) => q.y < p.y ? q : p);
@@ -1287,7 +1289,7 @@ function drawConstellations() {
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
       ctx.fillStyle = g.color;
-      ctx.fillText(g.name, fig.box[0] * W + fig.box[2] * W * 0.5, top.y - 14);
+      ctx.fillText(g.name, fig.box[0] * W + fig.box[2] * W * 0.5, top.y - 30);
     }
   });
   const btcR = 16;
