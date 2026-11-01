@@ -1163,16 +1163,14 @@ function loop() {
   const spokes = showPairs || usdcT > 0.04 || usdtT > 0.04;
   if (spokes) {
     drawn.forEach(p => {
-      const usdc = addedUsdc(p.t), usdt = addedUsdt(p.t);
-      let target = btcP, tr = btcR, color = 'rgba(244,241,234,0.45)';
-      if (p.pull >= 0.02 && usdt > usdc && hubU) {
-        target = hubU; tr = rU; color = 'rgba(168,235,110,0.9)';
-      } else if (p.pull >= 0.02 && hubB) {
-        target = hubB; tr = rB; color = 'rgba(184,160,255,0.9)';
-      }
-      ctx.strokeStyle = color;
       ctx.lineWidth = 1;
-      strokeBetween(target, p, tr + 2, p.r + 2);
+      if (p.pull >= 0.02 && (hubB || hubU)) {
+        if (hubB) { ctx.strokeStyle = 'rgba(184,160,255,0.9)'; strokeBetween(hubB, p, rB + 2, p.r + 2); }
+        if (hubU) { ctx.strokeStyle = 'rgba(168,235,110,0.9)'; strokeBetween(hubU, p, rU + 2, p.r + 2); }
+      } else {
+        ctx.strokeStyle = 'rgba(244,241,234,0.45)';
+        strokeBetween(btcP, p, btcR + 2, p.r + 2);
+      }
     });
   }
   document.getElementById('mapKey').hidden = !(usdcT > 0.02 || usdtT > 0.02);
