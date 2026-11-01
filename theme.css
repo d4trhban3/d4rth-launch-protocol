@@ -70,6 +70,11 @@ h3 { color: var(--muted); }
 .index a:hover b { color: var(--bulma-blue) !important; }
 .portrait, .sample img { border-color: rgba(184,160,255,.5) !important; box-shadow: 0 0 40px rgba(184,160,255,.18); }
 
+/* Bulma page banner */
+.banner { margin: 0 0 26px; border-radius: 18px; overflow: hidden; border: 1px solid var(--rule); box-shadow: 0 0 60px rgba(143,211,230,.12); background: rgba(255,255,255,.03); }
+.banner img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 1; object-fit: cover; margin: 0 !important; border: 0 !important; border-radius: 0 !important; }
+@media (max-width: 560px) { .banner { border-radius: 12px; margin-bottom: 18px; } }
+
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   * { transition: none !important; }
