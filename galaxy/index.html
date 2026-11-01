@@ -804,19 +804,22 @@ function launchEst() {
 }
 function paintLaunch() {
   const e = launchEst();
-  const pct = e.tokens / SUP * 100;
-  const big = n => n >= 1e9 ? (n / 1e9).toFixed(2) + 'B' : (n / 1e6).toFixed(0) + 'M';
+  const pc = (n, d) => n.toLocaleString('en-US', { maximumFractionDigits: n >= 100 ? 0 : (d == null ? 1 : d) });
+  const caps = [['at graduation', e.gradMc], ['$1M', 1e6], ['$10M', 1e7], ['$100M', 1e8]];
+  const follow = usdcOn && e.A > 0
+    ? '<table><tr><th>If Bulma is worth</th><th>Bulma needed</th><th>Cost</th></tr>'
+      + caps.map(c => '<tr><td>' + (c[0] === 'at graduation' ? money(c[1]) + ' (graduation)' : c[0]) + '</td><td>' + pc(e.A / c[1] * 100) + '% of supply</td><td>≈' + money(e.A) + '</td></tr>').join('')
+      + '</table><small>To fit inside 10% of supply Bulma needs about ' + money(e.A * 10) + ' of market cap.</small>'
+    : '<small>' + (usdcOn ? 'Raise the sliders to size the other coins’ pools.' : 'Turn on Add USDC to size the other coins’ pools.') + '</small>';
   document.getElementById('launchBox').innerHTML = '<h4>Launch Bulma on pump.fun · USDC</h4>'
     + '<table><tr><th>Step</th><th>Bulma</th><th>Cost</th></tr>'
     + '<tr><td>Dev buy, 20%</td><td>200M</td><td>≈' + money(DEV_COST) + '</td></tr>'
     + '<tr><td>Lock 10% with BTC</td><td>100M</td><td>≈' + money(e.side) + ' of BTC</td></tr>'
     + '<tr><td>Lock 10% with SOL</td><td>100M</td><td>≈' + money(e.side) + ' of SOL</td></tr>'
-    + '<tr class="on"><td>Launch total</td><td>200M</td><td>≈' + money(e.launch) + '</td></tr>'
-    + '<tr><td>Other coins’ pools (slider)</td><td>' + (usdcOn ? big(e.tokens) + ' · ' + pct.toLocaleString('en-US', { maximumFractionDigits: pct >= 100 ? 0 : 1 }) + '% of supply' : 'turn on USDC') + '</td><td>' + (usdcOn ? '≈' + money(e.A) : '$0') + '</td></tr>'
-    + '</table>'
-    + '<small>Bulma opens near ' + money(e.mc) + ' of market cap after the dev buy and graduates near ' + money(e.gradMc) + '. '
-    + (usdcOn && e.A > 0 ? 'To hold the slider’s ' + money(e.A) + ' inside 10% of supply, Bulma needs about ' + money(e.A * 10) + ' of market cap. ' : '')
-    + 'Pool depth on Solana: USDC ' + money(USDC_SUPPLY) + ' vs USDT ' + money(USDT_SUPPLY) + ', so USDC is ' + money(e.deeper) + ' deeper (' + (USDC_SUPPLY / USDT_SUPPLY).toFixed(1) + '×). Estimate from a standard curve, not a quote. USDT is not counted here.</small>';
+    + '<tr class="on"><td>Launch total</td><td>200M</td><td>≈' + money(e.launch) + '</td></tr></table>'
+    + '<small>Fixed. The sliders do not change the launch. Bulma opens near ' + money(e.mc) + ' of market cap after the dev buy and graduates near ' + money(e.gradMc) + '.</small>'
+    + '<h4 style="margin-top:12px">Afterwards · other coins’ pools (moves with the sliders)</h4>' + follow
+    + '<small>Pool depth on Solana: USDC ' + money(USDC_SUPPLY) + ' vs USDT ' + money(USDT_SUPPLY) + ', so USDC is ' + money(e.deeper) + ' deeper (' + (USDC_SUPPLY / USDT_SUPPLY).toFixed(1) + '×). Estimate from a standard curve, not a quote. USDT is not counted here.</small>';
 }
 function paintCeil() {
   const c = ceilings();
