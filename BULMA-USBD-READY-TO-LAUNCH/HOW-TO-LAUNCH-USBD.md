@@ -35,7 +35,7 @@ Dev buy **200M tokens (20% of supply)**.
 ### 4. Lock 10% in a pool with SOL on Meteora.
 Same as step 3, with SOL as the Quote Token. Deposit 100M USBD + equal $ value of SOL. Tick Permanently lock my liquidity. Create.
 
-Optional extra boost, not part of the protocol: a USDT hub, which is Tether paired to BTC, Bulma and USDT. USDT is the thinner side, about 35% of USDC on Solana. The protocol works without it.
+Optional extra boost, not part of the protocol: a Tether-themed token paired to USDT, Bulma and Big Titty Coin (BTC). Its USDT pool is the thinner side, about 35% of USDC on Solana. The protocol works without it. Bulma itself is paired to USDC, SOL and Big Titty Coin (BTC).
 
 ### 5. Leave the rest in the USDC pool. That stays the main pool, during the launch and after.
 Everything else trades on the USDC pool (the pump.fun curve, then PumpSwap after graduation). USDC remains the main pool.

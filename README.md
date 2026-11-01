@@ -51,7 +51,7 @@ Full sequence and the example pack: [BULMA-USBD-READY-TO-LAUNCH/](BULMA-USBD-REA
 3. Lock 10% in a pool with BTC on Meteora. BTC is the main coin of this group. Lock means the money cannot be pulled back out.
 4. Lock 10% in a pool with SOL on Meteora. Same thing, with Solana's own coin.
 
-Optional extra boost, not part of the protocol: a USDT hub, which is Tether paired to BTC, Bulma and USDT. USDT is the thinner side, about 35% of USDC on Solana. The protocol works without it.
+Optional extra boost, not part of the protocol: a Tether-themed token paired to USDT, Bulma and Big Titty Coin (BTC). Its USDT pool is the thinner side, about 35% of USDC on Solana. The protocol works without it. Bulma itself is paired to USDC, SOL and Big Titty Coin (BTC).
 5. Leave the rest in the USDC pool. That stays the main pool, during the launch and after. *(Then it moves to PumpSwap.)*
 6. Then other coins lock a piece of their supply against your new coin. Your coin becomes the hub they all connect through. The example hub is Bulma Dollar. Yours can be any coin.
 

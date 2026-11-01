@@ -367,7 +367,7 @@
       <aside id="mapKey" class="map-key" hidden>
         <b>Key</b>
         <div><i></i> USDC line · main protocol, through Bulma</div>
-        <div><i class="green"></i> USDT line · optional extra boost</div>
+        <div><i class="green"></i> Tether token line · optional extra boost</div>
         <div><i class="spoke"></i> Each coin's link to the center</div>
         <div><i class="ghost"></i> Where that coin sat before the pull</div>
         <p>Closer to BTC = stronger liquidity pool.</p>
@@ -401,14 +401,14 @@
         <div id="tvDirectory"></div>
       </div>
       <div id="paneProtocol" hidden>
-        <p class="proto-lead"><b>The main protocol is USDC · Bulma.</b> Bulma sits paired to BTC, SOL and USDC: the main pool is USDC, 10% locks to BTC, and 10% locks to SOL. The other coins lock a chunk of their supply to Bulma.</p>
-        <p class="proto-lead proto-extra"><b>USDT is not part of that protocol.</b> It is an optional extra boost: add Tether paired to BTC, Bulma and USDT and the same coins pull a little closer. USDT is the thinner pool, so the same chunk adds less.</p>
+        <p class="proto-lead"><b>The main protocol is USDC · Bulma.</b> Bulma is paired to USDC, SOL and Big Titty Coin (BTC): the main pool is USDC, 10% locks to BTC, and 10% locks to SOL. The other coins lock a chunk of their supply to Bulma.</p>
+        <p class="proto-lead proto-extra"><b>USDT is not part of that protocol.</b> It is an optional extra boost: add a Tether-themed token paired to USDT, Bulma and Big Titty Coin (BTC) and the same coins pull a little closer. Its USDT pool is the thinner one, so the same chunk adds less.</p>
         <div class="sl">Market cap increase <b id="allBoostLabel">+0%</b></div>
         <input id="allBoost" type="range" min="0" max="2000" step="1" value="0">
         <div class="ends"><span>0%</span><span>2000%</span></div>
         <div class="hubtabs">
           <button type="button" id="tabUsdc" class="on">USDC · Bulma (main)</button>
-          <button type="button" id="tabUsdt">USDT (extra boost)</button>
+          <button type="button" id="tabUsdt">Tether token (extra boost)</button>
         </div>
         <div class="sl pair"><span id="pairName">Supply paired to Bulma (main)</span> <b id="allShareLabel">0%</b></div>
         <input id="allShare" type="range" min="0" max="50" step="1" value="0">
@@ -791,7 +791,7 @@ function paintDeltas() {
 }
 function syncShareInputs() {
   const key = shareKey();
-  const name = hubTab === 'usdt' ? 'Supply paired to USDT (extra boost)' : 'Supply paired to Bulma (main)';
+  const name = hubTab === 'usdt' ? 'Supply paired to Tether token (extra boost)' : 'Supply paired to Bulma (main)';
   document.querySelectorAll('.pair-name').forEach(el => { el.textContent = name; });
   document.getElementById('pairName').textContent = name;
   const vals = planets.map(t => Math.round((t[key] || 0) * 100));
@@ -1308,7 +1308,7 @@ function loop() {
   if (hubU) {
     disc(hubU.x, hubU.y, rU, usdtImg.complete && usdtImg.naturalWidth ? usdtImg : null);
     ctx.fillStyle = '#f4f1ea'; ctx.font = '600 11px "DM Sans", sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('USDT', hubU.x, hubU.y + rU + 13);
+    ctx.fillText('TETHER', hubU.x, hubU.y + rU + 13);
   }
   ctx.globalAlpha = 1;
   disc(btcP.x, btcP.y, btcR, anchor.loaded ? anchor.img : null);
