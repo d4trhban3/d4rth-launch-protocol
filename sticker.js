@@ -18,6 +18,7 @@
   var clone = null;
   window.addEventListener('pageshow', function (e) {                       // back button: put the sticker back
     if (clone) { clone.remove(); clone = null; }
+    [].slice.call(document.body.children).forEach(function (n) { if (n.style && n.style.zIndex === '9998') n.remove(); });
     logo.style.visibility = '';
   });
 
@@ -37,22 +38,25 @@
     if (!logo.getBoundingClientRect().width) return;
     e.preventDefault();
     var r = logo.getBoundingClientRect();
-    var est = estimate(), size = est.d * 2;                                // 2x its galaxy size
+    var est = estimate(), size = est.d * 3;                                // 3x its galaxy size
     clone = document.createElement('img');
     clone.src = src; clone.alt = '';
     clone.style.cssText = 'position:fixed;z-index:9999;left:' + r.left + 'px;top:' + r.top + 'px;width:' + r.width + 'px;height:' + r.height +
       'px;border-radius:50%;object-fit:cover;pointer-events:none;border:1px solid rgba(255,255,255,.9);box-sizing:border-box;' +
       'will-change:transform,left,top,width,height;box-shadow:0 0 0 rgba(0,0,0,0)';
+    // the site behind it fades to the galaxy's own dark as the sticker flies
+    var veil = document.createElement('div');
+    veil.style.cssText = 'position:fixed;inset:0;z-index:9998;background:#10100e;opacity:0;pointer-events:none;transition:opacity .8s ease .1s';
+    document.body.appendChild(veil);
     document.body.appendChild(clone);
+    requestAnimationFrame(function () { requestAnimationFrame(function () { veil.style.opacity = '1'; }); });
     logo.style.visibility = 'hidden';                                      // it has come off the tab
-    var cx = r.left + r.width / 2, cy = r.top + r.height / 2;
     var end = { left: est.x - size / 2, top: est.y - size / 2, w: size };
     var anim = clone.animate([
-      { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px', transform: 'rotate(0deg) scale(1)', boxShadow: '0 0 0 rgba(0,0,0,0)', offset: 0 },
-      { left: (r.left - 8) + 'px', top: (r.top - 14) + 'px', width: (r.width * 1.3) + 'px', height: (r.height * 1.3) + 'px', transform: 'rotate(-14deg) scale(1)', boxShadow: '0 8px 18px rgba(0,0,0,.5)', offset: 0.2, easing: 'cubic-bezier(.3,0,.2,1)' },
-      { left: (end.left - 6) + 'px', top: (end.top - 4) + 'px', width: (end.w * 1.05) + 'px', height: (end.w * 1.05) + 'px', transform: 'rotate(7deg) scale(1)', boxShadow: '0 22px 46px rgba(0,0,0,.55)', offset: 0.82, easing: 'ease-out' },
-      { left: end.left + 'px', top: end.top + 'px', width: end.w + 'px', height: end.w + 'px', transform: 'rotate(0deg) scale(1)', boxShadow: '0 22px 46px rgba(0,0,0,.55)', offset: 1 }
-    ], { duration: 820, fill: 'forwards' });
+      { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px', transform: 'rotate(0deg)', boxShadow: '0 0 0 rgba(0,0,0,0)', offset: 0 },
+      { left: (r.left - 6) + 'px', top: (r.top - 12) + 'px', width: (r.width * 1.25) + 'px', height: (r.height * 1.25) + 'px', transform: 'rotate(-12deg)', boxShadow: '0 8px 18px rgba(0,0,0,.5)', offset: 0.18, easing: 'cubic-bezier(.45,0,.2,1)' },
+      { left: end.left + 'px', top: end.top + 'px', width: end.w + 'px', height: end.w + 'px', transform: 'rotate(0deg)', boxShadow: '0 26px 54px rgba(0,0,0,.55)', offset: 1 }
+    ], { duration: 950, fill: 'forwards' });
     var went = false;
     var go = function () {
       if (went) return; went = true;
@@ -60,6 +64,6 @@
       location.href = link.href;
     };
     anim.finished.then(go, go);
-    setTimeout(go, 1500);                                                  // never get stuck on this page
+    setTimeout(go, 1700);                                                  // never get stuck on this page
   });
 })();

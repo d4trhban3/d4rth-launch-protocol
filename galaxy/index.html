@@ -1841,23 +1841,23 @@ function applyLive(j) {
 let liveBusy = false;
 // The sticker sits at 2x the disc's size until the page has loaded in, then drops onto the disc.
 function placeSticker() {
-  // The sticker's box is 2x the disc's diameter, centred on the disc. Landing scales it down to 0.5.
+  // The sticker's box is 3x the disc's diameter, centred on the disc. Landing scales it down to a third.
   const el = document.getElementById('stickerFly'), b = window.__btc;
   if (!el || !b) return;
   el.style.transition = 'left .25s ease, top .25s ease, width .25s ease, height .25s ease';
-  el.style.left = (b.x - b.r * 2) + 'px'; el.style.top = (b.y - b.r * 2) + 'px';
-  el.style.width = (b.r * 4) + 'px'; el.style.height = (b.r * 4) + 'px';
+  el.style.left = (b.x - b.r * 3) + 'px'; el.style.top = (b.y - b.r * 3) + 'px';
+  el.style.width = (b.r * 6) + 'px'; el.style.height = (b.r * 6) + 'px';
 }
 function dropSticker() {
   const el = document.getElementById('stickerFly'), b = window.__btc;
   if (!el || !b) { stickerHold = false; if (el) el.remove(); lastSig = ''; return; }
   placeSticker();
   const done = () => { stickerHold = false; el.remove(); lastSig = ''; };
+  // one smooth settle that runs alongside the fade-in, no bounce
   const anim = el.animate([
-    { transform: 'scale(1) rotate(0deg)', boxShadow: '0 22px 46px rgba(0,0,0,.55)', offset: 0, easing: 'cubic-bezier(.6,0,.9,.45)' },
-    { transform: 'scale(0.465) rotate(-3deg)', boxShadow: '0 5px 12px rgba(0,0,0,.45)', offset: 0.64, easing: 'ease-out' },
-    { transform: 'scale(0.5) rotate(0deg)', boxShadow: '0 0 0 rgba(0,0,0,0)', offset: 1 }
-  ], { duration: 760, fill: 'forwards' });
+    { transform: 'scale(1)', boxShadow: '0 26px 54px rgba(0,0,0,.55)' },
+    { transform: 'scale(0.3333)', boxShadow: '0 0 0 rgba(0,0,0,0)' }
+  ], { duration: 1050, easing: 'cubic-bezier(.45,0,.2,1)', fill: 'forwards' });
   anim.finished.then(done, done);
 }
 function reveal() {
