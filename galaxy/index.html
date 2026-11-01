@@ -266,6 +266,14 @@
   .proto-extra { padding: 8px 10px; border-left: 2px solid #a8eb6e; background: rgba(168,235,110,.07); }
   .proto-extra b { color: #a8eb6e; }
   .bondline { white-space: pre-line; }
+  .ceil { margin: 0 0 14px; padding: 10px 12px; border: 1px solid var(--tv-rule); font-size: 11px; line-height: 1.5; color: var(--tv-muted); }
+  .ceil h4 { margin: 0 0 6px; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--tv-acid); }
+  .ceil table { width: 100%; border-collapse: collapse; }
+  .ceil th { text-align: left; font-weight: 600; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: #6f6b62; padding: 2px 0; }
+  .ceil td { padding: 3px 0; border-top: 1px solid var(--tv-rule); color: var(--tv-paper); }
+  .ceil td:nth-child(n+2), .ceil th:nth-child(n+2) { text-align: right; }
+  .ceil tr.on td { color: var(--tv-acid); font-weight: 700; }
+  .ceil small { display: block; margin-top: 6px; color: #6f6b62; font-size: 10px; }
   .weightline { margin: 0 0 16px; color: var(--tv-muted); font-size: 12px; line-height: 1.45; }
   .row { display: grid; grid-template-columns: 32px 1fr; gap: 8px; margin: 0 0 14px; }
   .row img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
@@ -414,6 +422,7 @@
         <input id="allShare" type="range" min="0" max="50" step="1" value="0">
         <div class="ends"><span>0%</span><span>50%</span></div>
         <div class="bondline" id="bondNote"></div>
+        <div class="ceil" id="ceilBox"></div>
         <p class="weightline">How the numbers work: added money = supply share × market cap (after the increase). USDT counts at about 35% of that, because Solana holds $2.40B of USDT against $6.83B of USDC. Closer = new money ÷ (current liquidity + new money), up to 42% nearer BTC.</p>
         <div id="rows"></div>
       </div>
@@ -761,13 +770,35 @@ function bondText() {
   const base = bodies.reduce((s, t) => s + liqOf(t), 0);
   return { bu, bd, bond, base };
 }
+const CEIL_BOOST = 10000, CEIL_SHARE = 0.5;
+function ceilings() {
+  const k = 1 + CEIL_BOOST / 100;
+  const lvl = planets.reduce((s, t) => s + (t.mc || 0) * k, 0);
+  const mcAll = bodies.reduce((s, t) => s + (t.mc || 0) * k, 0);
+  const base = bodies.reduce((s, t) => s + liqOf(t), 0);
+  const u = CEIL_SHARE * lvl, d = CEIL_SHARE * lvl * USDT_WEIGHT;
+  return { mcAll, base, rows: [
+    ['No hubs', 0, !usdcOn && !usdtOn], ['Bulma only (USDC · main)', u, usdcOn && !usdtOn],
+    ['USDT boost only', d, !usdcOn && usdtOn], ['Bulma + USDT boost', u + d, usdcOn && usdtOn]] };
+}
+function paintCeil() {
+  const c = ceilings();
+  const tr = c.rows.map(r => '<tr' + (r[2] ? ' class="on"' : '') + '><td>' + r[0] + '</td><td>+' + money(r[1]) + '</td><td>+' + (r[1] / c.base * 100).toLocaleString('en-US', { maximumFractionDigits: 0 }) + '%</td></tr>').join('');
+  document.getElementById('ceilBox').innerHTML = '<h4>Ceiling · +' + CEIL_BOOST.toLocaleString('en-US') + '% and ' + (CEIL_SHARE * 100) + '% paired</h4>'
+    + '<table><tr><th>Setup</th><th>Added money</th><th>Group liquidity</th></tr>' + tr + '</table>'
+    + '<small>Every coin at +' + CEIL_BOOST.toLocaleString('en-US') + '% reaches ' + money(c.mcAll) + ' of market cap in all four setups. Hubs add money, not market cap. Today the group holds ' + money(c.base) + ' of liquidity.</small>';
+}
 function paintDeltas() {
   const { bu, bd, bond, base } = bondText();
   planets.forEach(t => {
     const el = rows.querySelector('[data-d="' + t.mint + '"]');
     if (!el) return;
     const au = exactUsdc(t), ad = exactUsdt(t), add = au + ad;
-    if (!(usdcOn || usdtOn) || add < 1) { el.textContent = Math.round((t[shareKey()] || 0) * 100) + '%'; el.classList.remove('on'); return; }
+    if (!(usdcOn || usdtOn) || add < 1) {
+      if (t.boost > 0) { el.textContent = money(t.mc) + ' → ' + money(levelOf(t)); el.classList.add('on'); }
+      else { el.textContent = Math.round((t[shareKey()] || 0) * 100) + '%'; el.classList.remove('on'); }
+      return;
+    }
     const closer = Math.round(PULL_MAX * 100 * add / (liqOf(t) + add));
     const parts = [];
     if (au >= 1) parts.push('USDC +' + money(au));
@@ -775,14 +806,18 @@ function paintDeltas() {
     el.textContent = parts.join(' · ') + ' · ' + closer + '% closer';
     el.classList.add('on');
   });
+  paintCeil();
   const note = document.getElementById('bondNote');
   const chip = document.getElementById('bondChip');
+  const mcBase = bodies.reduce((s, t) => s + (t.mc || 0), 0);
+  const mcNow = bodies.reduce((s, t) => s + levelOf(t), 0);
+  const lines = ['Group market cap: ' + money(mcBase) + (mcNow > mcBase ? ' → ' + money(mcNow) + ' (×' + (mcNow / mcBase).toFixed(mcNow / mcBase >= 10 ? 0 : 2) + ')' : '')];
   if (!(usdcOn || usdtOn)) {
-    note.textContent = 'Both are off. The orbit is just the BTC system.';
+    lines.push('No hubs on. The market cap slider alone adds no liquidity.');
+    note.textContent = lines.join('\n');
     chip.hidden = true;
     return;
   }
-  const lines = [];
   if (usdcOn) lines.push('Main protocol (USDC · Bulma): +' + money(bu));
   if (usdtOn) lines.push('USDT extra boost (optional): +' + money(bd) + (usdcOn && bu > 0 ? ' · ' + (bd / bu * 100).toFixed(0) + '% on top of the main' : ''));
   lines.push('Group liquidity +' + (bond / base * 100).toFixed(1) + '%');
@@ -810,6 +845,7 @@ function syncShareInputs() {
   }
 }
 function applyAllBoost(v) {
+  anchor.boost = v;
   planets.forEach(t => {
     t.boost = v;
     const row = rows.querySelector('[data-d="' + t.mint + '"]')?.closest('.row');
@@ -921,13 +957,11 @@ function toggleHub(which) {
   const key = which === 'usdt' ? 'shareUsdt' : 'share';
   planets.forEach(t => {
     t[key] = turningOn ? 0.05 : 0;
-    if (turningOn) { if (!other || !t.boost) t.boost = 20; }
-    else if (!other) t.boost = 0;
   });
   hubTab = which === 'usdt' ? 'usdt' : 'usdc';
   document.getElementById('tabUsdc').classList.toggle('on', hubTab === 'usdc');
   document.getElementById('tabUsdt').classList.toggle('on', hubTab === 'usdt');
-  applyAllBoost(turningOn || other ? (planets[0].boost || 0) : 0);
+  applyAllBoost(planets[0] ? (planets[0].boost || 0) : 0);
   syncShareInputs();
   paintHubButtons();
   if (turningOn) setPanel('protocol');
