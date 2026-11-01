@@ -431,6 +431,7 @@
         <div class="ends"><span>0%</span><span>50%</span></div>
         <div class="bondline" id="bondNote"></div>
         <div class="ceil" id="ceilBox"></div>
+        <div class="ceil" id="launchBox"></div>
         <p class="weightline">How the numbers work: added money = supply share × market cap (after the increase). USDT counts at about 35% of that, because Solana holds $2.40B of USDT against $6.83B of USDC. Closer = new money ÷ (current liquidity + new money), up to 42% nearer BTC.</p>
         <div id="rows"></div>
       </div>
@@ -789,6 +790,34 @@ function ceilings() {
     ['No hubs', 0, !usdcOn && !usdtOn], ['Bulma only (USDC · main)', u, usdcOn && !usdtOn],
     ['USDT boost only', d, !usdcOn && usdtOn], ['Bulma + USDT boost', u + d, usdcOn && usdtOn]] };
 }
+// Bulma launch estimate on a pump.fun-style constant-product curve (1B supply, 1.073B virtual
+// tokens, 793.1M sold before it graduates). The virtual USDC reserve is calibrated so the 20% dev
+// buy costs about $1,000, the figure in the how-to. It is an estimate: check the live curve first.
+const SUP = 1e9, VT = 1.073e9, SOLD = 793.1e6, DEVBUY = 0.2 * SUP, LOCKED = 0.1 * SUP, DEV_COST = 1000;
+const VQ = DEV_COST * (VT - DEVBUY) / DEVBUY;
+function launchEst() {
+  const price = (VQ + DEV_COST) / (VT - DEVBUY);
+  const side = LOCKED * price;
+  const A = planets.reduce((s, t) => s + exactUsdc(t), 0);
+  const gradMc = VQ * VT / Math.pow(VT - SOLD, 2) * SUP;
+  return { price, mc: price * SUP, side, launch: DEV_COST + 2 * side, A, tokens: A / price, gradMc, deeper: USDC_SUPPLY - USDT_SUPPLY };
+}
+function paintLaunch() {
+  const e = launchEst();
+  const pct = e.tokens / SUP * 100;
+  const big = n => n >= 1e9 ? (n / 1e9).toFixed(2) + 'B' : (n / 1e6).toFixed(0) + 'M';
+  document.getElementById('launchBox').innerHTML = '<h4>Launch Bulma on pump.fun · USDC</h4>'
+    + '<table><tr><th>Step</th><th>Bulma</th><th>Cost</th></tr>'
+    + '<tr><td>Dev buy, 20%</td><td>200M</td><td>≈' + money(DEV_COST) + '</td></tr>'
+    + '<tr><td>Lock 10% with BTC</td><td>100M</td><td>≈' + money(e.side) + ' of BTC</td></tr>'
+    + '<tr><td>Lock 10% with SOL</td><td>100M</td><td>≈' + money(e.side) + ' of SOL</td></tr>'
+    + '<tr class="on"><td>Launch total</td><td>200M</td><td>≈' + money(e.launch) + '</td></tr>'
+    + '<tr><td>Other coins’ pools (slider)</td><td>' + (usdcOn ? big(e.tokens) + ' · ' + pct.toLocaleString('en-US', { maximumFractionDigits: pct >= 100 ? 0 : 1 }) + '% of supply' : 'turn on USDC') + '</td><td>' + (usdcOn ? '≈' + money(e.A) : '$0') + '</td></tr>'
+    + '</table>'
+    + '<small>Bulma opens near ' + money(e.mc) + ' of market cap after the dev buy and graduates near ' + money(e.gradMc) + '. '
+    + (usdcOn && e.A > 0 ? 'To hold the slider’s ' + money(e.A) + ' inside 10% of supply, Bulma needs about ' + money(e.A * 10) + ' of market cap. ' : '')
+    + 'Pool depth on Solana: USDC ' + money(USDC_SUPPLY) + ' vs USDT ' + money(USDT_SUPPLY) + ', so USDC is ' + money(e.deeper) + ' deeper (' + (USDC_SUPPLY / USDT_SUPPLY).toFixed(1) + '×). Estimate from a standard curve, not a quote. USDT is not counted here.</small>';
+}
 function paintCeil() {
   const c = ceilings();
   const tr = c.rows.map(r => '<tr' + (r[2] ? ' class="on"' : '') + '><td>' + r[0] + '</td><td>+' + money(r[1]) + '</td><td>+' + (r[1] / c.base * 100).toLocaleString('en-US', { maximumFractionDigits: 0 }) + '%</td></tr>').join('');
@@ -815,6 +844,7 @@ function paintDeltas() {
     el.classList.add('on');
   });
   paintCeil();
+  paintLaunch();
   const note = document.getElementById('bondNote');
   const chip = document.getElementById('bondChip');
   const mcBase = bodies.reduce((s, t) => s + (t.mc || 0), 0);
