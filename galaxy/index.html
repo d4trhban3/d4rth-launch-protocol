@@ -164,7 +164,7 @@
   .star-credit-note a:hover { color: var(--tv-acid); }
   .tv-system-caption strong { display: block; margin: 0; font: 500 26px/1.15 Manrope, sans-serif; letter-spacing: -0.9px; }
   .tv-stage-controls {
-    position: absolute; left: 24px; bottom: 18px; z-index: 4; display: flex; gap: 1px; padding: 1px; background: var(--tv-rule);
+    position: absolute; left: 24px; bottom: 18px; z-index: 4; display: flex; gap: 1px; padding: 1px; background: var(--tv-rule); flex-wrap: wrap; max-width: calc(100% - 48px);
   }
   .tv-stage-controls button, .tv-stage-controls output {
     display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; padding: 0 10px;
@@ -398,6 +398,9 @@
         <button type="button" id="zIn" aria-label="Zoom in">+</button>
         <button type="button" id="zReset" aria-label="Reset camera">⌖</button>
         <button type="button" id="tvMotion" aria-pressed="false">Rotate</button>
+        <button type="button" id="rOut" aria-label="Rotate slower">−</button>
+        <output id="rPct" title="Rotation speed">100%</output>
+        <button type="button" id="rIn" aria-label="Rotate faster">+</button>
       </div>
     </div>
     <aside class="tv-inspector" id="inspector" aria-label="Selected token"></aside>
@@ -484,6 +487,8 @@ let dive = null;
 const ease = { io: p => -(Math.cos(Math.PI * p) - 1) / 2, out: p => Math.sin(p * Math.PI / 2) };
 let theta = 0, phi = Math.acos(0.72), dTheta = 0, dPhi = 0;
 let dist = 90, distTarget = null;
+const ROT_STEPS = [25, 50, 75, 100, 150, 200, 300];
+let rotSpeed = 1;
 let dragging = false, lastX = 0, lastY = 0, userZoomed = false, autoRotate = false;
 const pointers = new Map();
 let pinchDist = 0;
@@ -633,7 +638,7 @@ function stepCamera() {
   phi = Math.max(MIN_PHI, Math.min(MAX_PHI, phi + dPhi * CAM_DAMP));
   dTheta *= 1 - CAM_DAMP;
   dPhi *= 1 - CAM_DAMP;
-  if (autoRotate && !dragging && view !== 'constellations') dTheta -= 0.002;
+  if (autoRotate && !dragging && view !== 'constellations') dTheta -= 0.0008 * rotSpeed;
   if (!userZoomed) distTarget = fittedDistance() * camSpread();
   if (distTarget != null) {
     dist += (distTarget - dist) * 0.16;
@@ -1100,6 +1105,15 @@ function zoomBy(factor) {
   userZoomed = true;
   distTarget = clampDist((distTarget ?? dist) / factor);
 }
+function stepRot(dir) {
+  const cur = Math.round(rotSpeed * 100);
+  let i = ROT_STEPS.reduce((b, v, k) => Math.abs(v - cur) < Math.abs(ROT_STEPS[b] - cur) ? k : b, 0);
+  i = Math.max(0, Math.min(ROT_STEPS.length - 1, i + dir));
+  rotSpeed = ROT_STEPS[i] / 100;
+  document.getElementById('rPct').textContent = ROT_STEPS[i] + '%';
+}
+document.getElementById('rOut').onclick = () => stepRot(-1);
+document.getElementById('rIn').onclick = () => stepRot(1);
 document.getElementById('zIn').onclick = () => zoomBy(1.18);
 document.getElementById('zOut').onclick = () => zoomBy(1 / 1.18);
 document.getElementById('zReset').onclick = () => resetCamera();
