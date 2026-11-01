@@ -1,7 +1,7 @@
 /* Shared Bulma theme: matches the galaxy (ink, paper, soft purple, Bulma blue). Loaded after each page's own styles. */
 :root {
   --ink: #10100e; --paper: #eee9dd; --muted: #a19e91; --rule: rgba(238,233,221,.14);
-  --bulma: #b8a0ff; --bulma-soft: rgba(184,160,255,.12); --bulma-blue: #3cc8e6;
+  --bulma: #b8a0ff; --bulma-soft: rgba(184,160,255,.12); --bulma-blue: #8fd3e6;
   color-scheme: dark;
 }
 html { scroll-behavior: smooth; }
@@ -11,7 +11,7 @@ body {
   -webkit-font-smoothing: antialiased;
   background-image:
     radial-gradient(ellipse 70% 40% at 105% -5%, rgba(184,160,255,.20), transparent 60%),
-    radial-gradient(ellipse 50% 30% at -10% 105%, rgba(60,200,230,.05), transparent 60%),
+    radial-gradient(ellipse 50% 30% at -10% 105%, rgba(143,211,230,.05), transparent 60%),
     radial-gradient(1px 1px at 12% 18%, rgba(238,233,221,.45), transparent 60%),
     radial-gradient(1px 1px at 78% 8%, rgba(238,233,221,.35), transparent 60%),
     radial-gradient(1.2px 1.2px at 91% 52%, rgba(238,233,221,.4), transparent 60%),
@@ -42,7 +42,7 @@ h1::after { content: ""; display: block; width: 56px; height: 3px; margin-top: 1
 .doc p, .doc li, .lede, .card p { color: #d9d5c9 !important; }
 .doc strong { color: #fff !important; }
 .doc em { color: var(--bulma-blue) !important; }
-.doc code { color: var(--bulma-blue) !important; background: rgba(60,200,230,.08) !important; }
+.doc code { color: var(--bulma-blue) !important; background: rgba(143,211,230,.08) !important; }
 .doc pre { background: rgba(255,255,255,.03) !important; border-color: var(--rule) !important; }
 .doc pre code { color: var(--paper) !important; background: none !important; }
 .doc blockquote { border-left-color: var(--bulma) !important; background: var(--bulma-soft) !important; }
@@ -65,8 +65,8 @@ h3 { color: var(--muted); }
 .chips b, .tag { color: var(--bulma) !important; border-color: rgba(184,160,255,.4) !important; }
 .btn { background: rgba(16,16,14,.8) !important; border: 1px solid var(--rule) !important; color: var(--paper) !important; transition: border-color .2s, transform .15s; }
 .btn:hover { border-color: var(--bulma) !important; color: var(--bulma) !important; transform: translateY(-1px); }
-.btn.primary { background: var(--bulma-blue) !important; border-color: var(--bulma-blue) !important; color: #06141a !important; font-weight: 700; }
-.btn.primary:hover { color: #06141a !important; filter: brightness(1.06); }
+.btn.primary { background: var(--bulma-blue) !important; border-color: var(--bulma-blue) !important; color: #0b1a20 !important; font-weight: 700; }
+.btn.primary:hover { color: #0b1a20 !important; filter: brightness(1.06); }
 .index a:hover b { color: var(--bulma) !important; }
 .portrait, .sample img { border-color: rgba(184,160,255,.5) !important; box-shadow: 0 0 40px rgba(184,160,255,.18); }
 
