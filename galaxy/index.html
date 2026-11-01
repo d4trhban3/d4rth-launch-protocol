@@ -284,6 +284,7 @@
   .ceil td { padding: 3px 0; border-top: 1px solid var(--tv-rule); color: var(--tv-paper); }
   .ceil td:nth-child(n+2), .ceil th:nth-child(n+2) { text-align: right; }
   .ceil tr.on td { color: var(--tv-acid); font-weight: 700; }
+  .ceil tr.no td { color: #6f6b62; }
   .ceil small { display: block; margin-top: 6px; color: #6f6b62; font-size: 10px; }
   .weightline { margin: 0 0 16px; color: var(--tv-muted); font-size: 12px; line-height: 1.45; }
   .row { display: grid; grid-template-columns: 32px 1fr; gap: 8px; margin: 0 0 14px; }
@@ -819,10 +820,16 @@ function paintLaunch() {
   const e = launchEst();
   const pc = (n, d) => n.toLocaleString('en-US', { maximumFractionDigits: n >= 100 ? 0 : (d == null ? 1 : d) });
   const caps = [['at graduation', e.gradMc], ['$1M', 1e6], ['$10M', 1e7], ['$100M', 1e8]];
+  // Other coins' pools need $A of Bulma on Bulma's side. That is $A at any Bulma price: a higher
+  // price only means fewer tokens. What changes is whether that many tokens exist.
+  const room = 80; // % of supply not already locked in the BTC and SOL pools (20% bought at launch)
   const follow = usdcOn && e.A > 0
-    ? '<table><tr><th>If Bulma is worth</th><th>Bulma needed</th><th>Cost</th></tr>'
-      + caps.map(c => '<tr><td>' + (c[0] === 'at graduation' ? money(c[1]) + ' (graduation)' : c[0]) + '</td><td>' + pc(e.A / c[1] * 100) + '% of supply</td><td>≈' + money(e.A) + '</td></tr>').join('')
-      + '</table><small>To fit inside 10% of supply Bulma needs about ' + money(e.A * 10) + ' of market cap.</small>'
+    ? '<table><tr><th>If Bulma is worth</th><th>Tokens needed</th><th>Can it be done?</th></tr>'
+      + caps.map(c => {
+          const need = e.A / c[1] * 100, ok = need <= room;
+          return '<tr' + (ok ? '' : ' class="no"') + '><td>' + (c[0] === 'at graduation' ? money(c[1]) + ' (graduation)' : c[0]) + '</td><td>' + pc(need) + '% of supply</td><td>' + (ok ? 'yes · ≈' + money(e.A) : 'no, only ' + room + '% is left') + '</td></tr>';
+        }).join('')
+      + '</table><small>The money is the same ' + money(e.A) + ' at every price: Bulma’s side of each pool has to match the other coin’s slice in dollars. A higher Bulma price means fewer tokens, so it only becomes possible once Bulma is worth about ' + money(e.A / (room / 100)) + ' or more. To fit inside 10% of supply it needs about ' + money(e.A * 10) + '.</small>'
     : '<small>' + (usdcOn ? 'Raise the sliders to size the other coins’ pools.' : 'Turn on Add USDC to size the other coins’ pools.') + '</small>';
   document.getElementById('launchBox').innerHTML = '<h4>Launch Bulma on pump.fun · USDC</h4>'
     + '<table><tr><th>Step</th><th>Bulma</th><th>Cost</th></tr>'
