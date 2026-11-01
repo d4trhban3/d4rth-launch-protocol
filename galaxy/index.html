@@ -518,22 +518,23 @@ function loadImg(t) {
   if (LOCAL.has(t.mint)) srcs.push(CLEAN[t.mint] || 'art/m/' + t.mint + '.jpg');
   if (t.remote) srcs.push(t.remote);
   t.image = srcs[0] || '';
-  (function next(i) {
-    if (i >= srcs.length) return;
-    const im = new Image();
-    im.onload = () => {
-      t.img = im; t.loaded = true; t.image = srcs[i]; imgVersion++;
+  const load = url => new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = url; });
+  return (async () => {
+    for (let i = 0; i < srcs.length; i++) {
+      let im = await load(srcs[i]);
+      if (!im) continue;
+      let url = srcs[i];
+      if (url === t.remote && /pump$/.test(t.mint) && await isPlaceholder(url)) {
+        const alt = 'https://images.pump.fun/coin-image/' + t.mint + '?imageWidth=256&imageHeight=256';
+        const im2 = await load(alt);
+        if (im2) { im = im2; url = alt; }
+      }
+      t.img = im; t.loaded = true; t.image = url; imgVersion++;
       if (!selected || selected === t) renderInspector();
-      if (srcs[i] === t.remote && /pump$/.test(t.mint)) isPlaceholder(t.remote).then(ph => {
-        if (!ph) return;
-        const alt = new Image(), url = 'https://images.pump.fun/coin-image/' + t.mint + '?imageWidth=256&imageHeight=256';
-        alt.onload = () => { t.img = alt; t.image = url; imgVersion++; if (!selected || selected === t) renderInspector(); renderCatalog(document.getElementById('tvSearch').value); };
-        alt.src = url;
-      });
-    };
-    im.onerror = () => next(i + 1);
-    im.src = srcs[i];
-  })(0);
+      return true;
+    }
+    return false;
+  })();
 }
 bodies.forEach(loadImg);
 const usdtImg = new Image();
@@ -1487,6 +1488,9 @@ async function enterOrbit(mint, hit) {
     const a = bodyFrom({ ...j.anchor, ...known, image: j.anchor.image }, null);
     const ps = layoutPlanets((j.tokens || []).filter(t => t.mint !== mint).map(t => bodyFrom(t, null)).sort((x, y) => y.mc - x.mc), null);
     if (!trail.length || trail[trail.length - 1].mint !== mint) trail.push({ mint, symbol: a.symbol, image: LOCAL.has(mint) ? (CLEAN[mint] || 'art/m/' + mint + '.jpg') : a.remote });
+    const pend = [a, ...ps].map(t => { t._req = true; return loadImg(t); });
+    await Promise.race([Promise.all(pend), sleep(2500)]);
+    if (token !== entering) return;
     setSystem(a, ps, true);
     if (dive && dive.snap) { const now = performance.now(); dive.swapT = now; dive.emergeT = Math.max(now, dive.t0 + 250); }
     else startArrive();
