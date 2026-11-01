@@ -28,9 +28,9 @@
     var W = innerWidth, H = innerHeight;
     var mobile = W <= 760;
     var inspector = mobile ? 0 : W <= 1100 ? 260 : W >= 1600 ? 345 : 300;
-    var top = mobile ? 182 : 127, foot = mobile ? 32 : 37;
-    var stageH = Math.max(200, H - top - foot);
-    return { x: (W - inspector) / 2, y: top + stageH / 2 - (mobile ? 0 : 0), d: 0.111 * stageH };
+    var top = mobile ? 182 : 127, foot = mobile ? 86 : 37;                // phones: header + chapter bar, then footer + info bar
+    var sw = W - inspector, sh = Math.max(200, H - top - foot);
+    return { x: sw / 2, y: top + sh / 2, d: 0.1122 * Math.min(sw, sh) };  // measured: the disc is 11.2% of the shorter side
   }
 
   link.addEventListener('click', function (e) {
@@ -54,7 +54,7 @@
     var end = { left: est.x - size / 2, top: est.y - size / 2, w: size };
     var anim = clone.animate([
       { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px', transform: 'rotate(0deg)', boxShadow: '0 0 0 rgba(0,0,0,0)', offset: 0 },
-      { left: (r.left - 6) + 'px', top: (r.top - 12) + 'px', width: (r.width * 1.25) + 'px', height: (r.height * 1.25) + 'px', transform: 'rotate(-12deg)', boxShadow: '0 8px 18px rgba(0,0,0,.5)', offset: 0.18, easing: 'cubic-bezier(.45,0,.2,1)' },
+      { left: (r.left - 6) + 'px', top: (r.top - 12) + 'px', width: (r.width * 1.25) + 'px', height: (r.height * 1.25) + 'px', transform: 'rotate(-12deg)', boxShadow: '0 8px 18px rgba(0,0,0,.5)', offset: 0.18, easing: 'cubic-bezier(.4,.06,.2,1)' },
       { left: end.left + 'px', top: end.top + 'px', width: end.w + 'px', height: end.w + 'px', transform: 'rotate(0deg)', boxShadow: '0 26px 54px rgba(0,0,0,.55)', offset: 1 }
     ], { duration: 950, fill: 'forwards' });
     var went = false;

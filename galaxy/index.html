@@ -379,7 +379,7 @@ try {
   if (d4s && Date.now() - d4s.t < 8000) {
     var d4i = document.createElement('img');
     d4i.id = 'stickerFly'; d4i.alt = ''; d4i.src = 'art/btc.webp';
-    d4i.style.cssText = 'position:fixed;z-index:9999;border-radius:50%;object-fit:cover;pointer-events:none;border:1px solid rgba(255,255,255,.9);box-sizing:border-box;box-shadow:0 22px 46px rgba(0,0,0,.55);left:' + (d4s.x - d4s.size / 2) + 'px;top:' + (d4s.y - d4s.size / 2) + 'px;width:' + d4s.size + 'px;height:' + d4s.size + 'px';
+    d4i.style.cssText = 'position:fixed;z-index:9999;border-radius:50%;object-fit:cover;pointer-events:none;border:1px solid rgba(255,255,255,.9);box-sizing:border-box;box-shadow:0 26px 54px rgba(0,0,0,.55);left:' + (d4s.x - d4s.size / 2) + 'px;top:' + (d4s.y - d4s.size / 2) + 'px;width:' + d4s.size + 'px;height:' + d4s.size + 'px';
     document.body.appendChild(d4i);
     window.__stickerHold = true;
   }
@@ -1840,23 +1840,17 @@ function applyLive(j) {
 }
 let liveBusy = false;
 // The sticker sits at 2x the disc's size until the page has loaded in, then drops onto the disc.
-function placeSticker() {
-  // The sticker's box is 3x the disc's diameter, centred on the disc. Landing scales it down to a third.
-  const el = document.getElementById('stickerFly'), b = window.__btc;
-  if (!el || !b) return;
-  el.style.transition = 'left .25s ease, top .25s ease, width .25s ease, height .25s ease';
-  el.style.left = (b.x - b.r * 3) + 'px'; el.style.top = (b.y - b.r * 3) + 'px';
-  el.style.width = (b.r * 6) + 'px'; el.style.height = (b.r * 6) + 'px';
-}
+function placeSticker() { /* the sticker waits exactly where the last page left it; nothing is adjusted early */ }
 function dropSticker() {
   const el = document.getElementById('stickerFly'), b = window.__btc;
   if (!el || !b) { stickerHold = false; if (el) el.remove(); lastSig = ''; return; }
-  placeSticker();
+  const r = el.getBoundingClientRect();
+  const dx = b.x - (r.left + r.width / 2), dy = b.y - (r.top + r.height / 2), sc = (b.r * 2) / r.width;
   const done = () => { stickerHold = false; el.remove(); lastSig = ''; };
-  // one smooth settle that runs alongside the fade-in, no bounce
+  // one smooth move to the real disc, alongside the fade-in: where it is to where BTC sits, 3x down to 1x
   const anim = el.animate([
-    { transform: 'scale(1)', boxShadow: '0 26px 54px rgba(0,0,0,.55)' },
-    { transform: 'scale(0.3333)', boxShadow: '0 0 0 rgba(0,0,0,0)' }
+    { transform: 'translate(0px,0px) scale(1)', boxShadow: '0 26px 54px rgba(0,0,0,.55)' },
+    { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + sc + ')', boxShadow: '0 0 0 rgba(0,0,0,0)' }
   ], { duration: 1050, easing: 'cubic-bezier(.45,0,.2,1)', fill: 'forwards' });
   anim.finished.then(done, done);
 }
