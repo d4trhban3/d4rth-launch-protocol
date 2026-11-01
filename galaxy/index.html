@@ -370,6 +370,21 @@
 </style>
 </head>
 <body>
+<script>
+// Arrived by clicking the Galaxy tab: the BTC sticker is already in the air. It waits at 2x size until
+// the page has loaded, then drops into the BTC disc (see dropSticker).
+try {
+  var d4s = JSON.parse(sessionStorage.getItem('d4sticker') || 'null');
+  sessionStorage.removeItem('d4sticker');
+  if (d4s && Date.now() - d4s.t < 8000) {
+    var d4i = document.createElement('img');
+    d4i.id = 'stickerFly'; d4i.alt = ''; d4i.src = 'art/btc.webp';
+    d4i.style.cssText = 'position:fixed;z-index:9999;border-radius:50%;object-fit:cover;pointer-events:none;border:1px solid rgba(255,255,255,.9);box-sizing:border-box;box-shadow:0 22px 46px rgba(0,0,0,.55);left:' + (d4s.x - d4s.size / 2) + 'px;top:' + (d4s.y - d4s.size / 2) + 'px;width:' + d4s.size + 'px;height:' + d4s.size + 'px';
+    document.body.appendChild(d4i);
+    window.__stickerHold = true;
+  }
+} catch (e) {}
+</script>
 <div class="tv-experience" id="app" data-view="universe" data-panel="none" data-details="closed" data-boot="1">
   <header class="tv-header">
     <a class="tv-brand" href="https://d4trhban3.github.io/d4rth-launch-protocol/">
@@ -488,6 +503,7 @@ const RINGS = [15, 24, 33, 42].map(r => r * 1.48);
 const canvas = document.getElementById('canvas');
 const ctx = canvas.getContext('2d');
 const app = document.getElementById('app');
+let stickerHold = !!window.__stickerHold;                  // the BTC disc waits for the sticker to land on it
 let W = 2, H = 2, DPR = 1, starLayer = null;
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 function buildStars() {
@@ -1482,7 +1498,7 @@ function loop() {
   stepCamera();
   const booting = app.hasAttribute('data-boot');
   if (booting && anchor.loaded && !loop._seen) loop._seen = performance.now();
-  const bootA = booting ? (loop._seen ? Math.min(1, (performance.now() - loop._seen) / 700) : 0) : 1;
+  const bootA = stickerHold ? 0 : booting ? (loop._seen ? Math.min(1, (performance.now() - loop._seen) / 700) : 0) : 1;
   let mix = 0;
   for (const t of bodies) mix += t.boost + t.share + t.shareUsdt + (t.loaded ? 1 : 0);
   const sig = [booting, bootA, camX.join(), camY.join(), camZ.join(), dist, usdcT, usdtT, W, H, view, showLabels, showOrbits, showPairs, selected && selected.mint, anchor.mint, imgVersion, dive ? performance.now() : 0, mix, bulmaImg.complete, toastImg.complete, usdtImg.complete, hubTab].join('|');
@@ -1577,6 +1593,11 @@ function loop() {
     disc(p.x, p.y, p.r, p.t.loaded ? p.t.img : null);
     hits.push({ t: p.t, x: p.x, y: p.y, r: p.r });
   });
+  if (stickerHold && W > 8) {
+    const first = !window.__btc, rc = canvas.getBoundingClientRect();
+    window.__btc = { x: rc.left + btcP.x, y: rc.top + btcP.y, r: btcR };
+    if (first) placeSticker();
+  }
   ctx.globalAlpha = bootA;
   disc(btcP.x, btcP.y, btcR, anchor.loaded ? anchor.img : null);
   if (usdcT > 0.01 && anchor.mint === home.anchor.mint && toastImg.complete && toastImg.naturalWidth) {
@@ -1818,11 +1839,32 @@ function applyLive(j) {
   liveAt = new Date(j.capturedAt || Date.now());
 }
 let liveBusy = false;
+// The sticker sits at 2x the disc's size until the page has loaded in, then drops onto the disc.
+function placeSticker() {
+  // The sticker's box is 2x the disc's diameter, centred on the disc. Landing scales it down to 0.5.
+  const el = document.getElementById('stickerFly'), b = window.__btc;
+  if (!el || !b) return;
+  el.style.transition = 'left .25s ease, top .25s ease, width .25s ease, height .25s ease';
+  el.style.left = (b.x - b.r * 2) + 'px'; el.style.top = (b.y - b.r * 2) + 'px';
+  el.style.width = (b.r * 4) + 'px'; el.style.height = (b.r * 4) + 'px';
+}
+function dropSticker() {
+  const el = document.getElementById('stickerFly'), b = window.__btc;
+  if (!el || !b) { stickerHold = false; if (el) el.remove(); lastSig = ''; return; }
+  placeSticker();
+  const done = () => { stickerHold = false; el.remove(); lastSig = ''; };
+  const anim = el.animate([
+    { transform: 'scale(1) rotate(0deg)', boxShadow: '0 22px 46px rgba(0,0,0,.55)', offset: 0, easing: 'cubic-bezier(.6,0,.9,.45)' },
+    { transform: 'scale(0.465) rotate(-3deg)', boxShadow: '0 5px 12px rgba(0,0,0,.45)', offset: 0.64, easing: 'ease-out' },
+    { transform: 'scale(0.5) rotate(0deg)', boxShadow: '0 0 0 rgba(0,0,0,0)', offset: 1 }
+  ], { duration: 760, fill: 'forwards' });
+  anim.finished.then(done, done);
+}
 function reveal() {
   if (!app.hasAttribute('data-boot') || reveal._wait) return;
   const wait = Math.max(0, 1500 - performance.now());        // the veil lasts at least 1.5s so it reads as intended
   reveal._wait = true;
-  setTimeout(() => { app.removeAttribute('data-boot'); startArrive(); }, wait);   // orbits open out around BTC
+  setTimeout(() => { app.removeAttribute('data-boot'); startArrive(); if (stickerHold) dropSticker(); }, wait);   // orbits open out around BTC
 }
 async function refreshLive(first) {
   if (liveBusy) return;
@@ -1872,5 +1914,6 @@ if (!(navigator.connection && navigator.connection.saveData)) {
   setInterval(() => { if (document.visibilityState === 'visible') refreshLive(false); }, 300000);
 }
 </script>
+<script src="../sticker.js" defer></script>
 </body>
 </html>
