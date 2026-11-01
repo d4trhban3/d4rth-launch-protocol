@@ -263,6 +263,9 @@
   .sl.pair b { color: var(--tv-acid); }
   .ends { display: flex; justify-content: space-between; font-size: 9px; letter-spacing: .08em; text-transform: uppercase; color: #6f6b62; }
   .bondline { margin: 10px 0; color: var(--tv-acid); font-size: 12px; line-height: 1.45; }
+  .proto-extra { padding: 8px 10px; border-left: 2px solid #a8eb6e; background: rgba(168,235,110,.07); }
+  .proto-extra b { color: #a8eb6e; }
+  .bondline { white-space: pre-line; }
   .weightline { margin: 0 0 16px; color: var(--tv-muted); font-size: 12px; line-height: 1.45; }
   .row { display: grid; grid-template-columns: 32px 1fr; gap: 8px; margin: 0 0 14px; }
   .row img { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; }
@@ -338,7 +341,7 @@
     </nav>
     <div class="tv-header-tools">
       <button type="button" id="btn" class="hub-btn" aria-pressed="false">Add USDC</button>
-      <button type="button" id="btnUsdt" class="hub-btn" aria-pressed="false">Add USDT</button>
+      <button type="button" id="btnUsdt" class="hub-btn" aria-pressed="false">Add USDT boost</button>
       <button type="button" id="openProtocol" class="tv-icon-button" aria-label="Protocol sliders" style="width:auto;padding:0 10px;font-size:11px;font-weight:700">Sliders</button>
       <button type="button" id="openStars" class="tv-icon-button" aria-label="Constellations" style="width:auto;padding:0 10px;font-size:11px">Stars</button>
     </div>
@@ -363,8 +366,8 @@
       <button type="button" id="bondChip" class="bond-chip" hidden></button>
       <aside id="mapKey" class="map-key" hidden>
         <b>Key</b>
-        <div><i></i> USDC line, through Bulma</div>
-        <div><i class="green"></i> USDT line, the thinner pool</div>
+        <div><i></i> USDC line · main protocol, through Bulma</div>
+        <div><i class="green"></i> USDT line · optional extra boost</div>
         <div><i class="spoke"></i> Each coin's link to the center</div>
         <div><i class="ghost"></i> Where that coin sat before the pull</div>
         <p>Closer to BTC = stronger liquidity pool.</p>
@@ -398,19 +401,20 @@
         <div id="tvDirectory"></div>
       </div>
       <div id="paneProtocol" hidden>
-        <p class="proto-lead">Add USDC brings Bulma in on the protocol: the main pool is USDC, 10% locks to BTC, and 10% locks to SOL. The other coins lock a chunk to Bulma. Add USDT is that same protocol, except the SOL lock is Bulma. USDT is the thinner pool, so the same chunk pulls less. Open this with the Sliders button. It does not cover the map.</p>
+        <p class="proto-lead"><b>The main protocol is USDC · Bulma.</b> Bulma sits paired to BTC, SOL and USDC: the main pool is USDC, 10% locks to BTC, and 10% locks to SOL. The other coins lock a chunk of their supply to Bulma.</p>
+        <p class="proto-lead proto-extra"><b>USDT is not part of that protocol.</b> It is an optional extra boost: add Tether paired to BTC, Bulma and USDT and the same coins pull a little closer. USDT is the thinner pool, so the same chunk adds less.</p>
         <div class="sl">Market cap increase <b id="allBoostLabel">+0%</b></div>
         <input id="allBoost" type="range" min="0" max="2000" step="1" value="0">
         <div class="ends"><span>0%</span><span>2000%</span></div>
         <div class="hubtabs">
-          <button type="button" id="tabUsdc" class="on">USDC · Bulma</button>
-          <button type="button" id="tabUsdt">USDT</button>
+          <button type="button" id="tabUsdc" class="on">USDC · Bulma (main)</button>
+          <button type="button" id="tabUsdt">USDT (extra boost)</button>
         </div>
-        <div class="sl pair"><span id="pairName">Supply paired to Bulma</span> <b id="allShareLabel">0%</b></div>
+        <div class="sl pair"><span id="pairName">Supply paired to Bulma (main)</span> <b id="allShareLabel">0%</b></div>
         <input id="allShare" type="range" min="0" max="50" step="1" value="0">
         <div class="ends"><span>0%</span><span>50%</span></div>
         <div class="bondline" id="bondNote"></div>
-        <p class="weightline">On Solana, USDC is $6.83B and USDT is $2.40B. The same 10% adds about 35% as much through USDT.</p>
+        <p class="weightline">How the numbers work: added money = supply share × market cap (after the increase). USDT counts at about 35% of that, because Solana holds $2.40B of USDT against $6.83B of USDC. Closer = new money ÷ (current liquidity + new money), up to 42% nearer BTC.</p>
         <div id="rows"></div>
       </div>
       <div id="paneSettings" hidden>
@@ -558,15 +562,22 @@ function money(n) {
 }
 function levelOf(t) { return (t.mc || 0) * (1 + (t.boost || 0) / 100); }
 function liqOf(t) { return Math.max(1, t.liq || 0); }
-function addedUsdc(t) { return (t.share || 0) * levelOf(t) * usdcT; }
-function addedUsdt(t) { return (t.shareUsdt || 0) * levelOf(t) * usdtT * USDT_WEIGHT; }
+// Main protocol: supply share x boosted market cap, paired to Bulma (USDC pool).
+// USDT is an optional extra: the same maths, scaled by how much thinner USDT is on Solana.
+// exact* is the settled number shown in text. added* eases in with the hub for the drawing.
+const PULL_MAX = 0.42;
+function exactUsdc(t) { return usdcOn ? (t.share || 0) * levelOf(t) : 0; }
+function exactUsdt(t) { return usdtOn ? (t.shareUsdt || 0) * levelOf(t) * USDT_WEIGHT : 0; }
+function exactOf(t) { return exactUsdc(t) + exactUsdt(t); }
+function addedUsdc(t) { return exactUsdc(t) * usdcT; }
+function addedUsdt(t) { return exactUsdt(t) * usdtT; }
 function addedOf(t) { return addedUsdc(t) + addedUsdt(t); }
 function pullOf(t) {
   const add = addedOf(t);
   return add / (liqOf(t) + add);
 }
 function radiusOf(t) {
-  return t.baseR * (1 - 0.42 * pullOf(t));
+  return t.baseR * (1 - PULL_MAX * pullOf(t));
 }
 function homeRadius(t) { return t.baseR; }
 let emergeK = 1, emergeA = 1;
@@ -724,7 +735,7 @@ function buildRows() {
   row.innerHTML = '<img alt="" src="' + esc(t.image || '') + '"><div><div class="nm"><b>' + esc(t.symbol) + '</b><span class="delta" data-d="' + esc(t.mint) + '">0%</span></div>'
     + '<div class="sl">Market cap <b data-v="' + esc(t.mint) + '">' + money(t.mc) + '</b></div>'
     + '<input type="range" data-kind="vol" min="0" max="2000" step="1" value="0">'
-    + '<div class="sl pair"><span class="pair-name">Supply paired to Bulma</span> <b data-s="' + esc(t.mint) + '">0%</b></div>'
+    + '<div class="sl pair"><span class="pair-name">Supply paired to Bulma (main)</span> <b data-s="' + esc(t.mint) + '">0%</b></div>'
     + '<input type="range" data-kind="share" min="0" max="50" step="1" value="0"></div>';
   rows.appendChild(row);
   row.querySelector('[data-kind="vol"]').addEventListener('input', e => {
@@ -742,8 +753,8 @@ function buildRows() {
 }
 buildRows();
 function bondText() {
-  const bu = planets.reduce((s, t) => s + addedUsdc(t), 0);
-  const bd = planets.reduce((s, t) => s + addedUsdt(t), 0);
+  const bu = planets.reduce((s, t) => s + exactUsdc(t), 0);
+  const bd = planets.reduce((s, t) => s + exactUsdt(t), 0);
   const bond = bu + bd;
   const base = bodies.reduce((s, t) => s + liqOf(t), 0);
   return { bu, bd, bond, base };
@@ -753,30 +764,34 @@ function paintDeltas() {
   planets.forEach(t => {
     const el = rows.querySelector('[data-d="' + t.mint + '"]');
     if (!el) return;
-    const add = addedOf(t);
+    const au = exactUsdc(t), ad = exactUsdt(t), add = au + ad;
     if (!(usdcOn || usdtOn) || add < 1) { el.textContent = Math.round((t[shareKey()] || 0) * 100) + '%'; el.classList.remove('on'); return; }
-    const closer = Math.round(55 * add / (liqOf(t) + add));
-    el.textContent = '+' + money(add) + ' · ' + closer + '% closer';
+    const closer = Math.round(PULL_MAX * 100 * add / (liqOf(t) + add));
+    const parts = [];
+    if (au >= 1) parts.push('USDC +' + money(au));
+    if (ad >= 1) parts.push('USDT boost +' + money(ad));
+    el.textContent = parts.join(' · ') + ' · ' + closer + '% closer';
     el.classList.add('on');
   });
   const note = document.getElementById('bondNote');
   const chip = document.getElementById('bondChip');
   if (!(usdcOn || usdtOn)) {
-    note.textContent = 'Both stables are off. The orbit is just the BTC system.';
+    note.textContent = 'Both are off. The orbit is just the BTC system.';
     chip.hidden = true;
     return;
   }
-  let text = 'USDC ' + money(bu) + ' · USDT ' + money(bd) + ' · BTC LP +' + (bond / base * 100).toFixed(1) + '%';
-  if (usdcOn && usdtOn) text += '. Bulma is the USDC hub. USDT locks its SOL chunk to Bulma.';
-  else if (usdcOn) text += '. Bulma: USDC pool, lock to BTC, lock to SOL.';
-  else text += '. USDT: same protocol, and the SOL lock is Bulma.';
-  note.textContent = text;
+  const lines = [];
+  if (usdcOn) lines.push('Main protocol (USDC · Bulma): +' + money(bu));
+  if (usdtOn) lines.push('USDT extra boost (optional): +' + money(bd) + (usdcOn && bu > 0 ? ' · ' + (bd / bu * 100).toFixed(0) + '% on top of the main' : ''));
+  lines.push('Group liquidity +' + (bond / base * 100).toFixed(1) + '%');
+  if (usdtOn && !usdcOn) lines.push('USDT is only a boost. The main protocol is Bulma on USDC, so turn USDC on for the full picture.');
+  note.textContent = lines.join('\n');
   chip.hidden = false;
-  chip.textContent = 'USDC ' + money(bu) + ' · USDT ' + money(bd) + ' · +' + (bond / base * 100).toFixed(0) + '%';
+  chip.textContent = (usdcOn ? 'Main ' + money(bu) : '') + (usdcOn && usdtOn ? ' · ' : '') + (usdtOn ? 'USDT boost +' + money(bd) : '') + ' · +' + (bond / base * 100).toFixed(0) + '%';
 }
 function syncShareInputs() {
   const key = shareKey();
-  const name = hubTab === 'usdt' ? 'Supply paired to USDT' : 'Supply paired to Bulma';
+  const name = hubTab === 'usdt' ? 'Supply paired to USDT (extra boost)' : 'Supply paired to Bulma (main)';
   document.querySelectorAll('.pair-name').forEach(el => { el.textContent = name; });
   document.getElementById('pairName').textContent = name;
   const vals = planets.map(t => Math.round((t[key] || 0) * 100));
@@ -823,7 +838,7 @@ function renderInspector() {
     ? (nested ? 'Follow ' + t.symbol + ' into its own corner of the universe.' : 'The home planet. Every orbit begins here.')
     : t.moon
       ? 'Little Titty Coin. Always close to Earth.'
-      : 'Paired with ' + anchor.symbol + '. Click the disc to open its own orbit. Add USDC or USDT and it pulls closer.';
+      : 'Paired with ' + anchor.symbol + '. Click the disc to open its own orbit. Add USDC for the main protocol. USDT is an optional extra boost.';
   const stats = [['Market cap', money(levelOf(t))], ['Price', t.price ? price(t.price) : '—'], ['24h volume', money(t.vol)], ['Liquidity', money(t.liq)]];
   if (t.change != null) stats.push(['24h change', '<span class="' + (t.change >= 0 ? 'chg-up' : 'chg-down') + '">' + (t.change >= 0 ? '+' : '') + Number(t.change).toFixed(1) + '%</span>']);
   const socials = (t.socials || []).filter(x => x.url && /^https:\/\//.test(x.url) && !/pump\.fun/.test(x.url));
@@ -891,7 +906,7 @@ function renderCatalog(q) {
 function paintHubButtons() {
   const uc = document.getElementById('btn'), ut = document.getElementById('btnUsdt');
   uc.textContent = usdcOn ? 'USDC on' : 'Add USDC';
-  ut.textContent = usdtOn ? 'USDT on' : 'Add USDT';
+  ut.textContent = usdtOn ? 'USDT boost on' : 'Add USDT boost';
   uc.classList.toggle('on', usdcOn);
   ut.classList.toggle('on', usdtOn);
   uc.setAttribute('aria-pressed', String(usdcOn));
