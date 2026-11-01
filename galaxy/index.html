@@ -586,11 +586,12 @@ function zoomFactor() {
   return home / (dist || home || 1);
 }
 function stepCamera() {
+  if (dive && dive.phase === 'in') { dTheta = 0; dPhi = 0; }
   theta += dTheta * CAM_DAMP;
   phi = Math.max(MIN_PHI, Math.min(MAX_PHI, phi + dPhi * CAM_DAMP));
   dTheta *= 1 - CAM_DAMP;
   dPhi *= 1 - CAM_DAMP;
-  if (autoRotate && !dragging && view !== 'constellations') dTheta -= 0.002;
+  if (autoRotate && !dragging && view !== 'constellations' && !(dive && dive.phase === 'in')) dTheta -= 0.002;
   if (!userZoomed) distTarget = fittedDistance() * camSpread();
   if (distTarget != null) {
     dist += (distTarget - dist) * 0.16;
@@ -1475,6 +1476,7 @@ async function enterOrbit(mint, hit) {
     const tan = Math.tan(46 * Math.PI / 360);
     const rA = (200 / 23 * 0.9) * H / (2 * Math.max(distTarget || dist, 1) * tan);
     const S = Math.max(1.15, Math.min(9, rA / Math.max(hit.r, 3)));
+    dTheta = 0; dPhi = 0;
     dive = { phase: 'in', t0: performance.now(), dur: 700, fx: hit.x, fy: hit.y, r: hit.r, S };
     zoomedR = 1;
   }
