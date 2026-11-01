@@ -838,6 +838,8 @@ function toggleHub(which) {
   applyAllBoost(turningOn || other ? (planets[0].boost || 0) : 0);
   syncShareInputs();
   paintHubButtons();
+  if (turningOn) setPanel('protocol');
+  else if (!usdcOn && !usdtOn && app.dataset.panel === 'protocol') setPanel('none');
 }
 function setStars(on) {
   view = on ? 'constellations' : 'orbit';
