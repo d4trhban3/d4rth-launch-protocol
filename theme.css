@@ -73,6 +73,8 @@ h3 { color: var(--muted); }
 /* One column width on every page, so nav and headings never jump sideways */
 .wrap { padding: 28px 22px 72px !important; max-width: 880px !important; margin-left: auto !important; margin-right: auto !important; }
 nav { margin-bottom: 22px !important; }
+nav a { min-height: 40px !important; padding: 10px 16px !important; font-size: 13px !important; }
+.kicker { font-size: 11px !important; margin-bottom: 10px !important; }
 .doc > * { max-width: 760px; }
 .doc > .gallery, .doc > .banner { max-width: none; }
 
