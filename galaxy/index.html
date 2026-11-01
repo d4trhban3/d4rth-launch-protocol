@@ -14,7 +14,7 @@
     color-scheme: dark;
     --tv-ink: #10100e;
     --tv-paper: #eee9dd;
-    --tv-acid: #e8ff58;
+    --tv-acid: #3cc8e6;
     --tv-muted: #a19e91;
     --tv-rule: #eee9dd2b;
     --tv-faint: #eee9dd0d;
@@ -171,13 +171,13 @@
     padding: 10px 12px 12px; background: #10100ee8; border: 1px solid #3a3934;
     color: #f4f1ea; font: 12px/1.35 "DM Sans", sans-serif; pointer-events: none;
   }
-  .map-key b { display: block; margin-bottom: 6px; color: #e8ff58; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }
+  .map-key b { display: block; margin-bottom: 6px; color: #3cc8e6; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; }
   .map-key div { display: flex; gap: 8px; align-items: center; margin: 4px 0; }
   .map-key i { width: 22px; height: 0; border-top: 2px solid #b8a0ff; flex: none; }
-  .map-key i.green { border-top-color: #a8eb6e; }
+  .map-key i.green { border-top-color: #3cc8e6; }
   .map-key i.spoke { border-top-color: rgba(244,241,234,.75); }
   .map-key i.ghost { border-top-style: dashed; border-top-color: #f4f1ea; }
-  .map-key p { margin: 8px 0 0; color: #e8ff58; }
+  .map-key p { margin: 8px 0 0; color: #3cc8e6; }
   .tv-inspector {
     min-width: 0; min-height: 0; overflow: auto; padding: 24px 22px 18px;
     border-left: 1px solid var(--tv-rule); background: var(--tv-ink);
@@ -1023,12 +1023,12 @@ function drawConstellations() {
     if (picked) {
       ctx.beginPath();
       ctx.arc(x, y, Math.max(r + 7, 11), 0, Math.PI * 2);
-      ctx.strokeStyle = '#e8ff58';
+      ctx.strokeStyle = '#3cc8e6';
       ctx.lineWidth = 1.5;
       ctx.stroke();
     }
     if (showLabels && (label || picked)) {
-      ctx.fillStyle = picked ? '#e8ff58' : '#f4f1ea';
+      ctx.fillStyle = picked ? '#3cc8e6' : '#f4f1ea';
       ctx.font = '600 11px "DM Sans", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
@@ -1170,7 +1170,7 @@ function loop() {
       ctx.lineWidth = 1;
       if (p.pull >= 0.02 && (hubB || hubU)) {
         if (hubB && addedUsdc(p.t) > 0) { ctx.strokeStyle = 'rgba(184,160,255,0.9)'; strokeBetween(hubB, p, rB + 2, p.r + 2); }
-        if (hubU && addedUsdt(p.t) > 0) { ctx.strokeStyle = 'rgba(168,235,110,0.9)'; strokeBetween(hubU, p, rU + 2, p.r + 2); }
+        if (hubU && addedUsdt(p.t) > 0) { ctx.strokeStyle = 'rgba(60,200,230,0.9)'; strokeBetween(hubU, p, rU + 2, p.r + 2); }
       } else {
         ctx.strokeStyle = 'rgba(244,241,234,0.45)';
         strokeBetween(btcP, p, btcR + 2, p.r + 2);
@@ -1189,7 +1189,7 @@ function loop() {
     strokeBetween(btcP, hubB, btcR + 2, rB + 2);
   }
   if (hubU) {
-    ctx.strokeStyle = 'rgba(168,235,110,0.95)';
+    ctx.strokeStyle = 'rgba(60,200,230,0.95)';
     ctx.lineWidth = 1.15;
     strokeBetween(btcP, hubU, btcR + 2, rU + 2);
   }
@@ -1205,7 +1205,7 @@ function loop() {
     hits.push({ t: { mint: 'bulma', symbol: 'BULMA' }, x: hubB.x, y: hubB.y, r: rB });
   }
   if (hubU) {
-    ctx.fillStyle = '#a8eb6e'; ctx.beginPath(); ctx.arc(hubU.x, hubU.y, rU, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#3cc8e6'; ctx.beginPath(); ctx.arc(hubU.x, hubU.y, rU, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1.2; ctx.stroke();
     ctx.fillStyle = '#f4f1ea'; ctx.font = '600 11px "DM Sans", sans-serif'; ctx.textAlign = 'center';
     ctx.fillText('USDT', hubU.x, hubU.y + rU + 13);
@@ -1225,7 +1225,7 @@ function loop() {
       ctx.font = '600 12px "DM Sans", sans-serif';
       ctx.fillText(h.t.symbol, h.x, h.y + h.r + 4);
       if ((selected && selected.mint === h.t.mint) || (!selected && h.t === anchor) || (selected === anchor && h.t === anchor)) {
-        ctx.fillStyle = '#e8ff58';
+        ctx.fillStyle = '#3cc8e6';
         ctx.fillRect(h.x - 12, h.y + h.r + 18, 24, 2);
       }
     });
