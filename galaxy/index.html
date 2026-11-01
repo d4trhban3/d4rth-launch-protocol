@@ -486,6 +486,9 @@ let lastSig = '', imgVersion = 0;
 let dive = null;
 const ease = { io: p => -(Math.cos(Math.PI * p) - 1) / 2, out: p => Math.sin(p * Math.PI / 2) };
 let theta = 0, phi = Math.acos(0.72), dTheta = 0, dPhi = 0;
+// Throwing: release a fast drag and the galaxy keeps spinning, then slows. Grab it to stop it.
+let spinV = 0, dragTrail = [];
+const SPIN_DECAY = 0.991, SPIN_GAIN = 1.5, SPIN_MAX = 0.3, SPIN_MIN = 0.015;
 let dist = 90, distTarget = null;
 const ROT_STEPS = [25, 50, 75, 100, 150, 200, 300, 500, 750, 1000, 1500, 2000];
 let rotSpeed = 1;
@@ -634,7 +637,9 @@ function zoomFactor() {
   return home / (dist || home || 1);
 }
 function stepCamera() {
-  theta += dTheta * CAM_DAMP;
+  theta += dTheta * CAM_DAMP + spinV;
+  spinV *= SPIN_DECAY;
+  if (Math.abs(spinV) < 0.0002) spinV = 0;
   phi = Math.max(MIN_PHI, Math.min(MAX_PHI, phi + dPhi * CAM_DAMP));
   dTheta *= 1 - CAM_DAMP;
   dPhi *= 1 - CAM_DAMP;
@@ -674,6 +679,7 @@ function centerCluster() {
 }
 function resetCamera() {
   userZoomed = false;
+  spinV = 0;
   theta = 0;
   phi = Math.acos(0.72);
   dTheta = 0;
@@ -1119,6 +1125,7 @@ document.getElementById('zOut').onclick = () => zoomBy(1 / 1.18);
 document.getElementById('zReset').onclick = () => resetCamera();
 canvas.style.cursor = 'grab';
 canvas.addEventListener('pointerdown', e => {
+  spinV = 0; dragTrail = [];
   pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
   lastX = e.clientX; lastY = e.clientY;
   canvas._moved = false; canvas._sx = e.clientX; canvas._sy = e.clientY;
@@ -1131,7 +1138,23 @@ canvas.addEventListener('pointerdown', e => {
   canvas.style.cursor = 'grabbing';
 });
 function endPointer(e) {
+  const wasDrag = pointers.size === 1 && e.type === 'pointerup' && !pinchDist;
   pointers.delete(e.pointerId);
+  if (wasDrag && view !== 'constellations') {
+    const now = performance.now();
+    const recent = dragTrail.filter(q => now - q.t < 90);
+    if (recent.length >= 2 && now - recent[recent.length - 1].t < 60) {
+      const a = recent[0], b = recent[recent.length - 1];
+      const frames = Math.max(1, (b.t - a.t) / 16.7);
+      const h = canvas.clientHeight || H || 1;
+      const v = -((b.x - a.x) / frames) * (2 * Math.PI) / h * ROT_SPEED * SPIN_GAIN;
+      if (Math.abs(v) > SPIN_MIN) {
+        spinV = Math.max(-SPIN_MAX, Math.min(SPIN_MAX, v));
+        dTheta = 0;
+      }
+    }
+  }
+  dragTrail = [];
   if (pointers.size < 2) pinchDist = 0;
   dragging = pointers.size === 1;
   if (!pointers.size) canvas.style.cursor = 'grab';
@@ -1152,6 +1175,8 @@ canvas.addEventListener('pointermove', e => {
     return;
   }
   if (pointers.size !== 1) return;
+  dragTrail.push({ t: performance.now(), x: e.clientX });
+  if (dragTrail.length > 12) dragTrail.shift();
   const dx = e.clientX - lastX, dy = e.clientY - lastY;
   lastX = e.clientX; lastY = e.clientY;
   if (Math.hypot(e.clientX - canvas._sx, e.clientY - canvas._sy) > 4) canvas._moved = true;
