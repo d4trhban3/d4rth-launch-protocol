@@ -102,13 +102,14 @@ layout: null
 <h2>The sequence (do it in this order)</h2>
 <h3>1. Launch the coin on pump.fun, paired with USDC. That is the main pool. USDC is a dollar on Solana.</h3>
 <p>On pump.fun, quote <strong>USDC</strong>.   Name: <code>Ultimate Super Bulma Dragonballs</code>   Ticker: <code>USBD</code>   Image: <code>USBD-ART/coin-images-and-logos/usbd-token-1000.png</code>   Banner: <code>USBD-ART/banners-and-headers/usbd-pumpfun-banner-1500x500.jpg</code> (banner can only be set at creation).</p>
-<p>Description: <code>$USBD Ultimate Super Bulma Dragonballs. The Bulma dollar. USDC main pool, locked $BTC pool, and the old SOL slot locks to Bulma. Fees go to holders. Fan parody.</code></p>
+<p>Description: <code>$USBD Ultimate Super Bulma Dragonballs. The Bulma dollar. USDC main pool, locked $BTC pool, and a locked SOL pool. Fees go to holders. Fan parody.</code></p>
 <h3>2. Buy about 20% of the coins yourself. That leaves most of the rest for other people.</h3>
 <p>Dev buy <strong>200M tokens (20% of supply)</strong>.</p>
 <h3>3. Lock 10% in a pool with BTC on Meteora. BTC is the main coin of this group. Lock means the money cannot be pulled back out.</h3>
 <ol><li><a href="https://meteora.ag/create/dammv2/standard">https://meteora.ag/create/dammv2/standard</a> (Create → DAMM V2 → Standard Pool)</li><li>Base Token = USBD CA. Quote Token = $BTC.</li><li>Initial Price = USBD $ price ÷ $BTC $ price.</li><li>Deposit <strong>100M USBD</strong> + equal $ value of $BTC.</li><li>Tick <strong>Permanently lock my liquidity</strong>. Create.</li></ol>
-<h3>4. Do not lock this 10% with SOL.</h3>
-<p>This is the seat the second hub takes. When the USDT hub launches, it locks 10% of its own supply with Bulma, and 10% with BTC. Same Meteora pool, permanently locked. Quote = Bulma, not wrapped SOL. The center is a three-way pair: BTC, Bulma, and USDT. USDT is the thinner side.</p>
+<h3>4. Lock 10% in a pool with SOL on Meteora.</h3>
+<p>Same as step 3, with SOL as the Quote Token. Deposit 100M USBD + equal $ value of SOL. Tick Permanently lock my liquidity. Create.</p>
+<p><em>Optional extra boost, not part of the protocol: a USDT hub, which is Tether paired to BTC, Bulma and USDT. USDT is the thinner side, about 35% of USDC on Solana. The protocol works without it.</em></p>
 <h3>5. Leave the rest in the USDC pool. That stays the main pool, during the launch and after.</h3>
 <p>Everything else trades on the USDC pool (the pump.fun curve, then PumpSwap after graduation). USDC remains the main pool.</p>
 <h3>6. Then other coins lock a piece of their supply against this coin. It becomes the hub they all connect through.</h3>
@@ -118,7 +119,7 @@ layout: null
 <h2>Fees</h2>
 <p>Holder rewards are the point. To also share creator fees, keep creator fees <strong>on</strong> (not pump.fun’s send-all-fees-to-holders switch) and pay holders from there.   Strongly encouraged (not required): add GitHub <code>d4trhban3</code> as a creator-fee recipient. Nothing breaks without it.</p>
 <h2>Cost notes</h2>
-<ul><li>The curve gets pricier with every buy. Check the live price on pump.fun before buying.</li><li>Rough estimate from public USDC curve numbers: ~$1,000 USDC for the 20% dev buy. Not a quote.</li><li>Each Meteora pool also needs the other side ($BTC, or Bulma when the USDT hub locks in) equal in $ to the 100M at that day’s price.</li><li>A pump.fun curve only sells ~79% of supply before it graduates to its USDC pool. A 20% dev buy uses a meaningful slice of that while leaving room for holders.</li></ul>
+<ul><li>The curve gets pricier with every buy. Check the live price on pump.fun before buying.</li><li>Rough estimate from public USDC curve numbers: ~$1,000 USDC for the 20% dev buy. Not a quote.</li><li>Each Meteora pool also needs the other side ($BTC or SOL) equal in $ to the 100M at that day’s price.</li><li>A pump.fun curve only sells ~79% of supply before it graduates to its USDC pool. A 20% dev buy uses a meaningful slice of that while leaving room for holders.</li></ul>
 <h2>Why 20% and not 2/3</h2>
 <p>2/3 would be ~84% of what the curve can sell, cost ~$7,000+ just on the curve, leave holders almost nothing to buy, and make the $BTC lock bigger than the USDC one. 20% keeps USDC the main pool and the dev bag reasonable.</p>
   </div>

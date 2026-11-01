@@ -20,7 +20,7 @@ Ticker: `USBD`
 Image: `USBD-ART/coin-images-and-logos/usbd-token-1000.png`  
 Banner: `USBD-ART/banners-and-headers/usbd-pumpfun-banner-1500x500.jpg` (banner can only be set at creation).
 
-Description: `$USBD Ultimate Super Bulma Dragonballs. The Bulma dollar. USDC main pool, locked $BTC pool, and the old SOL slot locks to Bulma. Fees go to holders. Fan parody.`
+Description: `$USBD Ultimate Super Bulma Dragonballs. The Bulma dollar. USDC main pool, locked $BTC pool, and a locked SOL pool. Fees go to holders. Fan parody.`
 
 ### 2. Buy about 20% of the coins yourself. That leaves most of the rest for other people.
 Dev buy **200M tokens (20% of supply)**.
@@ -32,8 +32,10 @@ Dev buy **200M tokens (20% of supply)**.
 4. Deposit **100M USBD** + equal $ value of $BTC.
 5. Tick **Permanently lock my liquidity**. Create.
 
-### 4. Do not lock this 10% with SOL.
-This is the seat the second hub takes. When the USDT hub launches, it locks 10% of its own supply with Bulma, and 10% with BTC. Same Meteora pool, permanently locked. Quote = Bulma, not wrapped SOL. The center is a three-way pair: BTC, Bulma, and USDT. USDT is the thinner side.
+### 4. Lock 10% in a pool with SOL on Meteora.
+Same as step 3, with SOL as the Quote Token. Deposit 100M USBD + equal $ value of SOL. Tick Permanently lock my liquidity. Create.
+
+Optional extra boost, not part of the protocol: a USDT hub, which is Tether paired to BTC, Bulma and USDT. USDT is the thinner side, about 35% of USDC on Solana. The protocol works without it.
 
 ### 5. Leave the rest in the USDC pool. That stays the main pool, during the launch and after.
 Everything else trades on the USDC pool (the pump.fun curve, then PumpSwap after graduation). USDC remains the main pool.
