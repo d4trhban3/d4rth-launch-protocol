@@ -484,6 +484,7 @@ try {
         <button type="button" id="starDraw">Draw lines</button>
         <button type="button" id="starClear" hidden>Clear my lines</button>
         <button type="button" id="starReset" hidden>Reset layout</button>
+        <button type="button" id="starPng">Save PNG</button>
       </div>
       <button type="button" id="bondChip" class="bond-chip" hidden></button>
       <button type="button" id="keyToggle" class="key-toggle" aria-expanded="false" aria-controls="mapKey">Key</button>
@@ -681,7 +682,7 @@ function loadImg(t) {
   if (LOCAL.has(t.mint)) srcs.push(CLEAN[t.mint] || 'art/m/' + t.mint + '.jpg');
   if (t.remote) srcs.push(t.remote);
   t.image = srcs[0] || '';
-  const load = url => new Promise(res => { const im = new Image(); im.onload = () => res(im); im.onerror = () => res(null); im.src = url; });
+  const load = url => new Promise(res => { const im = new Image(); if (/^https?:/.test(url) && !url.startsWith(location.origin)) im.crossOrigin = 'anonymous'; im.onload = () => res(im); im.onerror = () => res(null); im.src = url; });
   return (async () => {
     for (let i = 0; i < srcs.length; i++) {
       let im = await load(srcs[i]);
@@ -1883,6 +1884,27 @@ function loop() {
   if (tick !== loop._tick) { loop._tick = tick; paintDeltas(); }
   requestAnimationFrame(loop);
 }
+document.getElementById('starPng').onclick = () => {
+  const keepHover = starHover, keepPend = starPending;
+  starHover = null; starPending = null; starRev++;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const out = document.createElement('canvas');
+    out.width = canvas.width; out.height = canvas.height;
+    const o = out.getContext('2d');
+    o.drawImage(canvas, 0, 0);
+    o.setTransform(DPR, 0, 0, DPR, 0, 0);
+    o.fillStyle = 'rgba(244,241,234,0.7)'; o.font = '600 12px "DM Sans", sans-serif'; o.textAlign = 'left'; o.textBaseline = 'bottom';
+    o.fillText('My d4rth constellations · d4trhban3.github.io/d4rth-launch-protocol/galaxy · Concept by @BTCWScoin', 14, H - 12);
+    out.toBlob(b => {
+      if (!b) return;
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(b); a.download = 'd4rth-constellations.png';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+    }, 'image/png');
+    starHover = keepHover; starPending = keepPend; starRev++;
+  }));
+};
 document.getElementById('starDraw').onclick = () => { starDrawing = !starDrawing; starPending = null; starToolsSync(); };
 document.getElementById('starClear').onclick = () => { starMine.edges = []; starPending = null; starSave(); starToolsSync(); };
 document.getElementById('starReset').onclick = () => { starMine.pos = {}; starSave(); starToolsSync(); };
