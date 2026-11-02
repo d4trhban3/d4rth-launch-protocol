@@ -371,17 +371,33 @@
 </head>
 <body>
 <script>
-// Arrived by clicking the Galaxy tab: the BTC sticker is already in the air. It waits at 2x size until
-// the page has loaded, then drops into the BTC disc (see dropSticker).
+// Arrived by clicking the Galaxy tab: the BTC sticker is already in the air at 3x size, and
+// shrinks gently onto the BTC disc while the page loads in (see placeSticker).
 try {
   var d4s = JSON.parse(sessionStorage.getItem('d4sticker') || 'null');
   sessionStorage.removeItem('d4sticker');
   if (d4s && Date.now() - d4s.t < 8000) {
+    // wrapper = the moving sticker (transform only, so it runs on the GPU even while the page is busy);
+    // its shadow fades on its own layer.
+    var d4w = document.createElement('div');
+    d4w.id = 'stickerFly';
+    d4w.style.cssText = 'position:fixed;z-index:9999;border-radius:50%;pointer-events:none;left:' + (d4s.x - d4s.size / 2) + 'px;top:' + (d4s.y - d4s.size / 2) + 'px;width:' + d4s.size + 'px;height:' + d4s.size + 'px;will-change:transform';
+    var d4sh = document.createElement('div');
+    d4sh.style.cssText = 'position:absolute;inset:0;border-radius:50%;box-shadow:0 26px 54px rgba(0,0,0,.55);will-change:opacity';
     var d4i = document.createElement('img');
-    d4i.id = 'stickerFly'; d4i.alt = ''; d4i.src = 'art/btc.webp';
-    d4i.style.cssText = 'position:fixed;z-index:9999;border-radius:50%;object-fit:cover;pointer-events:none;border:1px solid rgba(255,255,255,.9);box-sizing:border-box;box-shadow:0 26px 54px rgba(0,0,0,.55);left:' + (d4s.x - d4s.size / 2) + 'px;top:' + (d4s.y - d4s.size / 2) + 'px;width:' + d4s.size + 'px;height:' + d4s.size + 'px';
-    document.body.appendChild(d4i);
+    d4i.alt = ''; d4i.src = 'art/btc.webp';
+    d4i.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.9);box-sizing:border-box';
+    d4w.appendChild(d4sh); d4w.appendChild(d4i);
+    document.body.appendChild(d4w);
     window.__stickerHold = true;
+    // It lands here at 3x and starts shrinking straight away, slowly, while the galaxy loads in around it.
+    // The main script re-aims the end of this move at the exact BTC disc as soon as it knows where that is.
+    var d4t = { duration: 2300, easing: 'cubic-bezier(.4,0,.2,1)', fill: 'forwards' };
+    window.__stickerAnim = d4w.animate([
+      { transform: 'translate(0px,0px) scale(1)' },
+      { transform: 'translate(0px,0px) scale(0.3333)' }
+    ], d4t);
+    d4sh.animate([{ opacity: 1 }, { opacity: 0 }], d4t);
   }
 } catch (e) {}
 </script>
@@ -1840,25 +1856,26 @@ function applyLive(j) {
 }
 let liveBusy = false;
 // The sticker sits at 2x the disc's size until the page has loaded in, then drops onto the disc.
-function placeSticker() { /* the sticker waits exactly where the last page left it; nothing is adjusted early */ }
-function dropSticker() {
-  const el = document.getElementById('stickerFly'), b = window.__btc;
-  if (!el || !b) { stickerHold = false; if (el) el.remove(); lastSig = ''; return; }
-  const r = el.getBoundingClientRect();
-  const dx = b.x - (r.left + r.width / 2), dy = b.y - (r.top + r.height / 2), sc = (b.r * 2) / r.width;
-  const done = () => { stickerHold = false; el.remove(); lastSig = ''; };
-  // one smooth move to the real disc, alongside the fade-in: where it is to where BTC sits, 3x down to 1x
-  const anim = el.animate([
-    { transform: 'translate(0px,0px) scale(1)', boxShadow: '0 26px 54px rgba(0,0,0,.55)' },
-    { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + sc + ')', boxShadow: '0 0 0 rgba(0,0,0,0)' }
-  ], { duration: 1050, easing: 'cubic-bezier(.45,0,.2,1)', fill: 'forwards' });
-  anim.finished.then(done, done);
+function placeSticker() {
+  // Re-aim the shrinking sticker at the real BTC disc (position and size) without restarting it.
+  const el = document.getElementById('stickerFly'), b = window.__btc, a = window.__stickerAnim;
+  if (!el || !b || !a || !a.effect) return;
+  const w = parseFloat(el.style.width), l = parseFloat(el.style.left), t = parseFloat(el.style.top);
+  const dx = b.x - (l + w / 2), dy = b.y - (t + w / 2), sc = (b.r * 2) / w;
+  a.effect.setKeyframes([
+    { transform: 'translate(0px,0px) scale(1)' },
+    { transform: 'translate(' + dx + 'px,' + dy + 'px) scale(' + sc + ')' }
+  ]);
+}
+if (stickerHold && window.__stickerAnim) {
+  const landed = () => { stickerHold = false; const el = document.getElementById('stickerFly'); if (el) el.remove(); loop._seen = performance.now() - 1000; lastSig = ''; };
+  window.__stickerAnim.finished.then(landed, landed);
 }
 function reveal() {
   if (!app.hasAttribute('data-boot') || reveal._wait) return;
   const wait = Math.max(0, 1500 - performance.now());        // the veil lasts at least 1.5s so it reads as intended
   reveal._wait = true;
-  setTimeout(() => { app.removeAttribute('data-boot'); startArrive(); if (stickerHold) dropSticker(); }, wait);   // orbits open out around BTC
+  setTimeout(() => { app.removeAttribute('data-boot'); startArrive(); }, wait);   // orbits open out around BTC
 }
 async function refreshLive(first) {
   if (liveBusy) return;
