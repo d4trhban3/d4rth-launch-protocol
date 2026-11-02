@@ -139,6 +139,7 @@
   .tv-breadcrumb { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 0; color: var(--tv-muted); font-size: 11px; }
   .tv-breadcrumb b { color: var(--tv-paper); font-weight: 500; }
   .tv-link-button { border: 0; border-bottom: 1px solid var(--tv-rule); background: none; color: var(--tv-muted); font-size: 10px; padding: 4px 0; }
+  #openStars.on { background: var(--tv-acid); border-color: var(--tv-acid); color: var(--tv-ink); }
   .tv-link-button:hover, .tv-link-button.on { color: var(--tv-acid); border-color: var(--tv-acid); }
   .crumb { border: 0; background: none; padding: 4px 0; color: var(--tv-muted); font-size: 11px; display: inline-flex; align-items: center; gap: 6px; }
   .crumb:hover { color: var(--tv-acid); }
@@ -1141,6 +1142,7 @@ function setCaption() {
   document.getElementById('starCredit').hidden = !stars;
   document.getElementById('orbitCount').hidden = stars;
   document.getElementById('openStars').classList.toggle('on', stars);
+  document.getElementById('openStars').setAttribute('aria-pressed', stars);
 }
 function setScreen() {
   app.dataset.view = 'universe';
