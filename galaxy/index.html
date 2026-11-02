@@ -1483,6 +1483,7 @@ function assignGroups() {
     const members = planets.filter(p => !used.has(p) && want.has(String(p.symbol || '').toUpperCase()));
     members.forEach(p => used.add(p));
     if (g.extra && !members.some(m => m.mint === g.extra.mint)) members.unshift(g.extra);
+    if (g.name === 'WALL STREET') starExtras.forEach((b, sym) => { if (!members.some(m => String(m.symbol).toUpperCase() === sym)) members.push(b); });
     return { name: g.name, color: g.color, members, fallback: g.fallback };
   });
   // every coin gets a constellation: whatever no narrative claimed joins the spinoffs and parodies
@@ -1503,6 +1504,7 @@ try {
 } catch (e) {}
 function starSave() { try { localStorage.setItem(STAR_KEY, JSON.stringify(starMine)); } catch (e) {} }
 let starRev = 0, starDrawing = false, starPending = null, starHover = null, starDrag = null, starPointer = null;
+const starExtras = new Map();                     // symbol -> body for Wall Street coins outside the home 48
 let starAuto = { key: '', pos: new Map() };
 const starCur = new Map();                        // mint -> {x, y, r, t}: where each star is on screen right now
 function starRadius(t) {
@@ -2122,6 +2124,23 @@ function applyLive(j) {
   [j.anchor, ...j.tokens].forEach(t => allTokens.set(t.mint, t));
   [home.anchor, ...home.planets, ...bodies].forEach(b => { const t = allTokens.get(b.mint); if (t) bodyFrom(t, b); });
   liveAt = new Date(j.capturedAt || Date.now());
+  fillStarExtras();
+}
+// Wall Street's TSLA, RSI and SP500 are not among the 48 home planets: pull the biggest live coin with that ticker.
+function fillStarExtras() {
+  const want = FIGURES['WALL STREET'] && Object.keys(FIGURES['WALL STREET'].slots);
+  if (!want) return;
+  want.forEach(sym => {
+    if (planets.some(p => String(p.symbol).toUpperCase() === sym) || starExtras.has(sym)) return;
+    let best = null;
+    allTokens.forEach(t => { if (String(t.symbol).toUpperCase() === sym && t.mint !== anchor.mint && (!best || (t.marketCap || 0) > (best.marketCap || 0))) best = t; });
+    if (!best) return;
+    const b = bodyFrom(best, null);
+    b.img = null; b.loaded = false;
+    starExtras.set(sym, b);
+    loadImg(b).then(() => { starRev++; });
+  });
+  starRev++;
 }
 let liveBusy = false;
 // The sticker sits at 2x the disc's size until the page has loaded in, then drops onto the disc.
