@@ -1309,7 +1309,7 @@ canvas.addEventListener('pointerdown', e => {
   if (view === 'constellations') {
     const r0 = canvas.getBoundingClientRect(), hit = starHitAt(e.clientX - r0.left, e.clientY - r0.top);
     canvas._moved = false; canvas._sx = e.clientX; canvas._sy = e.clientY;
-    if (hit && !starDrawing && !hit.t.credit && hit.t !== anchor) {
+    if (hit && !starDrawing && hit.t !== anchor) {
       const m = starCur.get(hit.t.mint);
       starDrag = { id: e.pointerId, t: hit.t, dx: m.x - (e.clientX - r0.left), dy: m.y - (e.clientY - r0.top) };
       canvas.setPointerCapture?.(e.pointerId); canvas.style.cursor = 'grabbing'; starRev++;
@@ -1587,7 +1587,7 @@ function drawConstellations() {
   const auto = starLayout(groups);
   const P = t => {
     const m = starMine.pos[t.mint];
-    if (m && !t.credit && t !== anchor) return { x: m[0] * W, y: m[1] * H };
+    if (m && t !== anchor) return { x: m[0] * W, y: m[1] * H };
     return auto.get(t.mint) || { x: cx, y: cy };
   };
   starCur.clear();
@@ -1638,7 +1638,9 @@ function drawConstellations() {
     const tops = [];
     const label = (txt, x, y) => { if (!showLabels) return; ctx.font = '600 12px "DM Sans", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillStyle = g.color; ctx.fillText(txt, x, y); };
     if (fig && fig.sword) {
-      const Q = (nx, ny) => ({ x: W * (fig.box[0] + nx * fig.box[2]), y: H * (fig.box[1] + ny * fig.box[3]) });
+      const c00 = P(g.members[0]);                       // the whole sword follows the cat when it is moved
+      const ox = c00.x - W * (fig.box[0] + 0.5 * fig.box[2]), oy = c00.y - H * (fig.box[1] + 0.64 * fig.box[3]);
+      const Q = (nx, ny) => ({ x: W * (fig.box[0] + nx * fig.box[2]) + ox, y: H * (fig.box[1] + ny * fig.box[3]) + oy });
       ctx.save(); ctx.lineCap = 'round'; ctx.strokeStyle = g.color;
       const seg = (a, b, al, lw) => { ctx.globalAlpha = al; ctx.lineWidth = lw; ctx.shadowColor = g.color; ctx.shadowBlur = 10; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); };
       seg(Q(0.5, 0), Q(0.5, 0.64), 0.95, 1.6);
@@ -1649,8 +1651,8 @@ function drawConstellations() {
       const cat = g.members[0], c0 = P(cat);
       pend.push(() => star(cat, c0.x, c0.y, 22, true));
       g.members.slice(1).forEach(t => { const q = P(t); pend.push(() => star(t, q.x, q.y, starRadius(t), false)); });
-      if (showLabels) { ctx.font = '500 11px "DM Sans", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillStyle = 'rgba(244,241,234,0.7)'; ctx.fillText('Concept by @BTCWScoin', W * (fig.box[0] + fig.box[2] * 0.5), pom.y + 10); }
-      label(g.name, W * (fig.box[0] + fig.box[2] * 0.5), Q(0.5, 0).y - 8);
+      if (showLabels) { ctx.font = '500 11px "DM Sans", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillStyle = 'rgba(244,241,234,0.7)'; ctx.fillText('Concept by @BTCWScoin', W * (fig.box[0] + fig.box[2] * 0.5) + ox, pom.y + 10); }
+      label(g.name, W * (fig.box[0] + fig.box[2] * 0.5) + ox, Q(0.5, 0).y - 8);
       return;
     }
     if (fig && fig.dollar) {
