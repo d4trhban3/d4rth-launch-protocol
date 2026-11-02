@@ -28,7 +28,7 @@
     var W = innerWidth, H = innerHeight;
     var mobile = W <= 760;
     var inspector = mobile ? 0 : W <= 1100 ? 260 : W >= 1600 ? 345 : 300;
-    var top = mobile ? 182 : 127, foot = mobile ? 86 : 37;                // phones: header + chapter bar, then footer + info bar
+    var top = mobile ? 88 : 127, foot = mobile ? 98 : 37;                 // phones: slim header + chapter bar; pull-up handle + info bar
     var sw = W - inspector, sh = Math.max(200, H - top - foot);
     return { x: sw / 2, y: top + sh / 2, d: 0.1122 * Math.min(sw, sh) };  // measured: the disc is 11.2% of the shorter side
   }

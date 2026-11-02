@@ -155,7 +155,7 @@
   .tv-stage { position: relative; min-width: 0; min-height: 0; background: var(--tv-ink); }
   /* Boot veil: for the first moment only BTC is there. The rest of the screen fades in around it. */
   .tv-header, .tv-chapter, .tv-inspector, .tv-system-caption, .tv-stage-controls, .tv-statusbar { transition: opacity .9s ease; }
-  .tv-experience[data-boot] :is(.tv-header, .tv-chapter, .tv-inspector, .tv-system-caption, .tv-stage-controls, .tv-statusbar) { opacity: 0; animation: bootshow .9s ease 6s forwards; }
+  .tv-experience[data-boot] :is(.tv-header, .tv-chapter, .tv-inspector, .tv-system-caption, .tv-stage-controls, .tv-statusbar, .sheet-handle, .key-toggle) { opacity: 0; animation: bootshow .9s ease 6s forwards; }
   @keyframes bootshow { to { opacity: 1; } }
   #canvas { width: 100%; height: 100%; touch-action: none; cursor: grab; }
   .tv-stage, .tv-stage *, .tv-header, .tv-chapter { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
@@ -239,6 +239,8 @@
   .tv-statusbar a { color: #c8c4b6; }
   .tv-hints { color: #929485; letter-spacing: .6px; text-transform: uppercase; font-size: 8px; flex: none; }
 
+  .tv-header-drop { display: contents; }
+  .menu-toggle, .sheet-handle, .sheet-grab, .key-toggle { display: none; }
   .tv-scrim { position: fixed; inset: 0; z-index: 50; border: 0; background: #10100eaa; }
   .tv-panel {
     position: fixed; top: calc(var(--tv-header-h) + 10px); right: 12px; bottom: 12px; z-index: 55;
@@ -320,17 +322,27 @@
     .tv-home-title { font-size: clamp(72px, 12vw, 160px); }
   }
   @media (max-width: 760px) {
-    :root { --tv-header-h: 140px; --tv-footer-h: 32px; }
-    .tv-header { flex-wrap: wrap; align-content: center; row-gap: 6px; padding: 6px 14px; }
-    .tv-brand { min-height: 36px; }
+    :root { --tv-header-h: 46px; --tv-footer-h: 0px; --tv-sheet-h: 44px; }
+    /* Header: a slim bar with a pull-down menu */
+    .tv-header { height: 46px; flex-wrap: nowrap; align-items: center; padding: 0 14px; position: relative; z-index: 61; touch-action: none; }
+    .tv-brand { min-height: 36px; margin-right: auto; }
+    .menu-toggle { display: inline-flex; align-items: center; gap: 8px; height: 34px; padding: 0 12px; border: 1px solid var(--tv-rule); background: transparent; color: var(--tv-paper); font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+    .menu-toggle i { width: 7px; height: 7px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-2px) rotate(45deg); transition: transform .3s var(--tv-ease); }
+    .tv-experience[data-menu=open] .menu-toggle i { transform: translateY(2px) rotate(-135deg); }
+    .tv-experience[data-menu=open] .menu-toggle { border-color: var(--tv-acid); color: var(--tv-acid); }
+    .tv-header-drop {
+      display: flex; flex-wrap: wrap; gap: 8px; position: fixed; left: 0; right: 0; top: 46px; z-index: 60;
+      padding: 12px 14px 16px; background: var(--tv-ink); border-bottom: 1px solid var(--tv-rule); box-shadow: 0 22px 44px #000d;
+      transform: translateY(-115%); visibility: hidden; transition: transform .32s var(--tv-ease), visibility 0s linear .32s;
+      max-height: calc(100svh - 46px - var(--tv-sheet-h)); overflow: auto; touch-action: pan-y;
+    }
+    .tv-experience[data-menu=open] .tv-header-drop { transform: none; visibility: visible; transition: transform .32s var(--tv-ease), visibility 0s; }
     .tv-header-tools { display: contents; }
-    .tv-brand { order: 1; margin-right: auto; }
-    #openProtocol { order: 2; height: 36px; }
-    #openStars { order: 2; height: 36px; }
-    #btn, #btnUsdt { order: 5; flex: 1 1 0; min-width: 0; height: 40px; white-space: normal; line-height: 1.15; text-align: center; padding: 0 6px; font-size: 11px; }
-    .site-nav { order: 3; flex: 1 0 100%; margin: 0; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
-    .site-nav::-webkit-scrollbar { display: none; }
+    .site-nav { order: 1; flex: 1 0 100%; margin: 0; flex-wrap: wrap; gap: 6px; }
     .site-nav a { flex: none; }
+    #btn, #btnUsdt { order: 2; flex: 1 1 0; min-width: 0; height: 44px; white-space: normal; line-height: 1.15; text-align: center; padding: 0 6px; font-size: 11px; }
+    #openStars { order: 3; height: 44px; flex: 0 0 auto; }
+    #openProtocol { display: none; }                        /* sliders come up from the bottom handle instead */
     .tv-brand b { font-size: 16px; }
     .site-nav a { height: 28px; padding: 0 8px; font-size: 11px; }
     .tv-brand small { display: none; }
@@ -344,7 +356,8 @@
     .tv-home-art { right: -18%; top: 42%; width: 92%; opacity: .95; }
     .tv-art-caption { display: none; }
     .tv-home-copy { max-width: 240px; font-size: 12px; }
-    .tv-universe { grid-template-columns: 1fr; grid-template-rows: 42px minmax(220px, 1fr) auto; height: calc(100svh - var(--tv-header-h) - var(--tv-footer-h)); }
+    .tv-universe { grid-template-columns: 1fr; grid-template-rows: 42px minmax(220px, 1fr) auto; height: calc(100svh - var(--tv-header-h) - var(--tv-footer-h) - var(--tv-sheet-h)); }
+    .tv-statusbar { display: none; }
     .tv-inspector { grid-column: 1; border-left: 0; border-top: 1px solid var(--tv-rule); max-height: 54px; overflow: hidden; padding: 8px 14px; }
     .tv-experience[data-details=open] .tv-inspector { max-height: 42vh; overflow: auto; }
     .tv-details-toggle {
@@ -366,6 +379,24 @@
     .bond-chip { top: 8px; right: 8px; font-size: 10px; max-width: 46vw; }
     .tv-hints { display: none; }
     .tv-panel { top: 8px; right: 8px; left: 8px; bottom: 8px; width: auto; }
+    /* Sliders: a pull-up sheet. The handle sits at the bottom; the galaxy stays visible and live above it */
+    .sheet-handle { display: flex; align-items: center; justify-content: center; position: fixed; left: 0; right: 0; bottom: 0; height: var(--tv-sheet-h); z-index: 54; border: 0; border-top: 1px solid var(--tv-rule); background: var(--tv-ink); color: var(--tv-paper); font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; touch-action: none; }
+    .sheet-handle i, .sheet-grab i { position: absolute; width: 38px; height: 4px; border-radius: 2px; background: rgba(244,241,234,.38); }
+    .sheet-handle i { left: 50%; top: 7px; margin-left: -19px; }
+    .tv-experience:not([data-panel=none]) .sheet-handle { visibility: hidden; }
+    .tv-panel[data-kind=protocol] { top: auto; left: 0; right: 0; bottom: 0; width: auto; height: 40svh; border-width: 1px 0 0; box-shadow: 0 -16px 40px #000c; transform: translateY(100%); opacity: 1; pointer-events: none; }
+    .tv-experience[data-panel=protocol] .tv-panel[data-kind=protocol] { transform: none; pointer-events: auto; }
+    .tv-panel[data-kind=protocol] .sheet-grab { display: block; position: absolute; top: 0; left: 0; right: 0; height: 34px; touch-action: none; z-index: 2; }
+    .sheet-grab i { left: 50%; top: 9px; margin-left: -19px; }
+    .tv-panel[data-kind=protocol] #tvPanelTitle { top: 24px; left: 16px; font-size: 18px; letter-spacing: -.3px; }
+    .tv-panel[data-kind=protocol] #tvPanelClose { top: 18px; right: 8px; }
+    .tv-panel[data-kind=protocol] .tv-panel-body { margin-top: 64px; padding: 0 16px 24px; }
+    .tv-experience[data-panel=protocol] .tv-stage-controls { display: none; }
+    /* Key: a small button that opens a popup */
+    .key-toggle { display: inline-flex; align-items: center; position: absolute; right: 8px; top: 46px; z-index: 6; height: 28px; padding: 0 12px; border: 1px solid var(--tv-rule); background: rgba(16,16,14,.88); color: var(--tv-paper); font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+    .tv-experience[data-key=open] .key-toggle { border-color: var(--tv-acid); color: var(--tv-acid); }
+    .map-key { display: none !important; }
+    .tv-experience[data-key=open] .map-key { display: block !important; position: absolute; left: 10px; right: 10px; top: 82px; bottom: auto; max-width: none; z-index: 7; background: rgba(16,16,14,.97); }
   }
 </style>
 </head>
@@ -401,11 +432,13 @@ try {
   }
 } catch (e) {}
 </script>
-<div class="tv-experience" id="app" data-view="universe" data-panel="none" data-details="closed" data-boot="1">
+<div class="tv-experience" id="app" data-view="universe" data-panel="none" data-details="closed" data-menu="closed" data-key="closed" data-boot="1">
   <header class="tv-header">
     <a class="tv-brand" href="https://d4trhban3.github.io/d4rth-launch-protocol/">
       <span><b>D4RTH</b><small>LAUNCH PROTOCOL</small></span>
     </a>
+    <button type="button" id="menuToggle" class="menu-toggle" aria-expanded="false" aria-controls="headerDrop"><span>Menu</span><i></i></button>
+    <div class="tv-header-drop" id="headerDrop">
     <nav class="site-nav" aria-label="Site">
       <a href="https://d4trhban3.github.io/d4rth-launch-protocol/">Home</a>
       <a href="https://d4trhban3.github.io/d4rth-launch-protocol/LAUNCH-ANY-COIN-TEMPLATE.html">Template</a>
@@ -418,6 +451,7 @@ try {
       <button type="button" id="btnUsdt" class="hub-btn" aria-pressed="false">Add USDT boost</button>
       <button type="button" id="openProtocol" class="tv-icon-button" aria-label="Protocol sliders" style="width:auto;padding:0 10px;font-size:11px;font-weight:700">Sliders</button>
       <button type="button" id="openStars" class="tv-icon-button" aria-label="Constellations" style="width:auto;padding:0 10px;font-size:11px">Stars</button>
+    </div>
     </div>
   </header>
 
@@ -439,6 +473,7 @@ try {
         <a id="starCredit" class="star-credit" href="https://x.com/BTCWScoin" target="_blank" rel="noopener" hidden>Concept · Big Titty Cat Wif Sword · @BTCWScoin</a>
       </div>
       <button type="button" id="bondChip" class="bond-chip" hidden></button>
+      <button type="button" id="keyToggle" class="key-toggle" aria-expanded="false" aria-controls="mapKey">Key</button>
       <aside id="mapKey" class="map-key" hidden>
         <b>Key</b>
         <div><i class="green"></i> Green light and Tether badge: the USDT boost</div>
@@ -465,7 +500,9 @@ try {
   </footer>
 
   <button type="button" id="tvScrim" class="tv-scrim" hidden aria-label="Close panel"></button>
+  <button type="button" id="sheetHandle" class="sheet-handle" aria-label="Pull up the sliders"><i></i><span>Sliders</span></button>
   <section id="tvPanel" class="tv-panel" role="dialog" aria-modal="true" aria-labelledby="tvPanelTitle">
+    <div class="sheet-grab" id="sheetGrab" aria-hidden="true"><i></i></div>
     <h2 id="tvPanelTitle">The collection</h2>
     <button type="button" id="tvPanelClose" class="tv-icon-button" aria-label="Close panel"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="m6 6 12 12M6 18 18 6" stroke="currentColor" stroke-width="1.5"/></svg></button>
     <div class="tv-panel-body">
@@ -1096,19 +1133,59 @@ function setScreen() {
   document.body.style.overflow = 'hidden';
   requestAnimationFrame(() => { resize(); requestAnimationFrame(resize); });
 }
+const onPhone = () => matchMedia('(max-width: 760px)').matches;
 function setPanel(name) {
+  const panelEl = document.getElementById('tvPanel');
+  const wasSheet = panelEl.dataset.kind === 'protocol';
+  clearTimeout(setPanel._t);
   app.dataset.panel = name;
+  if (name === 'protocol') panelEl.dataset.kind = 'protocol';
+  const keepSheet = name === 'none' && wasSheet && onPhone();           // let the sheet slide down before it is emptied
+  if (name !== 'protocol' && !keepSheet) panelEl.dataset.kind = '';
   document.getElementById('tvScrim').hidden = name !== 'catalog';
   document.getElementById('paneCatalog').hidden = name !== 'catalog';
-  document.getElementById('paneProtocol').hidden = name !== 'protocol';
+  document.getElementById('paneProtocol').hidden = name !== 'protocol' && !keepSheet;
   document.getElementById('paneSettings').hidden = name !== 'settings';
+  if (keepSheet) setPanel._t = setTimeout(() => { if (app.dataset.panel === 'none') { panelEl.style.transition = 'none'; document.getElementById('paneProtocol').hidden = true; panelEl.dataset.kind = ''; void panelEl.offsetHeight; panelEl.style.transition = ''; } }, 380);
   const titles = { catalog: 'The collection', protocol: 'Sliders', settings: 'View settings', none: '' };
-  document.getElementById('tvPanelTitle').textContent = titles[name] || '';
+  if (!keepSheet) document.getElementById('tvPanelTitle').textContent = titles[name] || '';
   const sl = document.getElementById('openProtocol');
   sl.classList.toggle('on', name === 'protocol');
   sl.setAttribute('aria-pressed', String(name === 'protocol'));
   if (name === 'catalog') setTimeout(() => document.getElementById('tvSearch').focus(), 30);
+  if (name !== 'none') setMenu(false);
 }
+// ---- phone only: pull-down header menu, pull-up sliders sheet, key popup ----
+const menuToggle = document.getElementById('menuToggle'), headerDrop = document.getElementById('headerDrop');
+function setMenu(open) {
+  if (open && !onPhone()) return;
+  app.dataset.menu = open ? 'open' : 'closed';
+  menuToggle.setAttribute('aria-expanded', String(!!open));
+  if (open) setKey(false);
+}
+function setKey(open) {
+  app.dataset.key = open ? 'open' : 'closed';
+  document.getElementById('keyToggle').setAttribute('aria-expanded', String(!!open));
+}
+function pullable(el, onPull) {                                          // tap or drag; reports the vertical travel
+  let y0 = null;
+  el.addEventListener('pointerdown', e => { y0 = e.clientY; });
+  el.addEventListener('pointerup', e => { if (y0 === null) return; const dy = e.clientY - y0; y0 = null; if (onPull(dy)) e.preventDefault(); });
+  el.addEventListener('pointercancel', () => { y0 = null; });
+}
+menuToggle.addEventListener('click', () => { if (performance.now() - (menuToggle._pulled || 0) < 400) return; setMenu(app.dataset.menu !== 'open'); });
+pullable(document.querySelector('.tv-header'), dy => { if (onPhone() && dy > 28) { menuToggle._pulled = performance.now(); setMenu(true); return true; } });          // pull the header down
+pullable(headerDrop, dy => { if (dy < -28) { setMenu(false); return true; } });                                                // push it back up
+headerDrop.addEventListener('click', e => { if (e.target.closest('button, a')) setTimeout(() => setMenu(false), 160); });
+const sheetHandle = document.getElementById('sheetHandle'), sheetGrab = document.getElementById('sheetGrab');
+pullable(sheetHandle, dy => { if (dy < -22 || Math.abs(dy) < 8) { setPanel('protocol'); return true; } });                    // pull the sliders up
+pullable(sheetGrab, dy => { if (dy > 22 || Math.abs(dy) < 8) { setPanel('none'); return true; } });                           // pull them back down
+sheetHandle.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setPanel('protocol'); } });
+document.getElementById('keyToggle').addEventListener('click', e => { e.stopPropagation(); setKey(app.dataset.key !== 'open'); });
+document.addEventListener('pointerdown', e => {
+  if (app.dataset.key === 'open' && !e.target.closest('#mapKey, #keyToggle')) setKey(false);
+  if (app.dataset.menu === 'open' && !e.target.closest('#headerDrop, .tv-header')) setMenu(false);
+}, true);
 function selectMint(mint) {
   selected = bodies.find(t => t.mint === mint) || anchor;
   renderInspector();
@@ -1155,7 +1232,7 @@ function toggleHub(which) {
   applyAllBoost(planets[0] ? (planets[0].boost || 0) : 0);
   syncShareInputs();
   paintHubButtons();
-  if (turningOn) setPanel('protocol');
+  if (turningOn && !matchMedia('(max-width: 760px)').matches) setPanel('protocol');   // on phones the sheet opens only from the Sliders button
 }
 function setStars(on) {
   view = on ? 'constellations' : 'orbit';
@@ -1292,7 +1369,7 @@ canvas.addEventListener('wheel', e => {
   distTarget = clampDist((distTarget ?? dist) / factor);
 }, { passive: false });
 addEventListener('keydown', e => {
-  if (e.key === 'Escape') setPanel('none');
+  if (e.key === 'Escape') { setPanel('none'); setMenu(false); setKey(false); }
   if (e.target.closest && e.target.closest('input,textarea')) return;
   if (e.key === '/' ) { e.preventDefault(); setPanel('catalog'); return; }
   if (e.key === 'Backspace' && !document.getElementById('navBack').disabled) { e.preventDefault(); goBack(); return; }
