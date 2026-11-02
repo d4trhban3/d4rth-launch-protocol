@@ -165,10 +165,17 @@
   .tv-system-caption span, .tv-system-caption small { display: block; margin-bottom: 6px; color: var(--tv-muted); font: 10px/1.4 "DM Sans", sans-serif; letter-spacing: 1.2px; text-transform: uppercase; }
   .star-credit {
     display: block; margin-top: 14px; color: var(--tv-paper); pointer-events: auto;
-    font: 500 20px/1.3 Manrope, sans-serif; letter-spacing: -0.3px; text-transform: none; text-decoration: none;
+    font: 500 10px/1.3 Manrope, sans-serif; letter-spacing: -0.15px; text-transform: none; text-decoration: none;
   }
   .star-credit:hover { color: var(--tv-acid); }
   .star-credit[hidden] { display: none; }
+  .star-tools { position: absolute; left: 50%; bottom: 54px; transform: translateX(-50%); z-index: 5; display: flex; align-items: center; gap: 8px; max-width: calc(100% - 24px); padding: 6px 8px; border: 1px solid var(--tv-rule); background: rgba(16,16,14,.88); font: 11px/1.3 "DM Sans", sans-serif; color: var(--tv-muted); }
+  .star-tools[hidden] { display: none; }
+  .star-tools span { min-width: 0; }
+  .star-tools button { height: 26px; padding: 0 10px; border: 1px solid var(--tv-rule); background: transparent; color: var(--tv-paper); font-size: 11px; white-space: nowrap; cursor: pointer; }
+  .star-tools button:hover, .star-tools button.on { border-color: #ffd166; color: #ffd166; }
+  .star-tools button[hidden] { display: none; }
+  @media (max-width: 760px) { .star-tools { bottom: 6px; padding: 4px 6px; gap: 6px; } .star-tools span { display: none; } .star-tools[data-drawing] span { display: block; position: absolute; left: 0; right: 0; bottom: 100%; margin-bottom: 4px; padding: 4px 8px; background: rgba(16,16,14,.9); text-align: center; } }
   .star-credit-note { margin: 14px 0 0; color: var(--tv-paper); font: 500 16px/1.35 Manrope, sans-serif; }
   .star-credit-note a { color: var(--tv-paper); text-decoration: none; }
   .star-credit-note a:hover { color: var(--tv-acid); }
@@ -470,7 +477,13 @@ try {
         <span id="kicker">01 / Home orbit</span>
         <strong id="title">BTC system</strong>
         <small id="orbitCount"></small>
-        <a id="starCredit" class="star-credit" href="https://x.com/BTCWScoin" target="_blank" rel="noopener" hidden>Concept · Big Titty Cat Wif Sword · @BTCWScoin</a>
+        <a id="starCredit" class="star-credit" href="https://x.com/BTCWScoin" target="_blank" rel="noopener" hidden>Concept by @BTCWScoin</a>
+      </div>
+      <div id="starTools" class="star-tools" hidden>
+        <span id="starHint"></span>
+        <button type="button" id="starDraw">Draw lines</button>
+        <button type="button" id="starClear" hidden>Clear my lines</button>
+        <button type="button" id="starReset" hidden>Reset layout</button>
       </div>
       <button type="button" id="bondChip" class="bond-chip" hidden></button>
       <button type="button" id="keyToggle" class="key-toggle" aria-expanded="false" aria-controls="mapKey">Key</button>
@@ -1101,7 +1114,7 @@ function renderInspector() {
   if (t.change != null) stats.push(['24h change', '<span class="' + (t.change >= 0 ? 'chg-up' : 'chg-down') + '">' + (t.change >= 0 ? '+' : '') + Number(t.change).toFixed(1) + '%</span>']);
   const socials = (t.socials || []).filter(x => x.url && /^https:\/\//.test(x.url) && !/pump\.fun/.test(x.url));
   const soc = socials.length ? '<div class="tv-socials">' + socials.map(x => '<a href="' + esc(x.url) + '" target="_blank" rel="noopener noreferrer">' + esc(x.label || x.type) + ' ↗</a>').join('') + '</div>' : '';
-  const stars = view === 'constellations' ? '<div class="star-key">' + GROUPS.map(g => '<div><i style="background:' + g.color + '"></i>' + esc(g.name.replace(/\b(\w)(\w*)/g, (m, c, r) => c + r.toLowerCase()).replace('Defi', 'DeFi')) + ' <small>' + esc(g.about) + '</small></div>').join('') + '<p class="star-credit-note">Only the big stars draw each shape. Smaller coins sit inside it. Search to find one.</p><p class="star-credit-note">Concept · <a href="https://x.com/BTCWScoin" target="_blank" rel="noopener">Big Titty Cat Wif Sword · @BTCWScoin</a></p></div>' : '';
+  const stars = view === 'constellations' ? '<div class="star-key">' + GROUPS.map(g => '<div><i style="background:' + g.color + '"></i>' + esc(g.name.replace(/\b(\w)(\w*)/g, (m, c, r) => c + r.toLowerCase()).replace('Defi', 'DeFi')) + ' <small>' + esc(g.about) + '</small></div>').join('') + '<p class="star-credit-note">Only the big stars draw each shape. Smaller coins sit inside it. Search to find one.</p><p class="star-credit-note"><a href="https://x.com/BTCWScoin" target="_blank" rel="noopener">Concept by @BTCWScoin</a></p></div>' : '';
   document.getElementById('inspector').innerHTML =
     '<button type="button" id="tvDetailsToggle" class="tv-details-toggle">Token details <span>' + (open ? '−' : '+') + '</span></button>'
     + '<div class="tv-token-role"><span>' + esc(role) + '</span><span>' + esc(stage) + '</span></div>'
@@ -1239,6 +1252,8 @@ function setStars(on) {
   try { updateBack(); } catch (e) {}
   document.getElementById('optStars').checked = on;
   setCaption();
+  if (!on) { starDrawing = false; starPending = null; starHover = null; }
+  starToolsSync();
   renderInspector();
 }
 document.getElementById('btn').onclick = () => toggleHub('usdc');
@@ -1288,6 +1303,17 @@ document.getElementById('zOut').onclick = () => zoomBy(1 / 1.18);
 document.getElementById('zReset').onclick = () => resetCamera();
 canvas.style.cursor = 'grab';
 canvas.addEventListener('pointerdown', e => {
+  if (view === 'constellations') {
+    const r0 = canvas.getBoundingClientRect(), hit = starHitAt(e.clientX - r0.left, e.clientY - r0.top);
+    canvas._moved = false; canvas._sx = e.clientX; canvas._sy = e.clientY;
+    if (hit && !starDrawing && !hit.t.credit && hit.t !== anchor) {
+      const m = starCur.get(hit.t.mint);
+      starDrag = { id: e.pointerId, t: hit.t, dx: m.x - (e.clientX - r0.left), dy: m.y - (e.clientY - r0.top) };
+      canvas.setPointerCapture?.(e.pointerId); canvas.style.cursor = 'grabbing'; starRev++;
+      return;
+    }
+    if (starDrawing) return;                                    // drawing: clicks do the work, no camera
+  }
   spinW = [0, 0, 0]; dragTrail = [];
   pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
   lastX = e.clientX; lastY = e.clientY;
@@ -1301,6 +1327,10 @@ canvas.addEventListener('pointerdown', e => {
   canvas.style.cursor = 'grabbing';
 });
 function endPointer(e) {
+  if (starDrag && starDrag.id === e.pointerId) {
+    if (canvas._moved) starSave();
+    starDrag = null; starRev++; starToolsSync(); return;
+  }
   const wasDrag = pointers.size === 1 && e.type === 'pointerup' && !pinchDist;
   pointers.delete(e.pointerId);
   if (wasDrag && view !== 'constellations') {
@@ -1338,6 +1368,21 @@ function endPointer(e) {
 canvas.addEventListener('pointerup', endPointer);
 canvas.addEventListener('pointercancel', endPointer);
 canvas.addEventListener('pointermove', e => {
+  if (view === 'constellations') {
+    const r0 = canvas.getBoundingClientRect(), x = e.clientX - r0.left, y = e.clientY - r0.top;
+    starPointer = { x, y };
+    if (starDrag && starDrag.id === e.pointerId) {
+      if (Math.hypot(e.clientX - canvas._sx, e.clientY - canvas._sy) > 4) canvas._moved = true;
+      if (canvas._moved) {
+        const nx = Math.max(10, Math.min(W - 10, x + starDrag.dx)), ny = Math.max(10, Math.min(H - 10, y + starDrag.dy));
+        starMine.pos[starDrag.t.mint] = [nx / W, ny / H]; starRev++;
+      }
+      return;
+    }
+    const h = starHitAt(x, y), hm = h ? h.t : null;
+    if ((hm && hm.mint) !== (starHover && starHover.mint)) { starHover = hm; starRev++; canvas.style.cursor = hm ? 'pointer' : (starDrawing ? 'crosshair' : 'grab'); }
+    if (starDrawing && starPending) starRev++;
+  }
   if (!pointers.has(e.pointerId)) return;
   pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
   if (pointers.size === 2 && pinchDist > 0) {
@@ -1408,7 +1453,7 @@ const GROUPS = [
   { name: 'WALL STREET', color: '#e6c15a', symbols: ['NVDA','SP500','TSLA','RSI','GLD','ETF'], about: 'Stocks, indexes and gold' },
   { name: "SLINGOOR'S BELT", color: '#ff7ad9', symbols: ['PUMP','SLING','SENDOOR','TITTY','OF'], about: 'Pump.fun and Slingoor' },
   { name: 'LITTLE SIBLINGS', color: '#f0a060', symbols: ['XBT','STC','XXXBTC','BTB','BTC','PTC','SPLASH','SI'], about: 'Spinoffs and parodies of BTC', fallback: true },
-  { name: 'BIG TITTY CAT WIF SWORD', color: '#ffb86b', symbols: ['BTCWS'], extra: SWORDCAT, about: 'Came up with the concept · @BTCWScoin' }
+  { name: 'BIG TITTY CAT WIF SWORD', color: '#ffb86b', symbols: ['BTCWS'], extra: SWORDCAT, about: 'Concept by @BTCWScoin' }
 ];
 // pts are slots in drawing order. The shape joins the big stars that fill them.
 const FIGURES = {
@@ -1446,13 +1491,105 @@ function assignGroups() {
 function starShare(t) {
   return Math.sqrt(Math.max(t.mc || 0, 1) / (SNAP.maxMc || 1));
 }
+// ---- the star map: every coin is a disc; drag to arrange, draw lines to make your own constellations ----
+const STAR_KEY = 'd4rth.starmap.v1';
+const starMine = { pos: {}, edges: [] };          // pos: mint -> [x/W, y/H]; edges: [[mintA, mintB]]
+try {
+  const sv = JSON.parse(localStorage.getItem(STAR_KEY) || 'null');
+  if (sv && typeof sv.pos === 'object' && Array.isArray(sv.edges)) { starMine.pos = sv.pos; starMine.edges = sv.edges.filter(e => Array.isArray(e) && e.length === 2); }
+} catch (e) {}
+function starSave() { try { localStorage.setItem(STAR_KEY, JSON.stringify(starMine)); } catch (e) {} }
+let starRev = 0, starDrawing = false, starPending = null, starHover = null, starDrag = null, starPointer = null;
+let starAuto = { key: '', pos: new Map() };
+const starCur = new Map();                        // mint -> {x, y, r, t}: where each star is on screen right now
+function starRadius(t) {
+  const k = Math.max(0.5, Math.min(1, Math.min(W, H * 1.5) / 820));
+  return Math.max(8, Math.min(20, 8 + starShare(t) * 24)) * k;
+}
+// Default places: the big stars sit on their figure's slots, the rest are packed around them so no two discs overlap.
+function starLayout(groups) {
+  const key = W + 'x' + H + ':' + groups.map(g => g.name + g.members.length).join();
+  if (starAuto.key === key) return starAuto.pos;
+  const pos = new Map(), placed = [];
+  const put = (t, x, y) => { pos.set(t.mint, { x, y }); placed.push({ x, y, r: starRadius(t) }); };
+  const mp = (box, nx, ny) => ({ x: W * (box[0] + nx * box[2]), y: H * (box[1] + ny * box[3]) });
+  put(anchor, W / 2, H / 2); placed[0].r = 30;
+  const smalls = [];
+  groups.forEach(g => {
+    const fig = FIGURES[g.name];
+    if (!fig) { g.members.forEach(t => smalls.push({ t, cx: W / 2, cy: H / 2 })); return; }
+    if (fig.sword) {
+      const c = mp(fig.box, 0.5, 0.64);
+      put(g.members[0], c.x, c.y); placed[placed.length - 1].r = 26;
+      g.members.slice(1).forEach(t => smalls.push({ t, cx: c.x, cy: c.y }));
+      return;
+    }
+    if (fig.dollar) {
+      Object.keys(fig.slots).forEach(sym => { const t = g.members.find(m => m.symbol === sym); if (t) { const q = mp(fig.box, ...fig.slots[sym]); put(t, q.x, q.y); } });
+      const c = mp(fig.box, ...fig.centre);
+      g.members.filter(m => !pos.has(m.mint)).forEach(t => smalls.push({ t, cx: c.x, cy: c.y }));
+      return;
+    }
+    const slots = fig.pts.map(([nx, ny]) => mp(fig.box, nx, ny));
+    const ranked = [...g.members].sort((a, b) => b.mc - a.mc);
+    const big = ranked.slice(0, slots.length);
+    big.forEach((t, i) => put(t, slots[i].x, slots[i].y));
+    const used = slots.slice(0, big.length);
+    const cx = used.reduce((q, p2) => q + p2.x, 0) / used.length, cy = used.reduce((q, p2) => q + p2.y, 0) / used.length;
+    ranked.slice(slots.length).forEach(t => smalls.push({ t, cx, cy }));
+  });
+  const free = (x, y, r) => x > r + 4 && x < W - r - 4 && y > r + (W <= 760 ? 44 : 70) && y < H - r - 8 && placed.every(q => Math.hypot(q.x - x, q.y - y) >= q.r + r + 5);
+  smalls.forEach(({ t, cx, cy }) => {
+    const r = starRadius(t);
+    let h = 0;
+    for (let i = 0; i < t.mint.length; i++) h = (h * 31 + t.mint.charCodeAt(i)) >>> 0;
+    const a0 = (h % 628) / 100;
+    for (let k = 0; k < 2400; k++) {
+      const rad = 6 + k * 0.45, a = a0 + k * 0.62;
+      const x = cx + Math.cos(a) * rad, y = cy + Math.sin(a) * rad;
+      if (free(x, y, r)) { put(t, x, y); return; }
+    }
+    put(t, cx, cy);
+  });
+  starAuto = { key, pos };
+  return pos;
+}
+function starHitAt(x, y) {
+  let best = null, bestD = 1e9;
+  (window.__hit || []).forEach(s => {
+    const d = Math.hypot(s.x - x, s.y - y);
+    if (d < s.r + 6 && d < bestD) { best = s; bestD = d; }
+  });
+  return best;
+}
+function starToolsSync() {
+  const on = view === 'constellations';
+  const bar = document.getElementById('starTools');
+  bar.hidden = !on;
+  bar.toggleAttribute('data-drawing', starDrawing);
+  document.getElementById('starDraw').classList.toggle('on', starDrawing);
+  document.getElementById('starDraw').textContent = starDrawing ? 'Drawing: done' : 'Draw lines';
+  document.getElementById('starHint').textContent = starDrawing
+    ? (starPending ? 'Now tap the next star to join ' + starPending.symbol + ' to it.' : 'Tap a star, then another, to join them. Tap a line again to take it away.')
+    : 'Drag a star to move it.';
+  document.getElementById('starClear').hidden = !starMine.edges.length;
+  document.getElementById('starReset').hidden = !Object.keys(starMine.pos).length;
+  canvas.style.cursor = on ? (starDrawing ? 'crosshair' : 'grab') : 'grab';
+  starRev++;
+}
 function drawConstellations() {
   const hits = [];
   const groups = assignGroups();
   const cx = W * 0.5, cy = H * 0.5;
-  function mapPt(box, nx, ny) {
-    return { x: W * (box[0] + nx * box[2]), y: H * (box[1] + ny * box[3]) };
-  }
+  const auto = starLayout(groups);
+  const P = t => {
+    const m = starMine.pos[t.mint];
+    if (m && !t.credit && t !== anchor) return { x: m[0] * W, y: m[1] * H };
+    return auto.get(t.mint) || { x: cx, y: cy };
+  };
+  starCur.clear();
+  const all = [anchor, ...groups.flatMap(g => g.members)];
+  all.forEach(t => { const q = P(t); starCur.set(t.mint, { x: q.x, y: q.y, t }); });
   function glow(pts, color) {
     ctx.save();
     ctx.strokeStyle = color;
@@ -1472,18 +1609,14 @@ function drawConstellations() {
     ctx.stroke();
     ctx.restore();
   }
-  function dot(t, x, y, r, label) {
-    if (r < 6) {
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = '#f4f1ea';
-      ctx.fill();
-    } else disc(x, y, r, t.loaded ? t.img : null);
+  function star(t, x, y, r, label) {
+    disc(x, y, r, t.loaded ? t.img : null);
     const picked = selected && selected.mint === t.mint;
-    if (picked) {
+    const held = starPending && starPending.mint === t.mint;
+    if (picked || held) {
       ctx.beginPath();
-      ctx.arc(x, y, Math.max(r + 7, 11), 0, Math.PI * 2);
-      ctx.strokeStyle = '#8fd3e6';
+      ctx.arc(x, y, r + 5, 0, Math.PI * 2);
+      ctx.strokeStyle = held ? '#ffd166' : '#8fd3e6';
       ctx.lineWidth = 1.5;
       ctx.stroke();
     }
@@ -1494,82 +1627,88 @@ function drawConstellations() {
       ctx.textBaseline = 'bottom';
       ctx.fillText(t.symbol, x, y - r - 4);
     }
-    hits.push({ t, x, y, r: Math.max(r, 12) });
+    hits.push({ t, x, y, r: Math.max(r, 11) });
   }
-  const field = groups.find(g => g.name === 'THE FIELD');
-  if (field) {
-    field.members.forEach(t => {
-      let h = 0;
-      for (let i = 0; i < t.mint.length; i++) h = (h * 33 + t.mint.charCodeAt(i)) >>> 0;
-      const a = (h % 1000) / 1000 * Math.PI * 2;
-      const dist = 0.84 + ((h >>> 8) % 100) / 100 * 0.12;
-      dot(t, cx + Math.cos(a) * W * 0.46 * dist, cy + Math.sin(a) * H * 0.44 * dist, Math.max(1.6, starShare(t) * 5), false);
-    });
-  }
+  const pend = [];
   groups.forEach(g => {
     const fig = FIGURES[g.name];
-    if (!fig) return;
-    if (fig.sword) {
-      const P = (nx, ny) => mapPt(fig.box, nx, ny);
+    const tops = [];
+    const label = (txt, x, y) => { if (!showLabels) return; ctx.font = '600 12px "DM Sans", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillStyle = g.color; ctx.fillText(txt, x, y); };
+    if (fig && fig.sword) {
+      const Q = (nx, ny) => ({ x: W * (fig.box[0] + nx * fig.box[2]), y: H * (fig.box[1] + ny * fig.box[3]) });
       ctx.save(); ctx.lineCap = 'round'; ctx.strokeStyle = g.color;
       const seg = (a, b, al, lw) => { ctx.globalAlpha = al; ctx.lineWidth = lw; ctx.shadowColor = g.color; ctx.shadowBlur = 10; ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke(); };
-      seg(P(0.5, 0), P(0.5, 0.64), 0.95, 1.6);        // blade
-      seg(P(0.5, 0.64), P(0.5, 0.92), 0.7, 1.4);      // grip
-      seg(P(0.04, 0.64), P(0.96, 0.64), 0.7, 1.4);    // crossguard
+      seg(Q(0.5, 0), Q(0.5, 0.64), 0.95, 1.6);
+      seg(Q(0.5, 0.64), Q(0.5, 0.92), 0.7, 1.4);
+      seg(Q(0.04, 0.64), Q(0.96, 0.64), 0.7, 1.4);
       ctx.restore();
-      const pom = P(0.5, 1); ctx.beginPath(); ctx.arc(pom.x, pom.y - 2, 5, 0, Math.PI * 2); ctx.strokeStyle = g.color; ctx.lineWidth = 1.4; ctx.stroke();
-      const cat = g.members[0], c0 = P(0.5, 0.64);
-      dot(cat, c0.x, c0.y, 22, true);
-      g.members.slice(1).forEach((t, i) => dot(t, c0.x + (i % 2 ? 36 : -36), c0.y + 26 + i * 8, 7, false));
-      if (showLabels) { ctx.font = '500 11px "DM Sans", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillStyle = 'rgba(244,241,234,0.7)'; ctx.fillText('@BTCWScoin · the concept', fig.box[0] * W + fig.box[2] * W * 0.5, P(0.5, 1).y + 10); }
-      if (showLabels) { ctx.font = '600 12px "DM Sans", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillStyle = g.color; ctx.fillText(g.name, fig.box[0] * W + fig.box[2] * W * 0.5, P(0.5, 0).y - 8); }
+      const pom = Q(0.5, 1); ctx.beginPath(); ctx.arc(pom.x, pom.y - 2, 5, 0, Math.PI * 2); ctx.strokeStyle = g.color; ctx.lineWidth = 1.4; ctx.stroke();
+      const cat = g.members[0], c0 = P(cat);
+      pend.push(() => star(cat, c0.x, c0.y, 22, true));
+      g.members.slice(1).forEach(t => { const q = P(t); pend.push(() => star(t, q.x, q.y, starRadius(t), false)); });
+      if (showLabels) { ctx.font = '500 11px "DM Sans", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillStyle = 'rgba(244,241,234,0.7)'; ctx.fillText('Concept by @BTCWScoin', W * (fig.box[0] + fig.box[2] * 0.5), pom.y + 10); }
+      label(g.name, W * (fig.box[0] + fig.box[2] * 0.5), Q(0.5, 0).y - 8);
       return;
     }
-    if (fig.dollar) {
-      const P = k => k === 'C' ? mapPt(fig.box, ...fig.centre) : mapPt(fig.box, ...fig.slots[k]);
+    if (fig && fig.dollar) {
+      const at = k => {
+        if (k === 'C') { const a = at(fig.bar[0]), b = at(fig.bar[1]); return { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 }; }
+        const t = g.members.find(m => m.symbol === k);
+        return t ? P(t) : { x: W * (fig.box[0] + fig.slots[k][0] * fig.box[2]), y: H * (fig.box[1] + fig.slots[k][1] * fig.box[3]) };
+      };
       ctx.save();
       ctx.lineCap = 'round'; ctx.strokeStyle = g.color;
-      fig.s.forEach(([a, b]) => { const pa = P(a), pb = P(b); ctx.globalAlpha = 0.5; ctx.lineWidth = 1.4; ctx.shadowColor = g.color; ctx.shadowBlur = 8; ctx.beginPath(); ctx.moveTo(pa.x, pa.y); ctx.lineTo(pb.x, pb.y); ctx.stroke(); });
-      glow([P(fig.bar[0]), P(fig.bar[1])], g.color);
+      fig.s.forEach(([a, b]) => { const pa = at(a), pb = at(b); ctx.globalAlpha = 0.5; ctx.lineWidth = 1.4; ctx.shadowColor = g.color; ctx.shadowBlur = 8; ctx.beginPath(); ctx.moveTo(pa.x, pa.y); ctx.lineTo(pb.x, pb.y); ctx.stroke(); });
+      glow([at(fig.bar[0]), at(fig.bar[1])], g.color);
       ctx.restore();
+      let top = 1e9, tx = 0;
       Object.keys(fig.slots).forEach(sym => {
-        const q = P(sym), t = g.members.find(m => m.symbol === sym);
+        const q = at(sym), t = g.members.find(m => m.symbol === sym);
+        if (q.y < top) { top = q.y; tx = q.x; }
         if (t) {
-          dot(t, q.x, q.y, Math.max(10, Math.min(20, 8 + starShare(t) * 24)), true);
-          if (LIT.has(t.mint)) { ctx.beginPath(); ctx.arc(q.x, q.y, 24, 0, Math.PI * 2); ctx.strokeStyle = g.color; ctx.lineWidth = 2; ctx.stroke(); }
+          pend.push(() => { star(t, q.x, q.y, starRadius(t), true); if (LIT.has(t.mint)) { ctx.beginPath(); ctx.arc(q.x, q.y, 24, 0, Math.PI * 2); ctx.strokeStyle = g.color; ctx.lineWidth = 2; ctx.stroke(); } });
         } else {
           ctx.beginPath(); ctx.arc(q.x, q.y, 8, 0, Math.PI * 2); ctx.strokeStyle = 'rgba(244,241,234,0.35)'; ctx.lineWidth = 1.2; ctx.stroke();
           if (showLabels) { ctx.fillStyle = 'rgba(244,241,234,0.45)'; ctx.font = '600 10px "DM Sans", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'top'; ctx.fillText(sym, q.x, q.y + 13); }
         }
       });
-      if (showLabels) { ctx.font = '600 12px "DM Sans", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.fillStyle = g.color; ctx.fillText(g.name, fig.box[0] * W + fig.box[2] * W * 0.5, P('NVDA').y - 30); }
+      g.members.filter(m => !fig.slots[m.symbol]).forEach(t => { const q = P(t); pend.push(() => star(t, q.x, q.y, starRadius(t), false)); });
+      label(g.name, tx, top - 30);
       return;
     }
-    const slots = fig.pts.map(([nx, ny]) => mapPt(fig.box, nx, ny));
+    const slots = fig ? fig.pts.length : 0;
     const ranked = [...g.members].sort((a, b) => b.mc - a.mc);
-    const big = ranked.slice(0, slots.length), small = ranked.slice(slots.length);
-    const outline = slots.slice(0, big.length);
+    const big = ranked.slice(0, slots), small = ranked.slice(slots);
+    const outline = big.map(P);
     if (outline.length > 1) glow(outline, g.color);
-    big.forEach((t, i) => { dot(t, outline[i].x, outline[i].y, Math.max(9, Math.min(20, 8 + starShare(t) * 24)), true); });
-    const cxg = outline.reduce((s2, q) => s2 + q.x, 0) / outline.length, cyg = outline.reduce((s2, q) => s2 + q.y, 0) / outline.length;
-    small.forEach((t, i) => {
-      let h = 0;
-      for (let k = 0; k < t.mint.length; k++) h = (h * 31 + t.mint.charCodeAt(k)) >>> 0;
-      const a2 = (h % 628) / 100, rr = 0.25 + ((h >>> 9) % 50) / 100;
-      const q = outline[(h >>> 4) % outline.length];
-      dot(t, cxg + (q.x - cxg) * rr + Math.cos(a2) * 10, cyg + (q.y - cyg) * rr + Math.sin(a2) * 10, Math.max(3, starShare(t) * 9), false);
-    });
-    if (showLabels) {
-      const top = outline.reduce((p, q) => q.y < p.y ? q : p);
-      ctx.font = '600 12px "DM Sans", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'bottom';
-      ctx.fillStyle = g.color;
-      ctx.fillText(g.name, fig.box[0] * W + fig.box[2] * W * 0.5, top.y - 30);
+    big.forEach((t, i) => pend.push(() => star(t, outline[i].x, outline[i].y, starRadius(t), true)));
+    small.forEach(t => { const q = P(t); pend.push(() => star(t, q.x, q.y, starRadius(t), false)); });
+    const pts = [...outline, ...small.map(P)];
+    if (pts.length) {
+      const top = pts.reduce((p, q) => q.y < p.y ? q : p);
+      label(g.name, outline.length ? outline.reduce((s2, q) => s2 + q.x, 0) / outline.length : top.x, (outline.length ? Math.min(...outline.map(q => q.y)) : top.y) - 30);
     }
   });
+  // lines the viewer has drawn
+  const mine = starMine.edges.filter(([a, b]) => starCur.has(a) && starCur.has(b));
+  if (mine.length) {
+    ctx.save();
+    ctx.lineCap = 'round'; ctx.strokeStyle = '#ffd166'; ctx.shadowColor = '#ffd166';
+    mine.forEach(([a, b]) => {
+      const pa = starCur.get(a), pb = starCur.get(b);
+      ctx.shadowBlur = 14; ctx.globalAlpha = 0.5; ctx.lineWidth = 5; ctx.beginPath(); ctx.moveTo(pa.x, pa.y); ctx.lineTo(pb.x, pb.y); ctx.stroke();
+      ctx.shadowBlur = 0; ctx.globalAlpha = 0.95; ctx.lineWidth = 1.4; ctx.stroke();
+    });
+    ctx.restore();
+  }
+  if (starDrawing && starPending && starPointer && starCur.has(starPending.mint)) {
+    const pa = starCur.get(starPending.mint);
+    ctx.save(); ctx.setLineDash([5, 5]); ctx.strokeStyle = '#ffd166'; ctx.globalAlpha = 0.8; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.moveTo(pa.x, pa.y); ctx.lineTo(starPointer.x, starPointer.y); ctx.stroke(); ctx.restore();
+  }
+  pend.forEach(f => f());
   const btcR = 16;
-  disc(cx, cy, btcR, anchor.loaded ? anchor.img : null);
+  star(anchor, cx, cy, btcR, false);
   ctx.beginPath();
   ctx.arc(cx, cy, btcR + 9, 0, Math.PI * 2);
   ctx.strokeStyle = 'rgba(244,241,234,0.25)';
@@ -1582,7 +1721,20 @@ function drawConstellations() {
     ctx.font = '600 13px "DM Sans", sans-serif';
     ctx.fillText('BTC', cx, cy + btcR + 4);
   }
-  hits.push({ t: anchor, x: cx, y: cy, r: btcR });
+  // the name of whatever the pointer is on
+  const hv = starDrag ? starDrag.t : starHover;
+  const hh = hv && hits.find(h => h.t.mint === hv.mint);
+  if (hh) {
+    const txt = hv.credit ? 'Big Titty Cat Wif Sword · concept by @BTCWScoin' : hv.symbol + (hv.name && hv.name !== hv.symbol ? ' · ' + hv.name : '');
+    ctx.font = '600 12px "DM Sans", sans-serif';
+    const w = ctx.measureText(txt).width + 16, h = 22;
+    let bx = Math.max(4, Math.min(W - w - 4, hh.x - w / 2)), by = hh.y - hh.r - h - 8;
+    if (by < 4) by = hh.y + hh.r + 8;
+    ctx.fillStyle = 'rgba(16,16,14,0.94)'; ctx.fillRect(bx, by, w, h);
+    ctx.strokeStyle = '#8fd3e6'; ctx.lineWidth = 1; ctx.strokeRect(bx + 0.5, by + 0.5, w - 1, h - 1);
+    ctx.fillStyle = '#f4f1ea'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillText(txt, bx + 8, by + h / 2 + 0.5);
+  }
   window.__hit = hits;
 }
 function loop() {
@@ -1594,7 +1746,7 @@ function loop() {
   const bootA = stickerHold ? 0 : booting ? (loop._seen ? Math.min(1, (performance.now() - loop._seen) / 700) : 0) : 1;
   let mix = 0;
   for (const t of bodies) mix += t.boost + t.share + t.shareUsdt + (t.loaded ? 1 : 0);
-  const sig = [booting, bootA, camX.join(), camY.join(), camZ.join(), dist, usdcT, usdtT, W, H, view, showLabels, showOrbits, showPairs, selected && selected.mint, anchor.mint, imgVersion, dive ? performance.now() : 0, mix, bulmaImg.complete, toastImg.complete, usdtImg.complete, hubTab].join('|');
+  const sig = [booting, bootA, camX.join(), camY.join(), camZ.join(), dist, usdcT, usdtT, W, H, view, showLabels, showOrbits, showPairs, selected && selected.mint, anchor.mint, imgVersion, dive ? performance.now() : 0, mix, bulmaImg.complete, toastImg.complete, usdtImg.complete, hubTab, starRev, starHover && starHover.mint, starPending && starPending.mint].join('|');
   if (sig === lastSig) { requestAnimationFrame(loop); return; }
   lastSig = sig;
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
@@ -1731,6 +1883,10 @@ function loop() {
   if (tick !== loop._tick) { loop._tick = tick; paintDeltas(); }
   requestAnimationFrame(loop);
 }
+document.getElementById('starDraw').onclick = () => { starDrawing = !starDrawing; starPending = null; starToolsSync(); };
+document.getElementById('starClear').onclick = () => { starMine.edges = []; starPending = null; starSave(); starToolsSync(); };
+document.getElementById('starReset').onclick = () => { starMine.pos = {}; starSave(); starToolsSync(); };
+canvas.addEventListener('pointerleave', () => { if (starHover) { starHover = null; starRev++; } starPointer = null; });
 canvas.addEventListener('click', e => {
   if (canvas._moved) return;
   const rect = canvas.getBoundingClientRect();
@@ -1740,6 +1896,16 @@ canvas.addEventListener('click', e => {
     const d = Math.hypot(s.x - x, s.y - y);
     if (d < s.r + 8 && d < bestD) { best = s; bestD = d; }
   });
+  if (view === 'constellations' && starDrawing) {
+    if (!best) { starPending = null; starToolsSync(); return; }
+    if (!starPending) { starPending = best.t; starToolsSync(); return; }
+    if (starPending.mint === best.t.mint) { starPending = null; starToolsSync(); return; }
+    const a = starPending.mint, b = best.t.mint;
+    const i = starMine.edges.findIndex(q => (q[0] === a && q[1] === b) || (q[0] === b && q[1] === a));
+    if (i >= 0) starMine.edges.splice(i, 1); else starMine.edges.push([a, b]);
+    starSave(); starPending = best.t; starToolsSync();
+    return;
+  }
   if (!best) return;
   if (best.t.credit) { window.open(best.t.url, '_blank', 'noopener'); return; }
   if (best.t === anchor) { selected = anchor; renderInspector(); return; }
